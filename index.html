@@ -1785,6 +1785,9 @@
     // Initialize theme
     document.body.className = 'light';
     
+    // Initialize AI mode as default
+    selectMode('ai');
+    
     // Add event listeners
     themeSelect.addEventListener('change', changeTheme);
     playerNameInput.addEventListener('input', function() {
