@@ -3077,19 +3077,44 @@
       }
     });
     
-    // Listen for moves with better error handling
-    roomRef.child('moves').on('child_added', (snapshot) => {
-      const move = snapshot.val();
-      console.log('Move received from Firebase:', move, 'My playerId:', window.playerId);
-      if (move && move.playerId !== window.playerId) {
-        console.log('Processing remote move from player:', move.playerId);
-        handleRemoteMove(move);
-      } else if (move && move.playerId === window.playerId) {
-        console.log('Ignoring my own move');
+    // Set up game state polling instead of move listening
+    setupGameStatePolling();
+  }
+
+  function setupGameStatePolling() {
+    // Poll for game state changes every 1 second
+    window.gameStateInterval = setInterval(() => {
+      if (window.roomCode) {
+        const roomRef = database.ref(`rooms/${window.roomCode}`);
+        roomRef.child('gameState').once('value').then((snapshot) => {
+          const gameState = snapshot.val();
+          if (gameState && gameState.lastMove && gameState.lastMove.playerId !== window.playerId) {
+            console.log('Received game state update:', gameState);
+            handleGameStateUpdate(gameState);
+          }
+        }).catch((error) => {
+          console.error('Error polling game state:', error);
+        });
       }
-    }, (error) => {
-      console.error('Error listening for moves:', error);
-    });
+    }, 1000);
+  }
+
+  function handleGameStateUpdate(gameState) {
+    if (gameState.board && gameState.lastMove) {
+      // Update board with the new state
+      board = gameState.board;
+      renderMultiplayerBoard();
+      
+      // Handle the last move
+      const move = gameState.lastMove;
+      console.log('Processing move from game state:', move);
+      
+      if (checkMultiplayerEnd(move.player)) return;
+      
+      // Switch turns
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      updateTurnDisplay();
+    }
   }
 
   function updateRoomDisplay(data) {
@@ -3242,12 +3267,20 @@
       timestamp: Date.now()
     };
     
-    console.log('Sending move to Firebase:', moveData);
+    console.log('Updating game state in Firebase:', moveData);
     
-    roomRef.child('moves').push(moveData).then(() => {
-      console.log('Move successfully sent to Firebase');
+    // Update the entire game state instead of individual moves
+    const gameState = {
+      board: board,
+      lastMove: moveData,
+      currentPlayer: currentPlayer,
+      timestamp: Date.now()
+    };
+    
+    roomRef.child('gameState').set(gameState).then(() => {
+      console.log('Game state successfully updated in Firebase');
     }).catch((error) => {
-      console.error('Error sending move to Firebase:', error);
+      console.error('Error updating game state in Firebase:', error);
     });
   }
 
@@ -3296,13 +3329,30 @@
     renderMultiplayerBoard();
     updateTurnDisplay();
     
-    // Clear moves in Firebase
+    // Clear game state in Firebase
     if (window.roomCode) {
       const roomRef = database.ref(`rooms/${window.roomCode}`);
-      roomRef.child('moves').remove().then(() => {
-        console.log('Firebase moves cleared');
+      roomRef.child('gameState').remove().then(() => {
+        console.log('Firebase game state cleared');
       });
     }
+  }
+
+  function leaveRoom() {
+    // Stop polling
+    if (window.gameStateInterval) {
+      clearInterval(window.gameStateInterval);
+      window.gameStateInterval = null;
+    }
+    
+    // Remove player from room
+    if (window.roomCode && window.playerId) {
+      const roomRef = database.ref(`rooms/${window.roomCode}`);
+      roomRef.child('players').child(window.playerId).remove();
+    }
+    
+    // Go back to welcome page
+    showPage('welcomePage');
   }
 
   function checkMultiplayerEnd(player) {
