@@ -528,6 +528,11 @@
       background: #fff3cd;
     }
 
+    .player-item.joined {
+      border-color: #28a745;
+      background: #d4edda;
+    }
+
     .player-status {
       font-size: 14px;
       color: #666;
@@ -3045,14 +3050,7 @@
     
     const roomRef = database.ref(`rooms/${window.roomCode}`);
     
-    roomRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        updateRoomDisplay(data);
-      }
-    });
-    
-    // Join the room
+    // Join the room first
     const playerId = Date.now().toString();
     window.playerId = playerId;
     
@@ -3062,14 +3060,34 @@
       isHost: window.isHost,
       timestamp: Date.now()
     });
+    
+    // Listen for room changes
+    roomRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      console.log('Room data updated:', data);
+      if (data) {
+        updateRoomDisplay(data);
+      }
+    });
+    
+    // Listen for moves
+    roomRef.child('moves').on('child_added', (snapshot) => {
+      const move = snapshot.val();
+      if (move && move.playerId !== window.playerId) {
+        handleRemoteMove(move);
+      }
+    });
   }
 
   function updateRoomDisplay(data) {
     const players = data.players || {};
     const playerIds = Object.keys(players);
     
+    console.log('Players in room:', playerIds.length, players);
+    
     if (playerIds.length >= 2) {
       // Both players joined, start game
+      console.log('Starting multiplayer game');
       showPage('gameRoomPage');
       startMultiplayerGame(data);
     } else {
@@ -3080,6 +3098,7 @@
 
   function updateWaitingDisplay(players) {
     const playerIds = Object.keys(players);
+    console.log('Updating waiting display for players:', players);
     
     if (window.isHost) {
       // Update host waiting display
@@ -3087,9 +3106,11 @@
         const otherPlayer = playerIds.find(id => id !== window.playerId);
         if (otherPlayer) {
           const otherPlayerData = players[otherPlayer];
+          console.log('Other player joined:', otherPlayerData);
           document.getElementById('nameO').textContent = otherPlayerData.name;
           document.getElementById('avatarO').textContent = getAvatarEmoji(otherPlayerData.avatar);
           document.getElementById('playerO').classList.remove('waiting');
+          document.getElementById('playerO').classList.add('joined');
         }
       }
     } else {
@@ -3098,6 +3119,7 @@
         const hostPlayer = playerIds.find(id => players[id].isHost);
         if (hostPlayer) {
           const hostData = players[hostPlayer];
+          console.log('Host player data:', hostData);
           document.getElementById('joinNameX').textContent = hostData.name;
           document.getElementById('joinAvatarX').textContent = getAvatarEmoji(hostData.avatar);
         }
@@ -3125,8 +3147,21 @@
     roomRef.child('moves').push({
       index: index,
       player: currentPlayer,
+      playerId: window.playerId,
       timestamp: Date.now()
     });
+  }
+
+  function handleRemoteMove(move) {
+    if (board[move.index] !== null) return;
+    
+    board[move.index] = move.player;
+    renderBoard();
+    playSound('click');
+    
+    if (checkEnd(move.player)) return;
+    
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   }
 
   // Initialize the app
