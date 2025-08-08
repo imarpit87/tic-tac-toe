@@ -101,6 +101,25 @@
         font-size: 1rem;
         padding: 6px 12px;
       }
+      
+      .mode-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .mode-btn {
+        min-width: 200px;
+      }
+      
+      .join-inputs {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .room-code-display {
+        flex-direction: column;
+        gap: 5px;
+      }
     }
     
     @media (max-width: 480px) {
@@ -220,6 +239,351 @@
     
     body.kids .difficulty-selector select {
       background: rgba(255,255,255,0.9);
+      color: #2c3e50;
+    }
+    
+    /* Mode Selector Styles */
+    .mode-selector {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .mode-selector h3 {
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+    
+    body.light .mode-selector h3 {
+      color: white;
+    }
+    
+    body.dark .mode-selector h3 {
+      color: #ecf0f1;
+    }
+    
+    body.kids .mode-selector h3 {
+      color: #2c3e50;
+    }
+    
+    .mode-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .mode-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px 20px;
+      border: 2px solid;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 140px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    body.light .mode-btn {
+      border-color: rgba(255,255,255,0.3);
+      color: white;
+    }
+    
+    body.dark .mode-btn {
+      border-color: rgba(255,255,255,0.2);
+      color: #ecf0f1;
+    }
+    
+    body.kids .mode-btn {
+      border-color: rgba(255,255,255,0.4);
+      color: #2c3e50;
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .mode-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .mode-btn.active {
+      border-color: #27ae60;
+      background: rgba(39, 174, 96, 0.2);
+    }
+    
+    .mode-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    
+    .mode-title {
+      font-weight: bold;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+    
+    .mode-desc {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+    
+    /* Settings Panel Styles */
+    .settings-panel {
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    .setting-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+    }
+    
+    .setting-group label {
+      font-weight: bold;
+      font-size: 1rem;
+    }
+    
+    body.light .setting-group label {
+      color: white;
+    }
+    
+    body.dark .setting-group label {
+      color: #ecf0f1;
+    }
+    
+    body.kids .setting-group label {
+      color: #2c3e50;
+    }
+    
+    /* Multiplayer Instructions */
+    .multiplayer-instructions {
+      margin-bottom: 20px;
+    }
+    
+    .multiplayer-instructions h4 {
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+    
+    body.light .multiplayer-instructions h4 {
+      color: white;
+    }
+    
+    body.dark .multiplayer-instructions h4 {
+      color: #ecf0f1;
+    }
+    
+    body.kids .multiplayer-instructions h4 {
+      color: #2c3e50;
+    }
+    
+    .multiplayer-instructions ol {
+      text-align: left;
+      padding-left: 20px;
+    }
+    
+    .multiplayer-instructions li {
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    
+    body.light .multiplayer-instructions li {
+      color: white;
+    }
+    
+    body.dark .multiplayer-instructions li {
+      color: #ecf0f1;
+    }
+    
+    body.kids .multiplayer-instructions li {
+      color: #2c3e50;
+    }
+    
+    /* Room Controls */
+    .room-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .create-room-section, .join-room-section {
+      text-align: center;
+    }
+    
+    .create-room-section h4, .join-room-section h4 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    
+    body.light .create-room-section h4, body.light .join-room-section h4 {
+      color: white;
+    }
+    
+    body.dark .create-room-section h4, body.dark .join-room-section h4 {
+      color: #ecf0f1;
+    }
+    
+    body.kids .create-room-section h4, body.kids .join-room-section h4 {
+      color: #2c3e50;
+    }
+    
+    .join-inputs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    /* Button Styles */
+    .primary-btn, .secondary-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .primary-btn {
+      background: #27ae60;
+      color: white;
+    }
+    
+    .primary-btn:hover {
+      background: #229954;
+      transform: translateY(-1px);
+    }
+    
+    .secondary-btn {
+      background: #3498db;
+      color: white;
+    }
+    
+    .secondary-btn:hover {
+      background: #2980b9;
+      transform: translateY(-1px);
+    }
+    
+    body.dark .primary-btn {
+      background: #2ecc71;
+    }
+    
+    body.dark .primary-btn:hover {
+      background: #27ae60;
+    }
+    
+    body.dark .secondary-btn {
+      background: #3498db;
+    }
+    
+    body.dark .secondary-btn:hover {
+      background: #2980b9;
+    }
+    
+    body.kids .primary-btn {
+      background: #e67e22;
+    }
+    
+    body.kids .primary-btn:hover {
+      background: #d35400;
+    }
+    
+    body.kids .secondary-btn {
+      background: #e74c3c;
+    }
+    
+    body.kids .secondary-btn:hover {
+      background: #c0392b;
+    }
+    
+    /* Room Info */
+    .room-info {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.15);
+      text-align: center;
+    }
+    
+    .room-info h4 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    
+    body.light .room-info h4 {
+      color: white;
+    }
+    
+    body.dark .room-info h4 {
+      color: #ecf0f1;
+    }
+    
+    body.kids .room-info h4 {
+      color: #2c3e50;
+    }
+    
+    .room-code-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .room-code {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      padding: 5px 10px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      color: #2c3e50;
+    }
+    
+    .copy-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      background: #f39c12;
+      color: white;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    
+    .copy-btn:hover {
+      background: #e67e22;
+    }
+    
+    .room-status {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    
+    body.light .room-status {
+      color: white;
+    }
+    
+    body.dark .room-status {
+      color: #ecf0f1;
+    }
+    
+    body.kids .room-status {
       color: #2c3e50;
     }
     
@@ -445,30 +809,84 @@
   </style>
 </head>
 <body>
-  <h1>Tic Tac Toe 🤖 vs 🧑</h1>
-  <div class="scoreboard">
-    You (X): <span id="xWins">0</span> | AI (O): <span id="oWins">0</span>
+  <h1>Tic Tac Toe 🎮</h1>
+  
+  <!-- Game Mode Selection -->
+  <div class="mode-selector">
+    <h3>Choose Game Mode:</h3>
+    <div class="mode-buttons">
+      <button class="mode-btn active" onclick="selectMode('ai')" id="aiModeBtn">
+        <span class="mode-icon">🤖</span>
+        <span class="mode-title">Play vs AI</span>
+        <span class="mode-desc">Challenge the computer</span>
+      </button>
+      <button class="mode-btn" onclick="selectMode('multiplayer')" id="multiplayerModeBtn">
+        <span class="mode-icon">👥</span>
+        <span class="mode-title">Play with Friend</span>
+        <span class="mode-desc">Online multiplayer</span>
+      </button>
+    </div>
   </div>
-  <div class="difficulty-selector">
-    <label for="gameMode">Game Mode:</label>
-    <select id="gameMode">
-      <option value="ai">vs AI</option>
-      <option value="multiplayer">2 Players Online</option>
-    </select>
+
+  <!-- AI Settings -->
+  <div class="settings-panel" id="aiSettings">
+    <div class="setting-group">
+      <label for="difficulty">AI Difficulty:</label>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
   </div>
-  <div class="difficulty-selector" id="aiSettings">
-    <label for="difficulty">AI Difficulty:</label>
-    <select id="difficulty">
-      <option value="easy">Easy</option>
-      <option value="medium" selected>Medium</option>
-      <option value="hard">Hard</option>
-    </select>
+
+  <!-- Multiplayer Settings -->
+  <div class="settings-panel" id="multiplayerSettings" style="display: none;">
+    <div class="multiplayer-instructions">
+      <h4>How to Play with a Friend:</h4>
+      <ol>
+        <li><strong>Create Room:</strong> Click "Create Room" to generate a code</li>
+        <li><strong>Share Code:</strong> Send the 6-digit code to your friend</li>
+        <li><strong>Friend Joins:</strong> Your friend enters the code and clicks "Join"</li>
+        <li><strong>Start Playing:</strong> Take turns playing X and O</li>
+      </ol>
+    </div>
+    
+    <div class="room-controls">
+      <div class="create-room-section">
+        <h4>Create a New Room</h4>
+        <button class="primary-btn" onclick="createRoom()">
+          <span>🎯</span> Create Room
+        </button>
+      </div>
+      
+      <div class="join-room-section">
+        <h4>Join Existing Room</h4>
+        <div class="join-inputs">
+          <input type="text" id="roomCode" placeholder="Enter 6-digit code" maxlength="6">
+          <button class="secondary-btn" onclick="joinRoom()">
+            <span>🚀</span> Join Room
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="room-info" id="roomInfo" style="display: none;">
+      <h4>Room Information:</h4>
+      <div class="room-code-display">
+        <span>Room Code: </span>
+        <span id="displayRoomCode" class="room-code"></span>
+        <button class="copy-btn" onclick="copyRoomCode()" id="copyBtn">
+          <span>📋</span> Copy
+        </button>
+      </div>
+      <div class="room-status" id="roomStatus"></div>
+    </div>
   </div>
-  <div class="difficulty-selector" id="multiplayerSettings" style="display: none;">
-    <label for="roomCode">Room Code:</label>
-    <input type="text" id="roomCode" placeholder="Enter 6-digit code" maxlength="6" style="width: 120px; text-align: center;">
-    <button onclick="joinRoom()" style="margin-left: 10px; padding: 4px 8px; font-size: 0.8rem;">Join</button>
-    <button onclick="createRoom()" style="margin-left: 5px; padding: 4px 8px; font-size: 0.8rem;">Create</button>
+
+  <!-- Scoreboard -->
+  <div class="scoreboard" id="scoreboard">
+    <span id="scoreText">You (X): <span id="xWins">0</span> | AI (O): <span id="oWins">0</span></span>
   </div>
   <div class="difficulty-selector">
     <label for="theme">Theme:</label>
@@ -495,10 +913,15 @@
     const difficultySelect = document.getElementById('difficulty');
     const themeSelect = document.getElementById('theme');
     const soundToggle = document.getElementById('soundToggle');
-    const gameModeSelect = document.getElementById('gameMode');
+    const aiModeBtn = document.getElementById('aiModeBtn');
+    const multiplayerModeBtn = document.getElementById('multiplayerModeBtn');
     const aiSettings = document.getElementById('aiSettings');
     const multiplayerSettings = document.getElementById('multiplayerSettings');
     const roomCodeInput = document.getElementById('roomCode');
+    const roomInfo = document.getElementById('roomInfo');
+    const displayRoomCode = document.getElementById('displayRoomCode');
+    const roomStatus = document.getElementById('roomStatus');
+    const scoreText = document.getElementById('scoreText');
 
     let board = Array(9).fill(null);
     let xWins = 0, oWins = 0;
@@ -570,17 +993,27 @@
       document.body.className = theme;
     }
 
-    function changeGameMode() {
-      gameMode = gameModeSelect.value;
-      if (gameMode === 'ai') {
-        aiSettings.style.display = 'flex';
+    function selectMode(mode) {
+      gameMode = mode;
+      
+      // Update button states
+      aiModeBtn.classList.remove('active');
+      multiplayerModeBtn.classList.remove('active');
+      
+      if (mode === 'ai') {
+        aiModeBtn.classList.add('active');
+        aiSettings.style.display = 'block';
         multiplayerSettings.style.display = 'none';
+        roomInfo.style.display = 'none';
         multiplayerGame = false;
+        updateScoreboard();
         resetGame();
       } else {
+        multiplayerModeBtn.classList.add('active');
         aiSettings.style.display = 'none';
-        multiplayerSettings.style.display = 'flex';
+        multiplayerSettings.style.display = 'block';
         multiplayerGame = true;
+        updateScoreboard();
         resetGame();
       }
     }
@@ -588,9 +1021,12 @@
     function createRoom() {
       roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       roomCodeInput.value = roomCode;
+      displayRoomCode.textContent = roomCode;
       isHost = true;
       currentPlayer = 'X';
-      showPopup(`Room created! Code: ${roomCode} - Share this code with your friend!`);
+      roomInfo.style.display = 'block';
+      roomStatus.textContent = 'Waiting for friend to join...';
+      showPopup(`Room created! Share the code with your friend!`);
       resetGame();
     }
 
@@ -601,10 +1037,40 @@
         return;
       }
       roomCode = code;
+      displayRoomCode.textContent = roomCode;
       isHost = false;
       currentPlayer = 'O';
-      showPopup(`Joined room: ${roomCode} - Waiting for host to make first move...`);
+      roomInfo.style.display = 'block';
+      roomStatus.textContent = 'Waiting for host to make first move...';
+      showPopup(`Joined room! Waiting for host to start...`);
       resetGame();
+    }
+
+    function copyRoomCode() {
+      if (roomCode) {
+        navigator.clipboard.writeText(roomCode).then(() => {
+          const copyBtn = document.getElementById('copyBtn');
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<span>✅</span> Copied!';
+          copyBtn.style.background = '#27ae60';
+          showPopup('Room code copied to clipboard!');
+          
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.style.background = '#f39c12';
+          }, 2000);
+        }).catch(() => {
+          showPopup('Failed to copy code. Please copy manually: ' + roomCode);
+        });
+      }
+    }
+
+    function updateScoreboard() {
+      if (multiplayerGame) {
+        scoreText.textContent = `Player X: ${xWins} | Player O: ${oWins}`;
+      } else {
+        scoreText.textContent = `You (X): ${xWins} | AI (O): ${oWins}`;
+      }
     }
 
     function generateRoomCode() {
@@ -778,6 +1244,7 @@
       else oWins++;
       xWinsElement.textContent = xWins;
       oWinsElement.textContent = oWins;
+      updateScoreboard();
     }
 
     function celebrateWin(player) {
@@ -842,7 +1309,6 @@
     
     // Add event listeners
     themeSelect.addEventListener('change', changeTheme);
-    gameModeSelect.addEventListener('change', changeGameMode);
   </script>
 </body>
 </html>
