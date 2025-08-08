@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Tic Tac Toe - AI Edition</title>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -452,6 +457,41 @@
       justify-content: center;
       align-items: center;
       flex-wrap: wrap;
+    }
+    
+    .multiplayer-options {
+      margin-bottom: 20px;
+    }
+    
+    .multiplayer-options h4 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    
+    body.light .multiplayer-options h4 {
+      color: white;
+    }
+    
+    body.dark .multiplayer-options h4 {
+      color: #ecf0f1;
+    }
+    
+    body.kids .multiplayer-options h4 {
+      color: #2c3e50;
+    }
+    
+    .option-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .room-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 15px;
     }
     
     /* Button Styles */
@@ -1201,11 +1241,26 @@
     </div>
     
     <div class="room-controls">
-      <div class="start-game-section">
-        <h4>Start Local Game</h4>
-        <button class="primary-btn" onclick="startLocalGame()" id="startGameBtn">
-          <span>🎮</span> Start Game
-        </button>
+      <div class="multiplayer-options">
+        <h4>Choose Multiplayer Type:</h4>
+        <div class="option-buttons">
+          <button class="secondary-btn" onclick="startLocalGame()" id="startGameBtn">
+            <span>🎮</span> Local Game (Same Device)
+          </button>
+          <button class="primary-btn" onclick="createRealTimeRoom()" id="createRealTimeBtn">
+            <span>🌐</span> Create Online Room
+          </button>
+        </div>
+      </div>
+      
+      <div class="join-room-section">
+        <h4>Join Online Room:</h4>
+        <div class="join-inputs">
+          <input type="text" id="roomCode" placeholder="Enter 6-digit code" maxlength="6">
+          <button class="secondary-btn" onclick="joinRealTimeRoom()">
+            <span>🚀</span> Join Room
+          </button>
+        </div>
       </div>
     </div>
     
@@ -1229,6 +1284,15 @@
       </div>
       
       <div class="room-status" id="roomStatus"></div>
+      
+      <div class="room-actions">
+        <button class="secondary-btn" onclick="resetRealTimeGame()" id="resetBtn">
+          <span>🔄</span> New Game
+        </button>
+        <button class="secondary-btn" onclick="leaveRoom()" id="leaveBtn">
+          <span>🚪</span> Leave Room
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1297,6 +1361,11 @@
     let selectedAvatarO = '';
     let playerXData = { name: '', avatar: '👤', online: false };
     let playerOData = { name: '', avatar: '👤', online: false };
+    
+    // Real-time multiplayer variables
+    let roomRef = null;
+    let playerId = null;
+    let isConnected = false;
 
     const winningCombos = [
       [0,1,2],[3,4,5],[6,7,8],
@@ -1628,6 +1697,264 @@
       resetGame();
     }
 
+    // Real-time multiplayer functions
+    function createRealTimeRoom() {
+      if (!playerName.trim()) {
+        showPopup('Please enter your name!');
+        return;
+      }
+      if (!selectedAvatar) {
+        showPopup('Please select an avatar!');
+        return;
+      }
+      
+      roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      playerId = 'player1';
+      
+      // Create room in Firebase
+      roomRef = database.ref(`rooms/${roomCode}`);
+      
+      const roomData = {
+        code: roomCode,
+        status: 'waiting',
+        board: Array(9).fill(null),
+        currentPlayer: 'X',
+        gameOver: false,
+        players: {
+          player1: {
+            name: playerName,
+            avatar: getAvatarEmoji(selectedAvatar),
+            symbol: 'X',
+            online: true,
+            lastSeen: Date.now()
+          }
+        },
+        createdAt: Date.now()
+      };
+      
+      roomRef.set(roomData);
+      
+      // Listen for changes
+      setupRoomListeners();
+      
+      // Update UI
+      displayRoomCode.textContent = roomCode;
+      roomInfo.style.display = 'block';
+      roomStatus.textContent = 'Waiting for friend to join...';
+      showPopup(`Room created! Share the code: ${roomCode}`);
+      
+      // Set up player data
+      playerXData = {
+        name: playerName,
+        avatar: getAvatarEmoji(selectedAvatar),
+        online: true
+      };
+      
+      updatePlayerDisplay();
+      resetGame();
+    }
+    
+    function joinRealTimeRoom() {
+      if (!playerName.trim()) {
+        showPopup('Please enter your name!');
+        return;
+      }
+      if (!selectedAvatar) {
+        showPopup('Please select an avatar!');
+        return;
+      }
+      
+      const code = roomCodeInput.value.trim().toUpperCase();
+      if (code.length !== 6) {
+        showPopup('Please enter a 6-digit room code!');
+        return;
+      }
+      
+      roomCode = code;
+      playerId = 'player2';
+      
+      // Join room in Firebase
+      roomRef = database.ref(`rooms/${roomCode}`);
+      
+      roomRef.once('value').then((snapshot) => {
+        const roomData = snapshot.val();
+        
+        if (!roomData) {
+          showPopup('Room not found! Please check the code.');
+          return;
+        }
+        
+        if (roomData.status === 'full') {
+          showPopup('Room is full!');
+          return;
+        }
+        
+        // Join the room
+        const playerData = {
+          name: playerName,
+          avatar: getAvatarEmoji(selectedAvatar),
+          symbol: 'O',
+          online: true,
+          lastSeen: Date.now()
+        };
+        
+        roomRef.child(`players/${playerId}`).set(playerData);
+        roomRef.child('status').set('playing');
+        
+        // Listen for changes
+        setupRoomListeners();
+        
+        // Update UI
+        displayRoomCode.textContent = roomCode;
+        roomInfo.style.display = 'block';
+        roomStatus.textContent = 'Connected! Waiting for host to start...';
+        showPopup('Joined room! Waiting for host...');
+        
+        // Set up player data
+        playerOData = {
+          name: playerName,
+          avatar: getAvatarEmoji(selectedAvatar),
+          online: true
+        };
+        
+        if (roomData.players.player1) {
+          playerXData = {
+            name: roomData.players.player1.name,
+            avatar: roomData.players.player1.avatar,
+            online: true
+          };
+        }
+        
+        updatePlayerDisplay();
+        resetGame();
+      });
+    }
+    
+    function setupRoomListeners() {
+      roomRef.on('value', (snapshot) => {
+        const roomData = snapshot.val();
+        
+        if (!roomData) return;
+        
+        // Update board
+        board = roomData.board || Array(9).fill(null);
+        currentPlayer = roomData.currentPlayer || 'X';
+        gameOver = roomData.gameOver || false;
+        
+        // Update player data
+        if (roomData.players) {
+          if (roomData.players.player1) {
+            playerXData = {
+              name: roomData.players.player1.name,
+              avatar: roomData.players.player1.avatar,
+              online: true
+            };
+          }
+          if (roomData.players.player2) {
+            playerOData = {
+              name: roomData.players.player2.name,
+              avatar: roomData.players.player2.avatar,
+              online: true
+            };
+          }
+        }
+        
+        // Update UI
+        updatePlayerDisplay();
+        renderBoard();
+        
+        // Update status
+        if (roomData.status === 'playing') {
+          const currentPlayerName = currentPlayer === 'X' ? playerXData.name : playerOData.name;
+          roomStatus.textContent = `${currentPlayerName}'s turn`;
+        }
+        
+        // Check for game end
+        if (gameOver) {
+          if (roomData.winner) {
+            const winnerName = roomData.winner === 'X' ? playerXData.name : playerOData.name;
+            showPopup(`${winnerName} wins! 🎉`);
+            playSound('win');
+          } else if (roomData.draw) {
+            showPopup("It's a draw! 🤝");
+            playSound('draw');
+          }
+        }
+      });
+    }
+    
+    function makeRealTimeMove(index) {
+      if (!roomRef || !playerId) return;
+      
+      const roomData = roomRef.val();
+      if (!roomData) return;
+      
+      // Check if it's this player's turn
+      const mySymbol = roomData.players[playerId].symbol;
+      if (roomData.currentPlayer !== mySymbol) return;
+      
+      // Check if cell is empty
+      if (roomData.board[index] !== null) return;
+      
+      // Make the move
+      const newBoard = [...roomData.board];
+      newBoard[index] = mySymbol;
+      
+      // Check for win
+      const winner = checkWinForBoard(newBoard, mySymbol);
+      const draw = newBoard.every(cell => cell !== null);
+      
+      // Update room data
+      const updates = {
+        board: newBoard,
+        currentPlayer: mySymbol === 'X' ? 'O' : 'X'
+      };
+      
+      if (winner) {
+        updates.gameOver = true;
+        updates.winner = mySymbol;
+        updates.status = 'finished';
+      } else if (draw) {
+        updates.gameOver = true;
+        updates.draw = true;
+        updates.status = 'finished';
+      }
+      
+      roomRef.update(updates);
+    }
+    
+    function checkWinForBoard(board, player) {
+      return winningCombos.some(combo => combo.every(i => board[i] === player));
+    }
+    
+    function resetRealTimeGame() {
+      if (!roomRef) return;
+      
+      const updates = {
+        board: Array(9).fill(null),
+        currentPlayer: 'X',
+        gameOver: false,
+        winner: null,
+        draw: false,
+        status: 'playing'
+      };
+      
+      roomRef.update(updates);
+    }
+    
+    function leaveRoom() {
+      if (roomRef && playerId) {
+        roomRef.child(`players/${playerId}/online`).set(false);
+        roomRef.off();
+      }
+      
+      roomRef = null;
+      playerId = null;
+      isConnected = false;
+      roomInfo.style.display = 'none';
+      resetGame();
+    }
+    
     function checkUrlForRoom() {
       const urlParams = new URLSearchParams(window.location.search);
       const roomParam = urlParams.get('room');
@@ -1636,7 +1963,7 @@
         // Auto-join room from URL
         selectMode('multiplayer');
         roomCodeInput.value = roomParam.toUpperCase();
-        joinRoom();
+        joinRealTimeRoom();
       }
     }
 
@@ -1660,25 +1987,30 @@
       if (board[index] !== null || gameOver || aiThinking) return;
       
       if (multiplayerGame) {
-        // Multiplayer mode
-        if (currentPlayer === 'X' && !isHost) return; // O player can't move when it's X's turn
-        if (currentPlayer === 'O' && isHost) return; // X player can't move when it's O's turn
-        
-        playSound('click');
-        board[index] = currentPlayer;
-        renderBoard();
-        
-        if (checkEnd(currentPlayer)) return;
-        
-        // Switch players
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        const nextPlayerName = currentPlayer === 'X' ? playerXData.name : playerOData.name;
-        showPopup(`${nextPlayerName}'s turn`);
-        
-        // Simulate multiplayer delay (in real app, this would be WebSocket communication)
-        setTimeout(() => {
+        // Real-time multiplayer mode
+        if (roomRef && playerId) {
+          makeRealTimeMove(index);
+        } else {
+          // Local multiplayer mode
+          if (currentPlayer === 'X' && !isHost) return; // O player can't move when it's X's turn
+          if (currentPlayer === 'O' && isHost) return; // X player can't move when it's O's turn
+          
+          playSound('click');
+          board[index] = currentPlayer;
           renderBoard();
-        }, 500);
+          
+          if (checkEnd(currentPlayer)) return;
+          
+          // Switch players
+          currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+          const nextPlayerName = currentPlayer === 'X' ? playerXData.name : playerOData.name;
+          showPopup(`${nextPlayerName}'s turn`);
+          
+          // Simulate multiplayer delay (in real app, this would be WebSocket communication)
+          setTimeout(() => {
+            renderBoard();
+          }, 500);
+        }
       } else {
         // AI mode
         playSound('click');
