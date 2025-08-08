@@ -1951,7 +1951,7 @@
         <div class="game-status" id="gameStatus"></div>
         
         <div class="game-actions">
-          <button onclick="resetRealTimeGame()">New Game</button>
+          <button onclick="resetMultiplayerGame()">New Game</button>
         </div>
       </div>
     </div>
@@ -3073,9 +3073,12 @@
     // Listen for moves
     roomRef.child('moves').on('child_added', (snapshot) => {
       const move = snapshot.val();
-      console.log('Move received from Firebase:', move);
+      console.log('Move received from Firebase:', move, 'My playerId:', window.playerId);
       if (move && move.playerId !== window.playerId) {
+        console.log('Processing remote move from player:', move.playerId);
         handleRemoteMove(move);
+      } else if (move && move.playerId === window.playerId) {
+        console.log('Ignoring my own move');
       }
     });
   }
@@ -3204,17 +3207,17 @@
     
     console.log('Making move:', index, 'as', window.playerSymbol);
     
-    // Make the move
-    board[index] = currentPlayer;
+    // Make the move locally first
+    board[index] = window.playerSymbol;
     renderMultiplayerBoard();
     playSound('click');
     
     // Send move to Firebase
     makeRealTimeMove(index);
     
-    if (checkMultiplayerEnd(currentPlayer)) return;
+    if (checkMultiplayerEnd(window.playerSymbol)) return;
     
-    // Switch turns
+    // Switch turns immediately for local player
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
     updateTurnDisplay();
   }
@@ -3238,7 +3241,10 @@
   }
 
   function handleRemoteMove(move) {
-    if (board[move.index] !== null) return;
+    if (board[move.index] !== null) {
+      console.log('Cell already occupied, ignoring move');
+      return;
+    }
     
     console.log('Received remote move:', move);
     
@@ -3249,25 +3255,31 @@
     
     if (checkMultiplayerEnd(move.player)) return;
     
-    // Switch turns
+    // Switch turns for the receiving player
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
     updateTurnDisplay();
+    
+    console.log('Turn switched to:', currentPlayer, 'My symbol:', window.playerSymbol);
   }
 
   function updateTurnDisplay() {
     const gameStatus = document.getElementById('gameStatus');
     if (gameStatus) {
+      console.log('Updating turn display - Current player:', currentPlayer, 'My symbol:', window.playerSymbol);
       if (currentPlayer === window.playerSymbol) {
         gameStatus.textContent = "Your turn!";
         gameStatus.style.color = '#28a745';
+        console.log('It\'s my turn!');
       } else {
         gameStatus.textContent = "Opponent's turn...";
         gameStatus.style.color = '#dc3545';
+        console.log('It\'s opponent\'s turn');
       }
     }
   }
 
   function resetMultiplayerGame() {
+    console.log('Resetting multiplayer game');
     board = Array(9).fill(null);
     currentPlayer = 'X';
     renderMultiplayerBoard();
@@ -3276,7 +3288,9 @@
     // Clear moves in Firebase
     if (window.roomCode) {
       const roomRef = database.ref(`rooms/${window.roomCode}`);
-      roomRef.child('moves').remove();
+      roomRef.child('moves').remove().then(() => {
+        console.log('Firebase moves cleared');
+      });
     }
   }
 
