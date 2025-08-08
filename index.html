@@ -120,6 +120,19 @@
         flex-direction: column;
         gap: 5px;
       }
+      
+      .avatar-options {
+        gap: 8px;
+      }
+      
+      .avatar-option {
+        min-width: 50px;
+        padding: 8px;
+      }
+      
+      .player-item {
+        padding: 6px 10px;
+      }
     }
     
     @media (max-width: 480px) {
@@ -587,6 +600,252 @@
       color: #2c3e50;
     }
     
+    /* Player Setup Styles */
+    .player-setup {
+      margin-bottom: 20px;
+    }
+    
+    .player-setup h4 {
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+    
+    body.light .player-setup h4 {
+      color: white;
+    }
+    
+    body.dark .player-setup h4 {
+      color: #ecf0f1;
+    }
+    
+    body.kids .player-setup h4 {
+      color: #2c3e50;
+    }
+    
+    .profile-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .name-input {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .name-input label {
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    
+    body.light .name-input label {
+      color: white;
+    }
+    
+    body.dark .name-input label {
+      color: #ecf0f1;
+    }
+    
+    body.kids .name-input label {
+      color: #2c3e50;
+    }
+    
+    .name-input input {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.9);
+      color: #2c3e50;
+    }
+    
+    .avatar-selection {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .avatar-selection label {
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    
+    body.light .avatar-selection label {
+      color: white;
+    }
+    
+    body.dark .avatar-selection label {
+      color: #ecf0f1;
+    }
+    
+    body.kids .avatar-selection label {
+      color: #2c3e50;
+    }
+    
+    .avatar-options {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .avatar-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.1);
+      min-width: 60px;
+    }
+    
+    .avatar-option:hover {
+      transform: scale(1.05);
+      border-color: #3498db;
+    }
+    
+    .avatar-option.selected {
+      border-color: #27ae60;
+      background: rgba(39, 174, 96, 0.2);
+    }
+    
+    .avatar-emoji {
+      font-size: 2rem;
+      margin-bottom: 5px;
+    }
+    
+    .avatar-name {
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    
+    body.light .avatar-name {
+      color: white;
+    }
+    
+    body.dark .avatar-name {
+      color: #ecf0f1;
+    }
+    
+    body.kids .avatar-name {
+      color: #2c3e50;
+    }
+    
+    /* Share Link Button */
+    .share-link-section {
+      margin: 15px 0;
+      text-align: center;
+    }
+    
+    .share-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #9b59b6;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .share-btn:hover {
+      background: #8e44ad;
+      transform: translateY(-1px);
+    }
+    
+    /* Room Players */
+    .room-players {
+      margin: 15px 0;
+    }
+    
+    .room-players h5 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    
+    body.light .room-players h5 {
+      color: white;
+    }
+    
+    body.dark .room-players h5 {
+      color: #ecf0f1;
+    }
+    
+    body.kids .room-players h5 {
+      color: #2c3e50;
+    }
+    
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .player-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .player-avatar {
+      font-size: 1.5rem;
+    }
+    
+    .player-name {
+      flex: 1;
+      font-weight: bold;
+    }
+    
+    body.light .player-name {
+      color: white;
+    }
+    
+    body.dark .player-name {
+      color: #ecf0f1;
+    }
+    
+    body.kids .player-name {
+      color: #2c3e50;
+    }
+    
+    .player-status {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.2);
+    }
+    
+    body.light .player-status {
+      color: white;
+    }
+    
+    body.dark .player-status {
+      color: #ecf0f1;
+    }
+    
+    body.kids .player-status {
+      color: #2c3e50;
+    }
+    
+    .player-item.online {
+      border-left: 3px solid #27ae60;
+    }
+    
+    .player-item.offline {
+      opacity: 0.6;
+    }
+    
     .difficulty-selector input[type="checkbox"] {
       margin-right: 8px;
       transform: scale(1.2);
@@ -845,17 +1104,50 @@
     <div class="multiplayer-instructions">
       <h4>How to Play with a Friend:</h4>
       <ol>
-        <li><strong>Create Room:</strong> Click "Create Room" to generate a code</li>
-        <li><strong>Share Code:</strong> Send the 6-digit code to your friend</li>
-        <li><strong>Friend Joins:</strong> Your friend enters the code and clicks "Join"</li>
+        <li><strong>Set up your profile:</strong> Enter your name and choose an avatar</li>
+        <li><strong>Create Room:</strong> Click "Create Room" to start a game</li>
+        <li><strong>Share Link:</strong> Send the direct link to your friend</li>
         <li><strong>Start Playing:</strong> Take turns playing X and O</li>
       </ol>
+    </div>
+    
+    <!-- Player Profile Setup -->
+    <div class="player-setup" id="playerSetup">
+      <h4>Set Up Your Profile:</h4>
+      <div class="profile-form">
+        <div class="name-input">
+          <label for="playerName">Your Name:</label>
+          <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+        </div>
+        
+        <div class="avatar-selection">
+          <label>Choose Your Avatar:</label>
+          <div class="avatar-options">
+            <div class="avatar-option" onclick="selectAvatar('boy1')" data-avatar="boy1">
+              <span class="avatar-emoji">👦</span>
+              <span class="avatar-name">Alex</span>
+            </div>
+            <div class="avatar-option" onclick="selectAvatar('boy2')" data-avatar="boy2">
+              <span class="avatar-emoji">🧒</span>
+              <span class="avatar-name">Sam</span>
+            </div>
+            <div class="avatar-option" onclick="selectAvatar('girl1')" data-avatar="girl1">
+              <span class="avatar-emoji">👧</span>
+              <span class="avatar-name">Emma</span>
+            </div>
+            <div class="avatar-option" onclick="selectAvatar('girl2')" data-avatar="girl2">
+              <span class="avatar-emoji">👩‍🦰</span>
+              <span class="avatar-name">Lily</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <div class="room-controls">
       <div class="create-room-section">
         <h4>Create a New Room</h4>
-        <button class="primary-btn" onclick="createRoom()">
+        <button class="primary-btn" onclick="createRoom()" id="createRoomBtn">
           <span>🎯</span> Create Room
         </button>
       </div>
@@ -877,9 +1169,32 @@
         <span>Room Code: </span>
         <span id="displayRoomCode" class="room-code"></span>
         <button class="copy-btn" onclick="copyRoomCode()" id="copyBtn">
-          <span>📋</span> Copy
+          <span>📋</span> Copy Code
         </button>
       </div>
+      
+      <div class="share-link-section">
+        <button class="share-btn" onclick="shareRoomLink()" id="shareBtn">
+          <span>🔗</span> Share Direct Link
+        </button>
+      </div>
+      
+      <div class="room-players">
+        <h5>Players in Room:</h5>
+        <div class="player-list" id="playerList">
+          <div class="player-item" id="playerX">
+            <span class="player-avatar" id="avatarX">👤</span>
+            <span class="player-name" id="nameX">Waiting...</span>
+            <span class="player-status" id="statusX">(X)</span>
+          </div>
+          <div class="player-item" id="playerO">
+            <span class="player-avatar" id="avatarO">👤</span>
+            <span class="player-name" id="nameO">Waiting...</span>
+            <span class="player-status" id="statusO">(O)</span>
+          </div>
+        </div>
+      </div>
+      
       <div class="room-status" id="roomStatus"></div>
     </div>
   </div>
@@ -922,6 +1237,16 @@
     const displayRoomCode = document.getElementById('displayRoomCode');
     const roomStatus = document.getElementById('roomStatus');
     const scoreText = document.getElementById('scoreText');
+    const playerNameInput = document.getElementById('playerName');
+    const createRoomBtn = document.getElementById('createRoomBtn');
+    const playerX = document.getElementById('playerX');
+    const playerO = document.getElementById('playerO');
+    const avatarX = document.getElementById('avatarX');
+    const avatarO = document.getElementById('avatarO');
+    const nameX = document.getElementById('nameX');
+    const nameO = document.getElementById('nameO');
+    const statusX = document.getElementById('statusX');
+    const statusO = document.getElementById('statusO');
 
     let board = Array(9).fill(null);
     let xWins = 0, oWins = 0;
@@ -932,6 +1257,10 @@
     let roomCode = null;
     let isHost = false;
     let multiplayerGame = false;
+    let playerName = '';
+    let selectedAvatar = '';
+    let playerXData = { name: '', avatar: '👤', online: false };
+    let playerOData = { name: '', avatar: '👤', online: false };
 
     const winningCombos = [
       [0,1,2],[3,4,5],[6,7,8],
@@ -1019,27 +1348,82 @@
     }
 
     function createRoom() {
+      // Validate player setup
+      if (!playerName.trim()) {
+        showPopup('Please enter your name!');
+        return;
+      }
+      if (!selectedAvatar) {
+        showPopup('Please select an avatar!');
+        return;
+      }
+      
       roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       roomCodeInput.value = roomCode;
       displayRoomCode.textContent = roomCode;
       isHost = true;
       currentPlayer = 'X';
+      
+      // Set up player X data
+      playerXData = {
+        name: playerName,
+        avatar: getAvatarEmoji(selectedAvatar),
+        online: true
+      };
+      
+      // Reset player O data
+      playerOData = {
+        name: '',
+        avatar: '👤',
+        online: false
+      };
+      
+      updatePlayerDisplay();
       roomInfo.style.display = 'block';
       roomStatus.textContent = 'Waiting for friend to join...';
-      showPopup(`Room created! Share the code with your friend!`);
+      showPopup(`Room created! Share the link with your friend!`);
       resetGame();
     }
 
     function joinRoom() {
+      // Validate player setup
+      if (!playerName.trim()) {
+        showPopup('Please enter your name!');
+        return;
+      }
+      if (!selectedAvatar) {
+        showPopup('Please select an avatar!');
+        return;
+      }
+      
       const code = roomCodeInput.value.trim().toUpperCase();
       if (code.length !== 6) {
         showPopup('Please enter a 6-digit room code!');
         return;
       }
+      
       roomCode = code;
       displayRoomCode.textContent = roomCode;
       isHost = false;
       currentPlayer = 'O';
+      
+      // Set up player O data
+      playerOData = {
+        name: playerName,
+        avatar: getAvatarEmoji(selectedAvatar),
+        online: true
+      };
+      
+      // Keep player X data if exists
+      if (!playerXData.online) {
+        playerXData = {
+          name: 'Host',
+          avatar: '👤',
+          online: true
+        };
+      }
+      
+      updatePlayerDisplay();
       roomInfo.style.display = 'block';
       roomStatus.textContent = 'Waiting for host to make first move...';
       showPopup(`Joined room! Waiting for host to start...`);
@@ -1077,6 +1461,98 @@
       return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
 
+    function selectAvatar(avatarType) {
+      selectedAvatar = avatarType;
+      
+      // Remove selected class from all avatars
+      document.querySelectorAll('.avatar-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      
+      // Add selected class to clicked avatar
+      document.querySelector(`[data-avatar="${avatarType}"]`).classList.add('selected');
+    }
+
+    function getAvatarEmoji(avatarType) {
+      const avatars = {
+        'boy1': '👦',
+        'boy2': '🧒',
+        'girl1': '👧',
+        'girl2': '👩‍🦰'
+      };
+      return avatars[avatarType] || '👤';
+    }
+
+    function updatePlayerDisplay() {
+      if (playerXData.online) {
+        avatarX.textContent = playerXData.avatar;
+        nameX.textContent = playerXData.name;
+        statusX.textContent = '(X)';
+        playerX.classList.add('online');
+        playerX.classList.remove('offline');
+      } else {
+        avatarX.textContent = '👤';
+        nameX.textContent = 'Waiting...';
+        statusX.textContent = '(X)';
+        playerX.classList.remove('online');
+        playerX.classList.add('offline');
+      }
+      
+      if (playerOData.online) {
+        avatarO.textContent = playerOData.avatar;
+        nameO.textContent = playerOData.name;
+        statusO.textContent = '(O)';
+        playerO.classList.add('online');
+        playerO.classList.remove('offline');
+      } else {
+        avatarO.textContent = '👤';
+        nameO.textContent = 'Waiting...';
+        statusO.textContent = '(O)';
+        playerO.classList.remove('online');
+        playerO.classList.add('offline');
+      }
+    }
+
+    function shareRoomLink() {
+      if (roomCode) {
+        const shareUrl = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
+        
+        if (navigator.share) {
+          navigator.share({
+            title: 'Join my Tic Tac Toe game!',
+            text: `Hey! Join my Tic Tac Toe game using this link: ${shareUrl}`,
+            url: shareUrl
+          }).then(() => {
+            showPopup('Link shared successfully!');
+          }).catch(() => {
+            copyToClipboard(shareUrl);
+          });
+        } else {
+          copyToClipboard(shareUrl);
+        }
+      }
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showPopup('Link copied to clipboard!');
+      }).catch(() => {
+        showPopup('Failed to copy. Please copy manually: ' + text);
+      });
+    }
+
+    function checkUrlForRoom() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomParam = urlParams.get('room');
+      
+      if (roomParam && roomParam.length === 6) {
+        // Auto-join room from URL
+        selectMode('multiplayer');
+        roomCodeInput.value = roomParam.toUpperCase();
+        joinRoom();
+      }
+    }
+
     function renderBoard() {
       boardElement.innerHTML = '';
       board.forEach((value, index) => {
@@ -1109,7 +1585,8 @@
         
         // Switch players
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        showPopup(`${currentPlayer === 'X' ? 'Player X' : 'Player O'}'s turn`);
+        const nextPlayerName = currentPlayer === 'X' ? playerXData.name : playerOData.name;
+        showPopup(`${nextPlayerName}'s turn`);
         
         // Simulate multiplayer delay (in real app, this would be WebSocket communication)
         setTimeout(() => {
@@ -1220,7 +1697,8 @@
         celebrateWin(player);
         updateScore(player);
         if (multiplayerGame) {
-          showPopup(`${player === 'X' ? 'Player X' : 'Player O'} wins! 🎉`);
+          const winnerName = player === 'X' ? playerXData.name : playerOData.name;
+          showPopup(`${winnerName} wins! 🎉`);
         } else {
           showPopup(`${player === 'X' ? 'You win!' : 'AI wins!'} 🎉`);
         }
@@ -1309,6 +1787,12 @@
     
     // Add event listeners
     themeSelect.addEventListener('change', changeTheme);
+    playerNameInput.addEventListener('input', function() {
+      playerName = this.value;
+    });
+    
+    // Check URL for room parameter on page load
+    checkUrlForRoom();
   </script>
 </body>
 </html>
