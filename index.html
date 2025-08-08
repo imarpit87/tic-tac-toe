@@ -3149,44 +3149,46 @@
       }
     });
     
-    // Set up game state polling instead of move listening
-    setupGameStatePolling();
+    // Set up real-time board listener
+    setupBoardListener();
   }
 
-  function setupGameStatePolling() {
-    // Poll for game state changes every 1 second
-    window.gameStateInterval = setInterval(() => {
-      if (window.roomCode) {
-        const roomRef = database.ref(`rooms/${window.roomCode}`);
-        roomRef.child('gameState').once('value').then((snapshot) => {
-          const gameState = snapshot.val();
-          if (gameState && gameState.lastMove && gameState.lastMove.playerId !== window.playerId) {
-            console.log('Received game state update:', gameState);
-            handleGameStateUpdate(gameState);
-          }
-        }).catch((error) => {
-          console.error('Error polling game state:', error);
-        });
+  function setupBoardListener() {
+    if (!window.roomCode) return;
+    
+    const roomRef = database.ref(`rooms/${window.roomCode}`);
+    
+    // Listen for board changes in real-time
+    roomRef.child('board').on('value', (snapshot) => {
+      const boardData = snapshot.val();
+      console.log('Board data received:', boardData);
+      
+      if (boardData && Array.isArray(boardData)) {
+        // Update local board
+        board = boardData;
+        renderMultiplayerBoard();
+        
+        // Check for game end
+        const lastMove = boardData.findIndex(cell => cell !== null);
+        if (lastMove !== -1) {
+          const player = boardData[lastMove];
+          if (checkMultiplayerEnd(player)) return;
+          
+          // Switch turns
+          currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+          updateTurnDisplay();
+        }
       }
-    }, 1000);
-  }
-
-  function handleGameStateUpdate(gameState) {
-    if (gameState.board && gameState.lastMove) {
-      // Update board with the new state
-      board = gameState.board;
-      renderMultiplayerBoard();
-      
-      // Handle the last move
-      const move = gameState.lastMove;
-      console.log('Processing move from game state:', move);
-      
-      if (checkMultiplayerEnd(move.player)) return;
-      
-      // Switch turns
-      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-      updateTurnDisplay();
-    }
+    });
+    
+    // Listen for current player changes
+    roomRef.child('currentPlayer').on('value', (snapshot) => {
+      const newCurrentPlayer = snapshot.val();
+      if (newCurrentPlayer && newCurrentPlayer !== currentPlayer) {
+        currentPlayer = newCurrentPlayer;
+        updateTurnDisplay();
+      }
+    });
   }
 
   function updateRoomDisplay(data) {
@@ -3255,6 +3257,21 @@
     }
     
     console.log('Player symbol assigned:', window.playerSymbol);
+    
+    // Initialize board in Firebase
+    const roomRef = database.ref(`rooms/${window.roomCode}`);
+    roomRef.child('board').set(board).then(() => {
+      console.log('Board initialized in Firebase');
+    }).catch((error) => {
+      console.error('Error initializing board in Firebase:', error);
+    });
+    
+    // Initialize current player in Firebase
+    roomRef.child('currentPlayer').set(currentPlayer).then(() => {
+      console.log('Current player initialized in Firebase');
+    }).catch((error) => {
+      console.error('Error initializing current player in Firebase:', error);
+    });
     
     // Set up game board for multiplayer
     renderMultiplayerBoard();
@@ -3332,27 +3349,26 @@
     if (!window.roomCode || board[index] !== null) return;
     
     const roomRef = database.ref(`rooms/${window.roomCode}`);
-    const moveData = {
-      index: index,
-      player: window.playerSymbol,
-      playerId: window.playerId,
-      timestamp: Date.now()
-    };
     
-    console.log('Updating game state in Firebase:', moveData);
+    console.log('Making real-time move:', index, 'Player:', window.playerSymbol);
     
-    // Update the entire game state instead of individual moves
-    const gameState = {
-      board: board,
-      lastMove: moveData,
-      currentPlayer: currentPlayer,
-      timestamp: Date.now()
-    };
+    // Update board array
+    const updatedBoard = [...board];
+    updatedBoard[index] = window.playerSymbol;
     
-    roomRef.child('gameState').set(gameState).then(() => {
-      console.log('Game state successfully updated in Firebase');
+    // Update board in Firebase
+    roomRef.child('board').set(updatedBoard).then(() => {
+      console.log('Board successfully updated in Firebase');
     }).catch((error) => {
-      console.error('Error updating game state in Firebase:', error);
+      console.error('Error updating board in Firebase:', error);
+    });
+    
+    // Update current player in Firebase
+    const nextPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    roomRef.child('currentPlayer').set(nextPlayer).then(() => {
+      console.log('Current player updated in Firebase');
+    }).catch((error) => {
+      console.error('Error updating current player in Firebase:', error);
     });
   }
 
@@ -3398,23 +3414,37 @@
     console.log('Resetting multiplayer game');
     board = Array(9).fill(null);
     currentPlayer = 'X';
-    renderMultiplayerBoard();
-    updateTurnDisplay();
     
-    // Clear game state in Firebase
+    // Reset Firebase board and current player
     if (window.roomCode) {
       const roomRef = database.ref(`rooms/${window.roomCode}`);
-      roomRef.child('gameState').remove().then(() => {
-        console.log('Firebase game state cleared');
+      
+      // Reset board in Firebase
+      roomRef.child('board').set(board).then(() => {
+        console.log('Board reset in Firebase');
+      }).catch((error) => {
+        console.error('Error resetting board in Firebase:', error);
+      });
+      
+      // Reset current player in Firebase
+      roomRef.child('currentPlayer').set(currentPlayer).then(() => {
+        console.log('Current player reset in Firebase');
+      }).catch((error) => {
+        console.error('Error resetting current player in Firebase:', error);
       });
     }
+    
+    renderMultiplayerBoard();
+    updateTurnDisplay();
   }
 
   function leaveRoom() {
-    // Stop polling
-    if (window.gameStateInterval) {
-      clearInterval(window.gameStateInterval);
-      window.gameStateInterval = null;
+    // Remove Firebase listeners
+    if (window.roomCode) {
+      const roomRef = database.ref(`rooms/${window.roomCode}`);
+      roomRef.child('board').off();
+      roomRef.child('currentPlayer').off();
+      roomRef.off();
     }
     
     // Remove player from room
