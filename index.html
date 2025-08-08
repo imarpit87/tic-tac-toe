@@ -86,25 +86,6 @@
     
     @media (max-width: 768px) {
       .board {
-        grid-template-columns: repeat(3, 100px);
-        gap: 10px;
-      }
-      
-      .cell {
-        width: 100px;
-        height: 100px;
-        font-size: 2rem;
-        line-height: 100px;
-      }
-      
-      .scoreboard {
-        font-size: 1.1rem;
-        padding: 8px 15px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .board {
         grid-template-columns: repeat(3, 80px);
         gap: 8px;
       }
@@ -112,31 +93,50 @@
       .cell {
         width: 80px;
         height: 80px;
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         line-height: 80px;
+      }
+      
+      .scoreboard {
+        font-size: 1rem;
+        padding: 6px 12px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .board {
+        grid-template-columns: repeat(3, 65px);
+        gap: 6px;
+      }
+      
+      .cell {
+        width: 65px;
+        height: 65px;
+        font-size: 1.3rem;
+        line-height: 65px;
       }
     }
     
     @media (max-width: 360px) {
       .board {
-        grid-template-columns: repeat(3, 70px);
-        gap: 6px;
+        grid-template-columns: repeat(3, 55px);
+        gap: 4px;
       }
       
       .cell {
-        width: 70px;
-        height: 70px;
-        font-size: 1.2rem;
-        line-height: 70px;
+        width: 55px;
+        height: 55px;
+        font-size: 1rem;
+        line-height: 55px;
       }
       
       h1 {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
       }
       
       button {
-        padding: 8px 16px;
-        font-size: 0.9rem;
+        padding: 6px 12px;
+        font-size: 0.8rem;
       }
     }
     
@@ -243,6 +243,43 @@
       -moz-user-select: text;
       -ms-user-select: text;
       user-select: text;
+    }
+    
+    /* Multiplayer input styling */
+    #roomCode {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    
+    #multiplayerSettings button {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    #multiplayerSettings button:hover {
+      background-color: #229954;
+    }
+    
+    body.dark #multiplayerSettings button {
+      background-color: #2ecc71;
+    }
+    
+    body.dark #multiplayerSettings button:hover {
+      background-color: #27ae60;
+    }
+    
+    body.kids #multiplayerSettings button {
+      background-color: #e67e22;
+    }
+    
+    body.kids #multiplayerSettings button:hover {
+      background-color: #d35400;
     }
     .board {
       display: grid;
@@ -413,12 +450,25 @@
     You (X): <span id="xWins">0</span> | AI (O): <span id="oWins">0</span>
   </div>
   <div class="difficulty-selector">
+    <label for="gameMode">Game Mode:</label>
+    <select id="gameMode">
+      <option value="ai">vs AI</option>
+      <option value="multiplayer">2 Players Online</option>
+    </select>
+  </div>
+  <div class="difficulty-selector" id="aiSettings">
     <label for="difficulty">AI Difficulty:</label>
     <select id="difficulty">
       <option value="easy">Easy</option>
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
+  </div>
+  <div class="difficulty-selector" id="multiplayerSettings" style="display: none;">
+    <label for="roomCode">Room Code:</label>
+    <input type="text" id="roomCode" placeholder="Enter 6-digit code" maxlength="6" style="width: 120px; text-align: center;">
+    <button onclick="joinRoom()" style="margin-left: 10px; padding: 4px 8px; font-size: 0.8rem;">Join</button>
+    <button onclick="createRoom()" style="margin-left: 5px; padding: 4px 8px; font-size: 0.8rem;">Create</button>
   </div>
   <div class="difficulty-selector">
     <label for="theme">Theme:</label>
@@ -445,11 +495,20 @@
     const difficultySelect = document.getElementById('difficulty');
     const themeSelect = document.getElementById('theme');
     const soundToggle = document.getElementById('soundToggle');
+    const gameModeSelect = document.getElementById('gameMode');
+    const aiSettings = document.getElementById('aiSettings');
+    const multiplayerSettings = document.getElementById('multiplayerSettings');
+    const roomCodeInput = document.getElementById('roomCode');
 
     let board = Array(9).fill(null);
     let xWins = 0, oWins = 0;
     let gameOver = false;
     let aiThinking = false;
+    let gameMode = 'ai';
+    let currentPlayer = 'X';
+    let roomCode = null;
+    let isHost = false;
+    let multiplayerGame = false;
 
     const winningCombos = [
       [0,1,2],[3,4,5],[6,7,8],
@@ -511,6 +570,47 @@
       document.body.className = theme;
     }
 
+    function changeGameMode() {
+      gameMode = gameModeSelect.value;
+      if (gameMode === 'ai') {
+        aiSettings.style.display = 'flex';
+        multiplayerSettings.style.display = 'none';
+        multiplayerGame = false;
+        resetGame();
+      } else {
+        aiSettings.style.display = 'none';
+        multiplayerSettings.style.display = 'flex';
+        multiplayerGame = true;
+        resetGame();
+      }
+    }
+
+    function createRoom() {
+      roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      roomCodeInput.value = roomCode;
+      isHost = true;
+      currentPlayer = 'X';
+      showPopup(`Room created! Code: ${roomCode} - Share this code with your friend!`);
+      resetGame();
+    }
+
+    function joinRoom() {
+      const code = roomCodeInput.value.trim().toUpperCase();
+      if (code.length !== 6) {
+        showPopup('Please enter a 6-digit room code!');
+        return;
+      }
+      roomCode = code;
+      isHost = false;
+      currentPlayer = 'O';
+      showPopup(`Joined room: ${roomCode} - Waiting for host to make first move...`);
+      resetGame();
+    }
+
+    function generateRoomCode() {
+      return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
     function renderBoard() {
       boardElement.innerHTML = '';
       board.forEach((value, index) => {
@@ -530,23 +630,45 @@
     function handleClick(index) {
       if (board[index] !== null || gameOver || aiThinking) return;
       
-      playSound('click');
-      board[index] = 'X';
-      renderBoard();
-      
-      if (checkEnd('X')) return;
-      
-      // AI move with delay
-      aiThinking = true;
-      boardElement.classList.add('thinking');
-      
-      const aiDelay = getDifficultyDelay();
-      setTimeout(() => {
-        aiMove();
-        aiThinking = false;
-        boardElement.classList.remove('thinking');
-        renderBoard(); // Re-render to enable clicks after AI move
-      }, aiDelay);
+      if (multiplayerGame) {
+        // Multiplayer mode
+        if (currentPlayer === 'X' && !isHost) return; // O player can't move when it's X's turn
+        if (currentPlayer === 'O' && isHost) return; // X player can't move when it's O's turn
+        
+        playSound('click');
+        board[index] = currentPlayer;
+        renderBoard();
+        
+        if (checkEnd(currentPlayer)) return;
+        
+        // Switch players
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        showPopup(`${currentPlayer === 'X' ? 'Player X' : 'Player O'}'s turn`);
+        
+        // Simulate multiplayer delay (in real app, this would be WebSocket communication)
+        setTimeout(() => {
+          renderBoard();
+        }, 500);
+      } else {
+        // AI mode
+        playSound('click');
+        board[index] = 'X';
+        renderBoard();
+        
+        if (checkEnd('X')) return;
+        
+        // AI move with delay
+        aiThinking = true;
+        boardElement.classList.add('thinking');
+        
+        const aiDelay = getDifficultyDelay();
+        setTimeout(() => {
+          aiMove();
+          aiThinking = false;
+          boardElement.classList.remove('thinking');
+          renderBoard(); // Re-render to enable clicks after AI move
+        }, aiDelay);
+      }
     }
 
     function getDifficultyDelay() {
@@ -631,7 +753,11 @@
         gameOver = true;
         celebrateWin(player);
         updateScore(player);
-        showPopup(`${player === 'X' ? 'You win!' : 'AI wins!'} 🎉`);
+        if (multiplayerGame) {
+          showPopup(`${player === 'X' ? 'Player X' : 'Player O'} wins! 🎉`);
+        } else {
+          showPopup(`${player === 'X' ? 'You win!' : 'AI wins!'} 🎉`);
+        }
         playSound('win');
         return true;
       } else if (board.every(cell => cell !== null)) {
@@ -689,6 +815,11 @@
       board = Array(9).fill(null);
       gameOver = false;
       aiThinking = false;
+      if (multiplayerGame) {
+        currentPlayer = isHost ? 'X' : 'O';
+      } else {
+        currentPlayer = 'X';
+      }
       renderBoard();
       confetti.innerHTML = '';
       boardElement.classList.remove('thinking');
@@ -711,6 +842,7 @@
     
     // Add event listeners
     themeSelect.addEventListener('change', changeTheme);
+    gameModeSelect.addEventListener('change', changeGameMode);
   </script>
 </body>
 </html>
