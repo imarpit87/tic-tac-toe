@@ -1952,6 +1952,7 @@
         
         <div class="game-actions">
           <button onclick="resetMultiplayerGame()">New Game</button>
+          <button onclick="testFirebaseConnection()" style="background: #007bff; margin-left: 10px;">Test Firebase</button>
         </div>
       </div>
     </div>
@@ -3054,11 +3055,17 @@
     const playerId = Date.now().toString();
     window.playerId = playerId;
     
+    console.log('Setting up room listeners for room:', window.roomCode, 'Player ID:', playerId);
+    
     roomRef.child('players').child(playerId).set({
       name: window.playerName,
       avatar: window.selectedAvatar,
       isHost: window.isHost,
       timestamp: Date.now()
+    }).then(() => {
+      console.log('Successfully joined room');
+    }).catch((error) => {
+      console.error('Error joining room:', error);
     });
     
     // Listen for room changes
@@ -3070,7 +3077,7 @@
       }
     });
     
-    // Listen for moves
+    // Listen for moves with better error handling
     roomRef.child('moves').on('child_added', (snapshot) => {
       const move = snapshot.val();
       console.log('Move received from Firebase:', move, 'My playerId:', window.playerId);
@@ -3080,6 +3087,8 @@
       } else if (move && move.playerId === window.playerId) {
         console.log('Ignoring my own move');
       }
+    }, (error) => {
+      console.error('Error listening for moves:', error);
     });
   }
 
@@ -3226,17 +3235,19 @@
     if (!window.roomCode || board[index] !== null) return;
     
     const roomRef = database.ref(`rooms/${window.roomCode}`);
-    roomRef.child('moves').push({
+    const moveData = {
       index: index,
       player: window.playerSymbol,
       playerId: window.playerId,
       timestamp: Date.now()
-    });
+    };
     
-    console.log('Move sent to Firebase:', {
-      index: index,
-      player: window.playerSymbol,
-      playerId: window.playerId
+    console.log('Sending move to Firebase:', moveData);
+    
+    roomRef.child('moves').push(moveData).then(() => {
+      console.log('Move successfully sent to Firebase');
+    }).catch((error) => {
+      console.error('Error sending move to Firebase:', error);
     });
   }
 
@@ -3319,8 +3330,26 @@
     return false;
   }
 
+  // Test Firebase connectivity
+  function testFirebaseConnection() {
+    console.log('Testing Firebase connection...');
+    const testRef = database.ref('test');
+    testRef.set({
+      timestamp: Date.now(),
+      message: 'Firebase connection test'
+    }).then(() => {
+      console.log('Firebase connection successful!');
+      testRef.remove(); // Clean up test data
+    }).catch((error) => {
+      console.error('Firebase connection failed:', error);
+    });
+  }
+
   // Initialize the app
   document.addEventListener('DOMContentLoaded', function() {
+    // Test Firebase connection
+    testFirebaseConnection();
+    
     // Set default theme
     selectTheme('light');
     
