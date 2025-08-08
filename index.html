@@ -3132,12 +3132,62 @@
     board = Array(9).fill(null);
     currentPlayer = 'X';
     
-    // Set up game board
-    renderBoard();
+    // Set up game board for multiplayer
+    renderMultiplayerBoard();
     
     // Update scoreboard
     document.getElementById('gameScoreText').textContent = 
       `${data.players[Object.keys(data.players)[0]]?.name || 'Player X'}: 0 | ${data.players[Object.keys(data.players)[1]]?.name || 'Player O'}: 0`;
+  }
+
+  function renderMultiplayerBoard() {
+    const gameBoard = document.getElementById('gameBoard');
+    gameBoard.innerHTML = '';
+    gameBoard.style.display = 'grid';
+    gameBoard.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    gameBoard.style.gap = '10px';
+    gameBoard.style.maxWidth = '300px';
+    gameBoard.style.margin = '20px auto';
+    
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.style.width = '80px';
+      cell.style.height = '80px';
+      cell.style.border = '2px solid #333';
+      cell.style.display = 'flex';
+      cell.style.alignItems = 'center';
+      cell.style.justifyContent = 'center';
+      cell.style.fontSize = '2rem';
+      cell.style.fontWeight = 'bold';
+      cell.style.cursor = 'pointer';
+      cell.style.backgroundColor = 'white';
+      cell.style.transition = 'background-color 0.3s';
+      
+      if (board[i]) {
+        cell.textContent = board[i];
+        cell.style.color = board[i] === 'X' ? '#e74c3c' : '#3498db';
+      }
+      
+      cell.addEventListener('click', () => handleMultiplayerClick(i));
+      gameBoard.appendChild(cell);
+    }
+  }
+
+  function handleMultiplayerClick(index) {
+    if (board[index] !== null) return;
+    
+    // Make the move
+    board[index] = currentPlayer;
+    renderMultiplayerBoard();
+    playSound('click');
+    
+    // Send move to Firebase
+    makeRealTimeMove(index);
+    
+    if (checkEnd(currentPlayer)) return;
+    
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   }
 
   function makeRealTimeMove(index) {
@@ -3156,12 +3206,24 @@
     if (board[move.index] !== null) return;
     
     board[move.index] = move.player;
-    renderBoard();
+    renderMultiplayerBoard();
     playSound('click');
     
     if (checkEnd(move.player)) return;
     
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+  }
+
+  function resetMultiplayerGame() {
+    board = Array(9).fill(null);
+    currentPlayer = 'X';
+    renderMultiplayerBoard();
+    
+    // Clear moves in Firebase
+    if (window.roomCode) {
+      const roomRef = database.ref(`rooms/${window.roomCode}`);
+      roomRef.child('moves').remove();
+    }
   }
 
   // Initialize the app
