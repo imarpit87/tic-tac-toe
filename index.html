@@ -625,7 +625,31 @@
     .profile-form {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 20px;
+    }
+    
+    .player-setup-section {
+      padding: 15px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .player-setup-section h5 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    
+    body.light .player-setup-section h5 {
+      color: white;
+    }
+    
+    body.dark .player-setup-section h5 {
+      color: #ecf0f1;
+    }
+    
+    body.kids .player-setup-section h5 {
+      color: #2c3e50;
     }
     
     .name-input {
@@ -1104,40 +1128,72 @@
     <div class="multiplayer-instructions">
       <h4>How to Play with a Friend:</h4>
       <ol>
-        <li><strong>Set up your profile:</strong> Enter your name and choose an avatar</li>
-        <li><strong>Create Room:</strong> Click "Create Room" to start a game</li>
-        <li><strong>Share Link:</strong> Send the direct link to your friend</li>
-        <li><strong>Start Playing:</strong> Take turns playing X and O</li>
+        <li><strong>Set up both players:</strong> Enter names and choose avatars for both players</li>
+        <li><strong>Start Game:</strong> Click "Start Local Game" to begin</li>
+        <li><strong>Take Turns:</strong> Players take turns on the same device</li>
+        <li><strong>Have Fun:</strong> Enjoy playing together!</li>
       </ol>
+      <p><em>Note: This is a local multiplayer mode. Both players use the same device.</em></p>
     </div>
     
     <!-- Player Profile Setup -->
     <div class="player-setup" id="playerSetup">
-      <h4>Set Up Your Profile:</h4>
+      <h4>Set Up Both Players:</h4>
       <div class="profile-form">
-        <div class="name-input">
-          <label for="playerName">Your Name:</label>
-          <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+        <div class="player-setup-section">
+          <h5>Player X (First Player):</h5>
+          <div class="name-input">
+            <label for="playerXName">Name:</label>
+            <input type="text" id="playerXName" placeholder="Enter Player X name" maxlength="20">
+          </div>
+          <div class="avatar-selection">
+            <label>Avatar:</label>
+            <div class="avatar-options">
+              <div class="avatar-option" onclick="selectAvatarX('boy1')" data-avatar-x="boy1">
+                <span class="avatar-emoji">👦</span>
+                <span class="avatar-name">Alex</span>
+              </div>
+              <div class="avatar-option" onclick="selectAvatarX('boy2')" data-avatar-x="boy2">
+                <span class="avatar-emoji">🧒</span>
+                <span class="avatar-name">Sam</span>
+              </div>
+              <div class="avatar-option" onclick="selectAvatarX('girl1')" data-avatar-x="girl1">
+                <span class="avatar-emoji">👧</span>
+                <span class="avatar-name">Emma</span>
+              </div>
+              <div class="avatar-option" onclick="selectAvatarX('girl2')" data-avatar-x="girl2">
+                <span class="avatar-emoji">👩‍🦰</span>
+                <span class="avatar-name">Lily</span>
+              </div>
+            </div>
+          </div>
         </div>
         
-        <div class="avatar-selection">
-          <label>Choose Your Avatar:</label>
-          <div class="avatar-options">
-            <div class="avatar-option" onclick="selectAvatar('boy1')" data-avatar="boy1">
-              <span class="avatar-emoji">👦</span>
-              <span class="avatar-name">Alex</span>
-            </div>
-            <div class="avatar-option" onclick="selectAvatar('boy2')" data-avatar="boy2">
-              <span class="avatar-emoji">🧒</span>
-              <span class="avatar-name">Sam</span>
-            </div>
-            <div class="avatar-option" onclick="selectAvatar('girl1')" data-avatar="girl1">
-              <span class="avatar-emoji">👧</span>
-              <span class="avatar-name">Emma</span>
-            </div>
-            <div class="avatar-option" onclick="selectAvatar('girl2')" data-avatar="girl2">
-              <span class="avatar-emoji">👩‍🦰</span>
-              <span class="avatar-name">Lily</span>
+        <div class="player-setup-section">
+          <h5>Player O (Second Player):</h5>
+          <div class="name-input">
+            <label for="playerOName">Name:</label>
+            <input type="text" id="playerOName" placeholder="Enter Player O name" maxlength="20">
+          </div>
+          <div class="avatar-selection">
+            <label>Avatar:</label>
+            <div class="avatar-options">
+              <div class="avatar-option" onclick="selectAvatarO('boy1')" data-avatar-o="boy1">
+                <span class="avatar-emoji">👦</span>
+                <span class="avatar-name">Alex</span>
+              </div>
+              <div class="avatar-option" onclick="selectAvatarO('boy2')" data-avatar-o="boy2">
+                <span class="avatar-emoji">🧒</span>
+                <span class="avatar-name">Sam</span>
+              </div>
+              <div class="avatar-option" onclick="selectAvatarO('girl1')" data-avatar-o="girl1">
+                <span class="avatar-emoji">👧</span>
+                <span class="avatar-name">Emma</span>
+              </div>
+              <div class="avatar-option" onclick="selectAvatarO('girl2')" data-avatar-o="girl2">
+                <span class="avatar-emoji">👩‍🦰</span>
+                <span class="avatar-name">Lily</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1145,51 +1201,28 @@
     </div>
     
     <div class="room-controls">
-      <div class="create-room-section">
-        <h4>Create a New Room</h4>
-        <button class="primary-btn" onclick="createRoom()" id="createRoomBtn">
-          <span>🎯</span> Create Room
+      <div class="start-game-section">
+        <h4>Start Local Game</h4>
+        <button class="primary-btn" onclick="startLocalGame()" id="startGameBtn">
+          <span>🎮</span> Start Game
         </button>
-      </div>
-      
-      <div class="join-room-section">
-        <h4>Join Existing Room</h4>
-        <div class="join-inputs">
-          <input type="text" id="roomCode" placeholder="Enter 6-digit code" maxlength="6">
-          <button class="secondary-btn" onclick="joinRoom()">
-            <span>🚀</span> Join Room
-          </button>
-        </div>
       </div>
     </div>
     
     <div class="room-info" id="roomInfo" style="display: none;">
-      <h4>Room Information:</h4>
-      <div class="room-code-display">
-        <span>Room Code: </span>
-        <span id="displayRoomCode" class="room-code"></span>
-        <button class="copy-btn" onclick="copyRoomCode()" id="copyBtn">
-          <span>📋</span> Copy Code
-        </button>
-      </div>
-      
-      <div class="share-link-section">
-        <button class="share-btn" onclick="shareRoomLink()" id="shareBtn">
-          <span>🔗</span> Share Direct Link
-        </button>
-      </div>
+      <h4>Game Information:</h4>
       
       <div class="room-players">
-        <h5>Players in Room:</h5>
+        <h5>Players:</h5>
         <div class="player-list" id="playerList">
           <div class="player-item" id="playerX">
             <span class="player-avatar" id="avatarX">👤</span>
-            <span class="player-name" id="nameX">Waiting...</span>
+            <span class="player-name" id="nameX">Player X</span>
             <span class="player-status" id="statusX">(X)</span>
           </div>
           <div class="player-item" id="playerO">
             <span class="player-avatar" id="avatarO">👤</span>
-            <span class="player-name" id="nameO">Waiting...</span>
+            <span class="player-name" id="nameO">Player O</span>
             <span class="player-status" id="statusO">(O)</span>
           </div>
         </div>
@@ -1237,8 +1270,9 @@
     const displayRoomCode = document.getElementById('displayRoomCode');
     const roomStatus = document.getElementById('roomStatus');
     const scoreText = document.getElementById('scoreText');
-    const playerNameInput = document.getElementById('playerName');
-    const createRoomBtn = document.getElementById('createRoomBtn');
+    const playerXNameInput = document.getElementById('playerXName');
+    const playerONameInput = document.getElementById('playerOName');
+    const startGameBtn = document.getElementById('startGameBtn');
     const playerX = document.getElementById('playerX');
     const playerO = document.getElementById('playerO');
     const avatarX = document.getElementById('avatarX');
@@ -1257,8 +1291,10 @@
     let roomCode = null;
     let isHost = false;
     let multiplayerGame = false;
-    let playerName = '';
-    let selectedAvatar = '';
+    let playerXName = '';
+    let playerOName = '';
+    let selectedAvatarX = '';
+    let selectedAvatarO = '';
     let playerXData = { name: '', avatar: '👤', online: false };
     let playerOData = { name: '', avatar: '👤', online: false };
 
@@ -1461,16 +1497,28 @@
       return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
 
-    function selectAvatar(avatarType) {
-      selectedAvatar = avatarType;
+    function selectAvatarX(avatarType) {
+      selectedAvatarX = avatarType;
       
-      // Remove selected class from all avatars
-      document.querySelectorAll('.avatar-option').forEach(option => {
+      // Remove selected class from all X avatars
+      document.querySelectorAll('[data-avatar-x]').forEach(option => {
         option.classList.remove('selected');
       });
       
       // Add selected class to clicked avatar
-      document.querySelector(`[data-avatar="${avatarType}"]`).classList.add('selected');
+      document.querySelector(`[data-avatar-x="${avatarType}"]`).classList.add('selected');
+    }
+
+    function selectAvatarO(avatarType) {
+      selectedAvatarO = avatarType;
+      
+      // Remove selected class from all O avatars
+      document.querySelectorAll('[data-avatar-o]').forEach(option => {
+        option.classList.remove('selected');
+      });
+      
+      // Add selected class to clicked avatar
+      document.querySelector(`[data-avatar-o="${avatarType}"]`).classList.add('selected');
     }
 
     function getAvatarEmoji(avatarType) {
@@ -1539,6 +1587,45 @@
       }).catch(() => {
         showPopup('Failed to copy. Please copy manually: ' + text);
       });
+    }
+
+    function startLocalGame() {
+      // Validate player setup
+      if (!playerXName.trim()) {
+        showPopup('Please enter Player X name!');
+        return;
+      }
+      if (!playerOName.trim()) {
+        showPopup('Please enter Player O name!');
+        return;
+      }
+      if (!selectedAvatarX) {
+        showPopup('Please select Player X avatar!');
+        return;
+      }
+      if (!selectedAvatarO) {
+        showPopup('Please select Player O avatar!');
+        return;
+      }
+      
+      // Set up player data
+      playerXData = {
+        name: playerXName,
+        avatar: getAvatarEmoji(selectedAvatarX),
+        online: true
+      };
+      
+      playerOData = {
+        name: playerOName,
+        avatar: getAvatarEmoji(selectedAvatarO),
+        online: true
+      };
+      
+      updatePlayerDisplay();
+      roomInfo.style.display = 'block';
+      roomStatus.textContent = `${playerXName}'s turn to start!`;
+      showPopup(`Game started! ${playerXName} goes first!`);
+      resetGame();
     }
 
     function checkUrlForRoom() {
@@ -1790,8 +1877,11 @@
     
     // Add event listeners
     themeSelect.addEventListener('change', changeTheme);
-    playerNameInput.addEventListener('input', function() {
-      playerName = this.value;
+    playerXNameInput.addEventListener('input', function() {
+      playerXName = this.value;
+    });
+    playerONameInput.addEventListener('input', function() {
+      playerOName = this.value;
     });
     
     // Check URL for room parameter on page load
