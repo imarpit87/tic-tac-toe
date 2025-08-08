@@ -2925,12 +2925,21 @@
     checkUrlForRoom();
   // Multi-page navigation functions
   function showPage(pageId) {
+    console.log('Showing page:', pageId);
+    
     // Hide all pages
     document.querySelectorAll('.page').forEach(page => {
       page.style.display = 'none';
     });
+    
     // Show the requested page
-    document.getElementById(pageId).style.display = 'flex';
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+      targetPage.style.display = 'flex';
+      console.log('Page displayed:', pageId);
+    } else {
+      console.error('Page not found:', pageId);
+    }
   }
 
   function goToWelcome() {
@@ -3467,12 +3476,39 @@
       return;
     }
     
+    console.log('Joining with code:', joinCode);
+    
     // Store the room code for later use
     window.pendingRoomCode = joinCode;
     
     // Show join page with the code pre-filled
     showPage('multiplayerJoinPage');
-    document.getElementById('roomCode').value = joinCode;
+    
+    // Try multiple times to set the room code (in case page takes time to load)
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    const setRoomCode = () => {
+      const roomCodeInput = document.getElementById('roomCode');
+      if (roomCodeInput) {
+        roomCodeInput.value = joinCode;
+        console.log('Room code set to input field:', joinCode);
+        return true;
+      } else {
+        attempts++;
+        console.log(`Attempt ${attempts}: Room code input field not found, retrying...`);
+        if (attempts < maxAttempts) {
+          setTimeout(setRoomCode, 200);
+        } else {
+          console.error('Failed to set room code after multiple attempts');
+          alert('Error: Could not load join page. Please try again.');
+        }
+        return false;
+      }
+    };
+    
+    // Start trying to set the room code
+    setTimeout(setRoomCode, 100);
   }
 
   // Initialize the app
