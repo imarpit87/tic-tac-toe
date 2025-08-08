@@ -2950,8 +2950,9 @@
       
       if (roomCode) {
         // Auto-join room
+        showPage('multiplayerJoinPage');
         document.getElementById('roomCode').value = roomCode;
-        joinRealTimeRoom();
+        // Don't auto-join, let user click the button
       } else {
         // Show host page
         showPage('multiplayerHostPage');
@@ -2977,7 +2978,11 @@
     document.getElementById('roomInfo').style.display = 'block';
     
     // Create room in Firebase
-    createRealTimeRoom();
+    setupRoomListeners();
+    
+    // Update player display
+    document.getElementById('nameX').textContent = window.playerName;
+    document.getElementById('avatarX').textContent = getAvatarEmoji(window.selectedAvatar);
   }
 
   function joinRealTimeRoom() {
@@ -2995,7 +3000,11 @@
     document.getElementById('joinRoomInfo').style.display = 'block';
     
     // Join room in Firebase
-    joinRealTimeRoom();
+    setupRoomListeners();
+    
+    // Update player display
+    document.getElementById('joinNameO').textContent = window.playerName;
+    document.getElementById('joinAvatarO').textContent = getAvatarEmoji(window.selectedAvatar);
   }
 
   function copyRoomCode() {
@@ -3028,6 +3037,96 @@
         }, 2000);
       });
     }
+  }
+
+  // Firebase multiplayer functions
+  function setupRoomListeners() {
+    if (!window.roomCode) return;
+    
+    const roomRef = database.ref(`rooms/${window.roomCode}`);
+    
+    roomRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        updateRoomDisplay(data);
+      }
+    });
+    
+    // Join the room
+    const playerId = Date.now().toString();
+    window.playerId = playerId;
+    
+    roomRef.child('players').child(playerId).set({
+      name: window.playerName,
+      avatar: window.selectedAvatar,
+      isHost: window.isHost,
+      timestamp: Date.now()
+    });
+  }
+
+  function updateRoomDisplay(data) {
+    const players = data.players || {};
+    const playerIds = Object.keys(players);
+    
+    if (playerIds.length >= 2) {
+      // Both players joined, start game
+      showPage('gameRoomPage');
+      startMultiplayerGame(data);
+    } else {
+      // Update waiting display
+      updateWaitingDisplay(players);
+    }
+  }
+
+  function updateWaitingDisplay(players) {
+    const playerIds = Object.keys(players);
+    
+    if (window.isHost) {
+      // Update host waiting display
+      if (playerIds.length > 1) {
+        const otherPlayer = playerIds.find(id => id !== window.playerId);
+        if (otherPlayer) {
+          const otherPlayerData = players[otherPlayer];
+          document.getElementById('nameO').textContent = otherPlayerData.name;
+          document.getElementById('avatarO').textContent = getAvatarEmoji(otherPlayerData.avatar);
+          document.getElementById('playerO').classList.remove('waiting');
+        }
+      }
+    } else {
+      // Update join waiting display
+      if (playerIds.length > 1) {
+        const hostPlayer = playerIds.find(id => players[id].isHost);
+        if (hostPlayer) {
+          const hostData = players[hostPlayer];
+          document.getElementById('joinNameX').textContent = hostData.name;
+          document.getElementById('joinAvatarX').textContent = getAvatarEmoji(hostData.avatar);
+        }
+      }
+    }
+  }
+
+  function startMultiplayerGame(data) {
+    // Initialize multiplayer game board
+    board = Array(9).fill(null);
+    currentPlayer = 'X';
+    
+    // Set up game board
+    renderBoard();
+    
+    // Update scoreboard
+    document.getElementById('gameScoreText').textContent = 
+      `${data.players[Object.keys(data.players)[0]]?.name || 'Player X'}: 0 | ${data.players[Object.keys(data.players)[1]]?.name || 'Player O'}: 0`;
+  }
+
+  function makeRealTimeMove(index) {
+    if (!window.roomCode || board[index] !== null) return;
+    
+    const roomRef = database.ref(`rooms/${window.roomCode}`);
+    roomRef.child('moves').push({
+      index: index,
+      player: currentPlayer,
+      timestamp: Date.now()
+    });
   }
 
   // Initialize the app
