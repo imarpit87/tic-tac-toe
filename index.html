@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Tic Tac Toe - AI Edition</title>
   <style>
     * { box-sizing: border-box; }
@@ -11,11 +11,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      justify-content: flex-start;
+      min-height: 100vh;
       margin: 0;
-      overflow: hidden;
+      padding: 20px 10px;
+      overflow-x: hidden;
+      overflow-y: auto;
       transition: all 0.3s ease;
+      -webkit-overflow-scrolling: touch;
     }
     
     /* Light Theme (Default) */
@@ -39,6 +42,102 @@
       font-size: 3rem;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
       transition: all 0.3s ease;
+      margin: 10px 0;
+      text-align: center;
+    }
+    
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+        margin: 5px 0;
+      }
+      
+      body {
+        padding: 10px 5px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+        margin: 5px 0;
+      }
+      
+      .scoreboard {
+        font-size: 1rem;
+        padding: 8px 15px;
+      }
+      
+      .difficulty-selector {
+        flex-direction: column;
+        gap: 5px;
+      }
+      
+      .difficulty-selector label {
+        font-size: 1rem;
+      }
+      
+      .difficulty-selector select {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .board {
+        grid-template-columns: repeat(3, 100px);
+        gap: 10px;
+      }
+      
+      .cell {
+        width: 100px;
+        height: 100px;
+        font-size: 2rem;
+        line-height: 100px;
+      }
+      
+      .scoreboard {
+        font-size: 1.1rem;
+        padding: 8px 15px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .board {
+        grid-template-columns: repeat(3, 80px);
+        gap: 8px;
+      }
+      
+      .cell {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+        line-height: 80px;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .board {
+        grid-template-columns: repeat(3, 70px);
+        gap: 6px;
+      }
+      
+      .cell {
+        width: 70px;
+        height: 70px;
+        font-size: 1.2rem;
+        line-height: 70px;
+      }
+      
+      h1 {
+        font-size: 1.3rem;
+      }
+      
+      button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
     }
     
     body.light h1 {
@@ -60,6 +159,8 @@
       padding: 10px 20px;
       border-radius: 12px;
       transition: all 0.3s ease;
+      text-align: center;
+      white-space: nowrap;
     }
     
     body.light .scoreboard {
@@ -78,6 +179,8 @@
       display: flex;
       gap: 10px;
       align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     .difficulty-selector label {
       font-weight: bold;
@@ -123,12 +226,30 @@
     .difficulty-selector input[type="checkbox"] {
       margin-right: 8px;
       transform: scale(1.2);
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Prevent text selection on mobile */
+    * {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    /* Allow text selection for inputs */
+    input, select {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
     }
     .board {
       display: grid;
       grid-template-columns: repeat(3, 120px);
       gap: 15px;
       margin: 20px 0;
+      justify-content: center;
     }
     .cell {
       width: 120px;
@@ -142,6 +263,8 @@
       position: relative;
       overflow: hidden;
       border: 3px solid;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     
     body.light .cell {
@@ -207,6 +330,9 @@
       cursor: pointer;
       margin-top: 10px;
       transition: background-color 0.3s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      min-height: 44px;
     }
     
     body.light button {
