@@ -2023,33 +2023,11 @@
     <div id="confetti"></div>
 
   <script>
-    const boardElement = document.getElementById('board');
-    const xWinsElement = document.getElementById('xWins');
-    const oWinsElement = document.getElementById('oWins');
-    const confetti = document.getElementById('confetti');
-    const difficultySelect = document.getElementById('difficulty');
-    const themeSelect = document.getElementById('theme');
-    const soundToggle = document.getElementById('soundToggle');
-    const aiModeBtn = document.getElementById('aiModeBtn');
-    const multiplayerModeBtn = document.getElementById('multiplayerModeBtn');
-    const aiSettings = document.getElementById('aiSettings');
-    const multiplayerSettings = document.getElementById('multiplayerSettings');
-    const roomCodeInput = document.getElementById('roomCode');
-    const roomInfo = document.getElementById('roomInfo');
-    const displayRoomCode = document.getElementById('displayRoomCode');
-    const roomStatus = document.getElementById('roomStatus');
-    const scoreText = document.getElementById('scoreText');
-    const playerXNameInput = document.getElementById('playerXName');
-    const playerONameInput = document.getElementById('playerOName');
-    const startGameBtn = document.getElementById('startGameBtn');
-    const playerX = document.getElementById('playerX');
-    const playerO = document.getElementById('playerO');
-    const avatarX = document.getElementById('avatarX');
-    const avatarO = document.getElementById('avatarO');
-    const nameX = document.getElementById('nameX');
-    const nameO = document.getElementById('nameO');
-    const statusX = document.getElementById('statusX');
-    const statusO = document.getElementById('statusO');
+    // Global variables - will be initialized after DOM loads
+    let boardElement, xWinsElement, oWinsElement, confetti, difficultySelect, themeSelect, soundToggle;
+    let aiModeBtn, multiplayerModeBtn, aiSettings, multiplayerSettings, roomCodeInput, roomInfo;
+    let displayRoomCode, roomStatus, scoreText, playerXNameInput, playerONameInput, startGameBtn;
+    let playerX, playerO, avatarX, avatarO, nameX, nameO, statusX, statusO;
 
     let board = Array(9).fill(null);
     let xWins = 0, oWins = 0;
@@ -2072,6 +2050,37 @@
     let playerId = null;
     let isConnected = false;
     let database = null;
+
+    // Initialize DOM elements
+    function initializeDOMElements() {
+      boardElement = document.getElementById('board');
+      xWinsElement = document.getElementById('xWins');
+      oWinsElement = document.getElementById('oWins');
+      confetti = document.getElementById('confetti');
+      difficultySelect = document.getElementById('difficulty');
+      themeSelect = document.getElementById('theme');
+      soundToggle = document.getElementById('soundToggle');
+      aiModeBtn = document.getElementById('aiModeBtn');
+      multiplayerModeBtn = document.getElementById('multiplayerModeBtn');
+      aiSettings = document.getElementById('aiSettings');
+      multiplayerSettings = document.getElementById('multiplayerSettings');
+      roomCodeInput = document.getElementById('roomCode');
+      roomInfo = document.getElementById('roomInfo');
+      displayRoomCode = document.getElementById('displayRoomCode');
+      roomStatus = document.getElementById('roomStatus');
+      scoreText = document.getElementById('scoreText');
+      playerXNameInput = document.getElementById('playerXName');
+      playerONameInput = document.getElementById('playerOName');
+      startGameBtn = document.getElementById('startGameBtn');
+      playerX = document.getElementById('playerX');
+      playerO = document.getElementById('playerO');
+      avatarX = document.getElementById('avatarX');
+      avatarO = document.getElementById('avatarO');
+      nameX = document.getElementById('nameX');
+      nameO = document.getElementById('nameO');
+      statusX = document.getElementById('statusX');
+      statusO = document.getElementById('statusO');
+    }
 
     // Initialize Firebase database
     function initializeDatabase() {
@@ -2132,7 +2141,7 @@
     };
 
     function playSound(soundName) {
-      if (!soundToggle.checked) return; // Don't play if sound is disabled
+      if (!soundToggle || !soundToggle.checked) return; // Don't play if sound is disabled
       
       try {
         // Resume audio context if suspended (needed for some browsers)
@@ -2278,6 +2287,8 @@
     }
 
     function updateScoreboard() {
+      if (!scoreText) return;
+      
       if (multiplayerGame) {
         scoreText.textContent = `Player X: ${xWins} | Player O: ${oWins}`;
       } else {
@@ -2793,6 +2804,8 @@
     }
 
     function renderBoard() {
+      if (!boardElement) return;
+      
       boardElement.innerHTML = '';
       board.forEach((value, index) => {
         const cell = document.createElement('div');
@@ -2909,7 +2922,7 @@
     }
 
     function getDifficultyDelay() {
-      const difficulty = difficultySelect.value;
+      const difficulty = difficultySelect ? difficultySelect.value : 'medium';
       switch(difficulty) {
         case 'easy': return 800;
         case 'medium': return 1200;
@@ -2932,7 +2945,7 @@
     }
 
     function getBestMove() {
-      const difficulty = difficultySelect.value;
+      const difficulty = difficultySelect ? difficultySelect.value : 'medium';
       const empty = board.map((v, i) => v ? null : i).filter(v => v !== null);
       
       if (empty.length === 0) return null;
@@ -3020,8 +3033,8 @@
     function updateScore(player) {
       if (player === 'X') xWins++;
       else oWins++;
-      xWinsElement.textContent = xWins;
-      oWinsElement.textContent = oWins;
+      if (xWinsElement) xWinsElement.textContent = xWins;
+      if (oWinsElement) oWinsElement.textContent = oWins;
       updateScoreboard();
     }
 
@@ -3208,12 +3221,12 @@
     const selectedAvatar = window.selectedAvatar;
     
     if (!playerName) {
-      alert('Please enter your name first!');
+      showPopup('Please enter your name first!');
       return;
     }
     
     if (!selectedAvatar) {
-      alert('Please select an avatar first!');
+      showPopup('Please select an avatar first!');
       return;
     }
     
@@ -3222,8 +3235,10 @@
     window.selectedAvatar = selectedAvatar;
     
     // Update displays
-    document.getElementById('hostName').textContent = playerName;
-    document.getElementById('joinName').textContent = playerName;
+    const hostNameElement = document.getElementById('hostName');
+    const joinNameElement = document.getElementById('joinName');
+    if (hostNameElement) hostNameElement.textContent = playerName;
+    if (joinNameElement) joinNameElement.textContent = playerName;
     updateAvatarDisplays();
     
     if (mode === 'ai') {
@@ -3236,7 +3251,8 @@
       if (roomCode) {
         // Auto-join room
         showPage('multiplayerJoinPage');
-        document.getElementById('roomCode').value = roomCode;
+        const roomCodeInput = document.getElementById('roomCode');
+        if (roomCodeInput) roomCodeInput.value = roomCode;
         // Don't auto-join, let user click the button
       } else {
         // Show host page
@@ -3247,6 +3263,9 @@
 
   // Initialize the app
   document.addEventListener('DOMContentLoaded', function() {
+    // Initialize DOM elements first
+    initializeDOMElements();
+    
     // Initialize database
     if (!initializeDatabase()) {
       console.error('Failed to initialize Firebase database');
