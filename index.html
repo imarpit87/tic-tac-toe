@@ -3073,6 +3073,7 @@
     // Listen for moves
     roomRef.child('moves').on('child_added', (snapshot) => {
       const move = snapshot.val();
+      console.log('Move received from Firebase:', move);
       if (move && move.playerId !== window.playerId) {
         handleRemoteMove(move);
       }
@@ -3130,14 +3131,32 @@
   function startMultiplayerGame(data) {
     // Initialize multiplayer game board
     board = Array(9).fill(null);
-    currentPlayer = 'X';
+    
+    // Assign symbols based on who joined first (host = X, joiner = O)
+    const playerIds = Object.keys(data.players);
+    const hostPlayer = playerIds.find(id => data.players[id].isHost);
+    const joinerPlayer = playerIds.find(id => !data.players[id].isHost);
+    
+    if (window.playerId === hostPlayer) {
+      window.playerSymbol = 'X';
+      currentPlayer = 'X'; // Host goes first
+    } else {
+      window.playerSymbol = 'O';
+      currentPlayer = 'X'; // Host goes first
+    }
+    
+    console.log('Player symbol assigned:', window.playerSymbol);
     
     // Set up game board for multiplayer
     renderMultiplayerBoard();
     
-    // Update scoreboard
-    document.getElementById('gameScoreText').textContent = 
-      `${data.players[Object.keys(data.players)[0]]?.name || 'Player X'}: 0 | ${data.players[Object.keys(data.players)[1]]?.name || 'Player O'}: 0`;
+    // Update scoreboard with player names
+    const hostName = data.players[hostPlayer]?.name || 'Player X';
+    const joinerName = data.players[joinerPlayer]?.name || 'Player O';
+    document.getElementById('gameScoreText').textContent = `${hostName}: 0 | ${joinerName}: 0`;
+    
+    // Show whose turn it is
+    updateTurnDisplay();
   }
 
   function renderMultiplayerBoard() {
@@ -3177,6 +3196,14 @@
   function handleMultiplayerClick(index) {
     if (board[index] !== null) return;
     
+    // Only allow moves on player's turn
+    if (currentPlayer !== window.playerSymbol) {
+      console.log('Not your turn!');
+      return;
+    }
+    
+    console.log('Making move:', index, 'as', window.playerSymbol);
+    
     // Make the move
     board[index] = currentPlayer;
     renderMultiplayerBoard();
@@ -3185,9 +3212,11 @@
     // Send move to Firebase
     makeRealTimeMove(index);
     
-    if (checkEnd(currentPlayer)) return;
+    if (checkMultiplayerEnd(currentPlayer)) return;
     
+    // Switch turns
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    updateTurnDisplay();
   }
 
   function makeRealTimeMove(index) {
@@ -3196,34 +3225,84 @@
     const roomRef = database.ref(`rooms/${window.roomCode}`);
     roomRef.child('moves').push({
       index: index,
-      player: currentPlayer,
+      player: window.playerSymbol,
       playerId: window.playerId,
       timestamp: Date.now()
+    });
+    
+    console.log('Move sent to Firebase:', {
+      index: index,
+      player: window.playerSymbol,
+      playerId: window.playerId
     });
   }
 
   function handleRemoteMove(move) {
     if (board[move.index] !== null) return;
     
+    console.log('Received remote move:', move);
+    
+    // Update the board with opponent's move
     board[move.index] = move.player;
     renderMultiplayerBoard();
     playSound('click');
     
-    if (checkEnd(move.player)) return;
+    if (checkMultiplayerEnd(move.player)) return;
     
+    // Switch turns
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    updateTurnDisplay();
+  }
+
+  function updateTurnDisplay() {
+    const gameStatus = document.getElementById('gameStatus');
+    if (gameStatus) {
+      if (currentPlayer === window.playerSymbol) {
+        gameStatus.textContent = "Your turn!";
+        gameStatus.style.color = '#28a745';
+      } else {
+        gameStatus.textContent = "Opponent's turn...";
+        gameStatus.style.color = '#dc3545';
+      }
+    }
   }
 
   function resetMultiplayerGame() {
     board = Array(9).fill(null);
     currentPlayer = 'X';
     renderMultiplayerBoard();
+    updateTurnDisplay();
     
     // Clear moves in Firebase
     if (window.roomCode) {
       const roomRef = database.ref(`rooms/${window.roomCode}`);
       roomRef.child('moves').remove();
     }
+  }
+
+  function checkMultiplayerEnd(player) {
+    if (checkWin(player)) {
+      const gameStatus = document.getElementById('gameStatus');
+      if (gameStatus) {
+        if (player === window.playerSymbol) {
+          gameStatus.textContent = "You win! 🎉";
+          gameStatus.style.color = '#28a745';
+        } else {
+          gameStatus.textContent = "Opponent wins! 😔";
+          gameStatus.style.color = '#dc3545';
+        }
+      }
+      dropConfetti();
+      return true;
+    } else if (board.every(cell => cell !== null)) {
+      const gameStatus = document.getElementById('gameStatus');
+      if (gameStatus) {
+        gameStatus.textContent = "It's a draw! 🤝";
+        gameStatus.style.color = '#6c757d';
+      }
+      return true;
+    }
+    return false;
   }
 
   // Initialize the app
