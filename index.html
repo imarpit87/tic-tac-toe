@@ -270,6 +270,54 @@
       color: #666;
     }
 
+    .join-code-section {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .join-code-section h4 {
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
+
+    .join-code-input {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .join-code-input input {
+      flex: 1;
+      max-width: 200px;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .join-code-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+    }
+
+    .join-code-btn:hover {
+      background: #0056b3;
+    }
+
     /* AI Game Page */
     .ai-settings {
       background: white;
@@ -585,6 +633,11 @@
       
       .join-inputs {
         flex-direction: column;
+      }
+      
+      .join-code-input {
+        flex-direction: column;
+        gap: 15px;
       }
       
       .room-code-display {
@@ -1777,6 +1830,16 @@
                 <span class="mode-icon">👥</span>
                 <span class="mode-title">Play with Friend</span>
                 <span class="mode-desc">Online multiplayer</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="join-code-section">
+            <h4>Or Join Existing Room:</h4>
+            <div class="join-code-input">
+              <input type="text" id="joinCodeInput" placeholder="Enter 6-digit room code" maxlength="6">
+              <button class="join-code-btn" onclick="joinWithCode()">
+                <span>🚀</span> Join Room
               </button>
             </div>
           </div>
@@ -3395,6 +3458,23 @@
     });
   }
 
+  // Join with code function
+  function joinWithCode() {
+    const joinCode = document.getElementById('joinCodeInput').value.trim();
+    
+    if (!joinCode || joinCode.length !== 6) {
+      alert('Please enter a valid 6-digit room code!');
+      return;
+    }
+    
+    // Store the room code for later use
+    window.pendingRoomCode = joinCode;
+    
+    // Show join page with the code pre-filled
+    showPage('multiplayerJoinPage');
+    document.getElementById('roomCode').value = joinCode;
+  }
+
   // Initialize the app
   document.addEventListener('DOMContentLoaded', function() {
     // Test Firebase connection
@@ -3415,11 +3495,53 @@
     const roomCode = urlParams.get('room');
     
     if (roomCode) {
-      // Auto-navigate to join page
-      showPage('multiplayerJoinPage');
-      document.getElementById('roomCode').value = roomCode;
+      // Store the room code and show modified welcome page
+      window.pendingRoomCode = roomCode;
+      showModifiedWelcomePage();
     }
   });
+
+  function showModifiedWelcomePage() {
+    // Show the welcome page but modify the game mode section
+    showPage('welcomePage');
+    
+    // Hide the regular game mode section
+    const gameModeSection = document.querySelector('.game-mode-section');
+    if (gameModeSection) {
+      gameModeSection.style.display = 'none';
+    }
+    
+    // Hide the join code section since they already have a code
+    const joinCodeSection = document.querySelector('.join-code-section');
+    if (joinCodeSection) {
+      joinCodeSection.style.display = 'none';
+    }
+    
+    // Add a special join section for link-based joining
+    const setupSection = document.querySelector('.setup-section');
+    if (setupSection && !document.getElementById('linkJoinSection')) {
+      const linkJoinSection = document.createElement('div');
+      linkJoinSection.id = 'linkJoinSection';
+      linkJoinSection.className = 'link-join-section';
+      linkJoinSection.innerHTML = `
+        <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #e0e0e0; text-align: center;">
+          <h4>Join Your Friend's Game</h4>
+          <p style="color: #666; margin-bottom: 20px;">You've been invited to join a game!</p>
+          <button class="join-code-btn" onclick="joinWithLink()" style="background: #28a745; font-size: 18px; padding: 15px 30px;">
+            <span>🎮</span> Join Game
+          </button>
+        </div>
+      `;
+      setupSection.appendChild(linkJoinSection);
+    }
+  }
+
+  function joinWithLink() {
+    if (window.pendingRoomCode) {
+      showPage('multiplayerJoinPage');
+      document.getElementById('roomCode').value = window.pendingRoomCode;
+    }
+  }
 
   </script>
 </body>
