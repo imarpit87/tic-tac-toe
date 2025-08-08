@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic Tac Toe - AI Edition</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    /* Light Theme (Default) */
+    body.light {
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      color: #1e1e2f;
+    }
+    
+    /* Dark Theme */
+    body.dark {
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: #ecf0f1;
+    }
+    
+    /* Kids Theme */
+    body.kids {
+      background: linear-gradient(135deg, #ff9a9e, #fecfef, #fecfef);
+      color: #2c3e50;
+    }
+    h1 {
+      font-size: 3rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+    
+    body.light h1 {
+      color: #ffffff;
+    }
+    
+    body.dark h1 {
+      color: #ecf0f1;
+    }
+    
+    body.kids h1 {
+      color: #2c3e50;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+    }
+    
+    .scoreboard {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      padding: 10px 20px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    body.light .scoreboard {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    body.dark .scoreboard {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    body.kids .scoreboard {
+      background: rgba(255,255,255,0.4);
+    }
+    .difficulty-selector {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .difficulty-selector label {
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+    
+    body.light .difficulty-selector label {
+      color: white;
+    }
+    
+    body.dark .difficulty-selector label {
+      color: #ecf0f1;
+    }
+    
+    body.kids .difficulty-selector label {
+      color: #2c3e50;
+    }
+    
+    .difficulty-selector select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    body.light .difficulty-selector select {
+      background: rgba(255,255,255,0.9);
+    }
+    
+    body.dark .difficulty-selector select {
+      background: rgba(255,255,255,0.2);
+      color: #ecf0f1;
+    }
+    
+    body.kids .difficulty-selector select {
+      background: rgba(255,255,255,0.9);
+      color: #2c3e50;
+    }
+    
+    .difficulty-selector input[type="checkbox"] {
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .cell {
+      width: 120px;
+      height: 120px;
+      font-size: 2.5rem;
+      text-align: center;
+      line-height: 120px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s;
+      position: relative;
+      overflow: hidden;
+      border: 3px solid;
+    }
+    
+    body.light .cell {
+      background-color: #ffffffcc;
+      border-color: #4b6cb7;
+    }
+    
+    body.dark .cell {
+      background-color: rgba(255,255,255,0.1);
+      border-color: #3498db;
+    }
+    
+    body.kids .cell {
+      background-color: rgba(255,255,255,0.8);
+      border-color: #e74c3c;
+    }
+    
+    body.light .cell:hover {
+      transform: scale(1.05);
+      background-color: #e0f7ff;
+    }
+    
+    body.dark .cell:hover {
+      transform: scale(1.05);
+      background-color: rgba(255,255,255,0.2);
+    }
+    
+    body.kids .cell:hover {
+      transform: scale(1.05);
+      background-color: #ffb3ba;
+    }
+    .cell.x, .cell.o {
+      animation: appear 0.6s ease-out;
+    }
+    @keyframes appear {
+      0% { 
+        transform: scale(0) rotate(180deg);
+        opacity: 0;
+      }
+      50% { 
+        transform: scale(1.2) rotate(90deg);
+        opacity: 0.7;
+      }
+      100% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+    .winner {
+      animation: highlight 1s ease forwards;
+    }
+    @keyframes highlight {
+      0% { background-color: #fff; }
+      50% { background-color: #a0f9d2; transform: scale(1.1); }
+      100% { background-color: #a0f9d2; transform: scale(1); }
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+    }
+    
+    body.light button {
+      background-color: #4b6cb7;
+      color: white;
+    }
+    
+    body.dark button {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    body.kids button {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    body.light button:hover {
+      background-color: #3753a2;
+    }
+    
+    body.dark button:hover {
+      background-color: #2980b9;
+    }
+    
+    body.kids button:hover {
+      background-color: #c0392b;
+    }
+    #confetti {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
+      animation: confetti-fall 3s linear forwards;
+    }
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+    .popup {
+      position: absolute;
+      background-color: #fff5b7;
+      border: 2px dashed #4b6cb7;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 1.5rem;
+      color: #4b6cb7;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      top: 20px;
+      animation: pop 0.5s ease forwards;
+      z-index: 1000;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .thinking {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe 🤖 vs 🧑</h1>
+  <div class="scoreboard">
+    You (X): <span id="xWins">0</span> | AI (O): <span id="oWins">0</span>
+  </div>
+  <div class="difficulty-selector">
+    <label for="difficulty">AI Difficulty:</label>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </div>
+  <div class="difficulty-selector">
+    <label for="theme">Theme:</label>
+    <select id="theme">
+      <option value="light" selected>Light</option>
+      <option value="dark">Dark</option>
+      <option value="kids">Kids</option>
+    </select>
+  </div>
+  <div class="difficulty-selector">
+    <label>
+      <input type="checkbox" id="soundToggle" checked> Sound Effects
+    </label>
+  </div>
+  <div class="board" id="board"></div>
+  <button onclick="resetGame()">New Game</button>
+  <div id="confetti"></div>
+
+  <script>
+    const boardElement = document.getElementById('board');
+    const xWinsElement = document.getElementById('xWins');
+    const oWinsElement = document.getElementById('oWins');
+    const confetti = document.getElementById('confetti');
+    const difficultySelect = document.getElementById('difficulty');
+    const themeSelect = document.getElementById('theme');
+    const soundToggle = document.getElementById('soundToggle');
+
+    let board = Array(9).fill(null);
+    let xWins = 0, oWins = 0;
+    let gameOver = false;
+    let aiThinking = false;
+
+    const winningCombos = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    // Web Audio API for creating sounds
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function createBeep(frequency, duration, type = 'sine') {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = frequency;
+      oscillator.type = type;
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + duration);
+    }
+    
+    // Sound effects using Web Audio API
+    const sounds = {
+      click: () => createBeep(800, 0.1, 'sine'),
+      aiMove: () => createBeep(600, 0.15, 'square'),
+      win: () => {
+        createBeep(523, 0.2, 'sine'); // C
+        setTimeout(() => createBeep(659, 0.2, 'sine'), 200); // E
+        setTimeout(() => createBeep(784, 0.3, 'sine'), 400); // G
+      },
+      draw: () => {
+        createBeep(400, 0.2, 'sawtooth');
+        setTimeout(() => createBeep(300, 0.3, 'sawtooth'), 200);
+      }
+    };
+
+    function playSound(soundName) {
+      if (!soundToggle.checked) return; // Don't play if sound is disabled
+      
+      try {
+        // Resume audio context if suspended (needed for some browsers)
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        sounds[soundName]();
+      } catch (e) {
+        console.log('Sound play failed:', e);
+      }
+    }
+
+    function changeTheme() {
+      const theme = themeSelect.value;
+      document.body.className = theme;
+    }
+
+    function renderBoard() {
+      boardElement.innerHTML = '';
+      board.forEach((value, index) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (value) {
+          cell.textContent = value;
+          cell.classList.add(value.toLowerCase());
+        }
+        if (!value && !gameOver) {
+          cell.addEventListener('click', () => handleClick(index));
+        }
+        boardElement.appendChild(cell);
+      });
+    }
+
+    function handleClick(index) {
+      if (board[index] !== null || gameOver || aiThinking) return;
+      
+      playSound('click');
+      board[index] = 'X';
+      renderBoard();
+      
+      if (checkEnd('X')) return;
+      
+      // AI move with delay
+      aiThinking = true;
+      boardElement.classList.add('thinking');
+      
+      const aiDelay = getDifficultyDelay();
+      setTimeout(() => {
+        aiMove();
+        aiThinking = false;
+        boardElement.classList.remove('thinking');
+        renderBoard(); // Re-render to enable clicks after AI move
+      }, aiDelay);
+    }
+
+    function getDifficultyDelay() {
+      const difficulty = difficultySelect.value;
+      switch(difficulty) {
+        case 'easy': return 800;
+        case 'medium': return 1200;
+        case 'hard': return 600;
+        default: return 1000;
+      }
+    }
+
+    function aiMove() {
+      const move = getBestMove();
+      if (move !== null) {
+        board[move] = 'O';
+        playSound('aiMove');
+        renderBoard();
+        if (checkEnd('O')) {
+          // Game ended, no need to re-render
+          return;
+        }
+      }
+    }
+
+    function getBestMove() {
+      const difficulty = difficultySelect.value;
+      const empty = board.map((v, i) => v ? null : i).filter(v => v !== null);
+      
+      if (empty.length === 0) return null;
+      
+      switch(difficulty) {
+        case 'easy':
+          // 50% smart moves
+          return Math.random() < 0.5 ? findWinningMove('O') || findBlockingMove() || findBestStrategicMove() || empty[Math.floor(Math.random() * empty.length)] : empty[Math.floor(Math.random() * empty.length)];
+        case 'medium':
+          // 80% smart moves
+          return Math.random() < 0.8 ? findWinningMove('O') || findBlockingMove() || findBestStrategicMove() || empty[Math.floor(Math.random() * empty.length)] : empty[Math.floor(Math.random() * empty.length)];
+        case 'hard':
+          // 99% smart moves
+          return Math.random() < 0.99 ? findWinningMove('O') || findBlockingMove() || findBestStrategicMove() || empty[Math.floor(Math.random() * empty.length)] : empty[Math.floor(Math.random() * empty.length)];
+        default:
+          return empty[Math.floor(Math.random() * empty.length)];
+      }
+    }
+
+    function findWinningMove(player) {
+      for (let combo of winningCombos) {
+        const [a, b, c] = combo;
+        if (board[a] === player && board[b] === player && board[c] === null) return c;
+        if (board[a] === player && board[c] === player && board[b] === null) return b;
+        if (board[b] === player && board[c] === player && board[a] === null) return a;
+      }
+      return null;
+    }
+
+    function findBlockingMove() {
+      return findWinningMove('X');
+    }
+
+    function findBestStrategicMove() {
+      // Prefer center, then corners, then edges
+      const center = 4;
+      const corners = [0, 2, 6, 8];
+      const edges = [1, 3, 5, 7];
+      
+      if (board[center] === null) return center;
+      
+      for (let corner of corners) {
+        if (board[corner] === null) return corner;
+      }
+      
+      for (let edge of edges) {
+        if (board[edge] === null) return edge;
+      }
+      
+      return null;
+    }
+
+    function checkEnd(player) {
+      if (checkWin(player)) {
+        gameOver = true;
+        celebrateWin(player);
+        updateScore(player);
+        showPopup(`${player === 'X' ? 'You win!' : 'AI wins!'} 🎉`);
+        playSound('win');
+        return true;
+      } else if (board.every(cell => cell !== null)) {
+        showPopup("It's a draw! 🤝");
+        gameOver = true;
+        playSound('draw');
+        return true;
+      }
+      return false;
+    }
+
+    function checkWin(player) {
+      return winningCombos.some(combo => combo.every(i => board[i] === player));
+    }
+
+    function updateScore(player) {
+      if (player === 'X') xWins++;
+      else oWins++;
+      xWinsElement.textContent = xWins;
+      oWinsElement.textContent = oWins;
+    }
+
+    function celebrateWin(player) {
+      winningCombos.forEach(combo => {
+        if (combo.every(i => board[i] === player)) {
+          combo.forEach(i => {
+            boardElement.children[i].classList.add('winner');
+          });
+        }
+      });
+      dropConfetti();
+    }
+
+    function dropConfetti() {
+      confetti.innerHTML = '';
+      const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+      
+      for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = Math.random() * 2 + 's';
+        piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+        confetti.appendChild(piece);
+      }
+      
+      // Clean up confetti after animation
+      setTimeout(() => {
+        confetti.innerHTML = '';
+      }, 5000);
+    }
+
+    function resetGame() {
+      board = Array(9).fill(null);
+      gameOver = false;
+      aiThinking = false;
+      renderBoard();
+      confetti.innerHTML = '';
+      boardElement.classList.remove('thinking');
+      document.querySelectorAll('.popup').forEach(el => el.remove());
+    }
+
+    function showPopup(message) {
+      const popup = document.createElement('div');
+      popup.className = 'popup';
+      popup.textContent = message;
+      document.body.appendChild(popup);
+      setTimeout(() => popup.remove(), 2500);
+    }
+
+    // Initialize the game
+    renderBoard();
+    
+    // Initialize theme
+    document.body.className = 'light';
+    
+    // Add event listeners
+    themeSelect.addEventListener('change', changeTheme);
+  </script>
+</body>
+</html>
