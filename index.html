@@ -2071,6 +2071,24 @@
     let roomRef = null;
     let playerId = null;
     let isConnected = false;
+    let database = null;
+
+    // Initialize Firebase database
+    function initializeDatabase() {
+      try {
+        if (window.database) {
+          database = window.database;
+          console.log('Firebase database initialized successfully');
+          return true;
+        } else {
+          console.error('Firebase database not found');
+          return false;
+        }
+      } catch (error) {
+        console.error('Error initializing database:', error);
+        return false;
+      }
+    }
 
     const winningCombos = [
       [0,1,2],[3,4,5],[6,7,8],
@@ -2413,8 +2431,14 @@
         return;
       }
       
+      if (!database) {
+        showPopup('Database not connected. Please refresh the page and try again.');
+        return;
+      }
+      
       roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       playerId = 'player1';
+      multiplayerGame = true;
       
       // Create room in Firebase
       roomRef = database.ref(`rooms/${roomCode}`);
@@ -2437,26 +2461,29 @@
         createdAt: Date.now()
       };
       
-      roomRef.set(roomData);
-      
-      // Listen for changes
-      setupRoomListeners();
-      
-      // Update UI
-      displayRoomCode.textContent = roomCode;
-      roomInfo.style.display = 'block';
-      roomStatus.textContent = 'Waiting for friend to join...';
-      showPopup(`Room created! Share the code: ${roomCode}`);
-      
-      // Set up player data
-      playerXData = {
-        name: playerName,
-        avatar: getAvatarEmoji(selectedAvatar),
-        online: true
-      };
-      
-      updatePlayerDisplay();
-      resetGame();
+      roomRef.set(roomData).then(() => {
+        // Listen for changes
+        setupRoomListeners();
+        
+        // Update UI
+        displayRoomCode.textContent = roomCode;
+        roomInfo.style.display = 'block';
+        roomStatus.textContent = 'Waiting for friend to join...';
+        showPopup(`Room created! Share the code: ${roomCode}`);
+        
+        // Set up player data
+        playerXData = {
+          name: playerName,
+          avatar: getAvatarEmoji(selectedAvatar),
+          online: true
+        };
+        
+        updatePlayerDisplay();
+        resetGame();
+      }).catch((error) => {
+        console.error('Error creating room:', error);
+        showPopup('Failed to create room. Please try again.');
+      });
     }
     
     function joinRealTimeRoom() {
@@ -2472,6 +2499,11 @@
       const code = roomCodeInput.value.trim().toUpperCase();
       if (code.length !== 6) {
         showPopup('Please enter a 6-digit room code!');
+        return;
+      }
+      
+      if (!database) {
+        showPopup('Database not connected. Please refresh the page and try again.');
         return;
       }
       
@@ -2491,6 +2523,11 @@
         
         if (roomData.status === 'full') {
           showPopup('Room is full!');
+          return;
+        }
+        
+        if (roomData.players && roomData.players.player2) {
+          showPopup('Room already has two players!');
           return;
         }
         
@@ -2532,14 +2569,22 @@
         
         updatePlayerDisplay();
         resetGame();
+      }).catch((error) => {
+        console.error('Error joining room:', error);
+        showPopup('Failed to join room. Please check the code and try again.');
       });
     }
     
     function setupRoomListeners() {
+      if (!roomRef) return;
+      
       roomRef.on('value', (snapshot) => {
         const roomData = snapshot.val();
         
-        if (!roomData) return;
+        if (!roomData) {
+          console.log('Room data not found, room may have been deleted');
+          return;
+        }
         
         // Update board
         board = roomData.board || Array(9).fill(null);
@@ -2566,12 +2611,20 @@
         
         // Update UI
         updatePlayerDisplay();
-        renderBoard();
+        
+        // Render appropriate board
+        if (document.getElementById('gameBoard')) {
+          renderGameBoard();
+        } else {
+          renderBoard();
+        }
         
         // Update status
         if (roomData.status === 'playing') {
           const currentPlayerName = currentPlayer === 'X' ? playerXData.name : playerOData.name;
-          roomStatus.textContent = `${currentPlayerName}'s turn`;
+          if (roomStatus) {
+            roomStatus.textContent = `${currentPlayerName}'s turn`;
+          }
         }
         
         // Check for game end
@@ -2585,49 +2638,74 @@
             playSound('draw');
           }
         }
+        
+        // Show game room if both players are connected
+        if (roomData.players && roomData.players.player1 && roomData.players.player2) {
+          showPage('gameRoomPage');
+          renderGameBoard();
+        }
       });
     }
     
     function makeRealTimeMove(index) {
-      if (!roomRef || !playerId) return;
-      
-      // Get current room data asynchronously
-      roomRef.once('value').then((snapshot) => {
-        const roomData = snapshot.val();
-        if (!roomData) return;
-      
-      // Check if it's this player's turn
-      const mySymbol = roomData.players[playerId].symbol;
-      if (roomData.currentPlayer !== mySymbol) return;
-      
-      // Check if cell is empty
-      if (roomData.board[index] !== null) return;
-      
-      // Make the move
-      const newBoard = [...roomData.board];
-      newBoard[index] = mySymbol;
-      
-      // Check for win
-      const winner = checkWinForBoard(newBoard, mySymbol);
-      const draw = newBoard.every(cell => cell !== null);
-      
-      // Update room data
-      const updates = {
-        board: newBoard,
-        currentPlayer: mySymbol === 'X' ? 'O' : 'X'
-      };
-      
-      if (winner) {
-        updates.gameOver = true;
-        updates.winner = mySymbol;
-        updates.status = 'finished';
-      } else if (draw) {
-        updates.gameOver = true;
-        updates.draw = true;
-        updates.status = 'finished';
+      if (!roomRef || !playerId) {
+        console.error('Room reference or player ID not found');
+        return;
       }
       
-      roomRef.update(updates);
+      // Get current room data
+      roomRef.once('value').then((snapshot) => {
+        const roomData = snapshot.val();
+        if (!roomData) {
+          console.error('Room data not found');
+          return;
+        }
+        
+        // Check if it's this player's turn
+        const mySymbol = roomData.players[playerId]?.symbol;
+        if (!mySymbol || roomData.currentPlayer !== mySymbol) {
+          console.log('Not your turn');
+          return;
+        }
+        
+        // Check if cell is empty
+        if (roomData.board[index] !== null) {
+          console.log('Cell already occupied');
+          return;
+        }
+        
+        // Make the move
+        const newBoard = [...roomData.board];
+        newBoard[index] = mySymbol;
+        
+        // Check for win
+        const winner = checkWinForBoard(newBoard, mySymbol);
+        const draw = newBoard.every(cell => cell !== null);
+        
+        // Update room data
+        const updates = {
+          board: newBoard,
+          currentPlayer: mySymbol === 'X' ? 'O' : 'X'
+        };
+        
+        if (winner) {
+          updates.gameOver = true;
+          updates.winner = mySymbol;
+          updates.status = 'finished';
+        } else if (draw) {
+          updates.gameOver = true;
+          updates.draw = true;
+          updates.status = 'finished';
+        }
+        
+        roomRef.update(updates).then(() => {
+          console.log('Move made successfully');
+        }).catch((error) => {
+          console.error('Error making move:', error);
+        });
+      }).catch((error) => {
+        console.error('Error getting room data:', error);
+      });
     }
     
     function checkWinForBoard(board, player) {
@@ -2649,17 +2727,58 @@
       roomRef.update(updates);
     }
     
+    function resetMultiplayerGame() {
+      if (roomRef) {
+        resetRealTimeGame();
+      } else {
+        resetGame();
+      }
+    }
+    
     function leaveRoom() {
       if (roomRef && playerId) {
+        // Mark player as offline
         roomRef.child(`players/${playerId}/online`).set(false);
+        
+        // Remove listeners
         roomRef.off();
+        
+        // Clean up room if no players are online
+        roomRef.once('value').then((snapshot) => {
+          const roomData = snapshot.val();
+          if (roomData && roomData.players) {
+            const onlinePlayers = Object.values(roomData.players).filter(p => p.online);
+            if (onlinePlayers.length === 0) {
+              roomRef.remove();
+            }
+          }
+        }).catch((error) => {
+          console.error('Error cleaning up room:', error);
+        });
       }
       
+      // Reset variables
       roomRef = null;
       playerId = null;
       isConnected = false;
-      roomInfo.style.display = 'none';
+      roomCode = null;
+      
+      // Hide room info
+      const roomInfo = document.getElementById('roomInfo');
+      if (roomInfo) {
+        roomInfo.style.display = 'none';
+      }
+      
+      const joinRoomInfo = document.getElementById('joinRoomInfo');
+      if (joinRoomInfo) {
+        joinRoomInfo.style.display = 'none';
+      }
+      
+      // Reset game
       resetGame();
+      
+      // Go back to welcome page
+      showPage('welcomePage');
     }
     
     function checkUrlForRoom() {
@@ -2668,9 +2787,8 @@
       
       if (roomParam && roomParam.length === 6) {
         // Auto-join room from URL
-        selectMode('multiplayer');
-        roomCodeInput.value = roomParam.toUpperCase();
-        joinRealTimeRoom();
+        window.pendingRoomCode = roomParam.toUpperCase();
+        showModifiedWelcomePage();
       }
     }
 
@@ -2688,6 +2806,51 @@
         }
         boardElement.appendChild(cell);
       });
+    }
+    
+    function renderGameBoard() {
+      const gameBoardElement = document.getElementById('gameBoard');
+      if (!gameBoardElement) return;
+      
+      gameBoardElement.innerHTML = '';
+      board.forEach((value, index) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (value) {
+          cell.textContent = value;
+          cell.classList.add(value.toLowerCase());
+        }
+        if (!value && !gameOver && multiplayerGame) {
+          cell.addEventListener('click', () => handleClick(index));
+        }
+        gameBoardElement.appendChild(cell);
+      });
+      
+      // Update game status
+      const gameStatusElement = document.getElementById('gameStatus');
+      if (gameStatusElement) {
+        if (gameOver) {
+          if (board.some(cell => cell !== null)) {
+            const winner = checkWin('X') ? 'X' : 'O';
+            const winnerName = winner === 'X' ? playerXData.name : playerOData.name;
+            gameStatusElement.textContent = `${winnerName} wins! 🎉`;
+          } else {
+            gameStatusElement.textContent = "It's a draw! 🤝";
+          }
+        } else {
+          const currentPlayerName = currentPlayer === 'X' ? playerXData.name : playerOData.name;
+          gameStatusElement.textContent = `${currentPlayerName}'s turn`;
+        }
+      }
+      
+      // Update scoreboard
+      const gameScoreboard = document.getElementById('gameScoreboard');
+      if (gameScoreboard) {
+        const gameScoreText = document.getElementById('gameScoreText');
+        if (gameScoreText) {
+          gameScoreText.textContent = `${playerXData.name}: ${xWins} | ${playerOData.name}: ${oWins}`;
+        }
+      }
     }
 
     function handleClick(index) {
@@ -2728,13 +2891,18 @@
         
         // AI move with delay
         aiThinking = true;
-        boardElement.classList.add('thinking');
+        const boardElement = document.getElementById('board');
+        if (boardElement) {
+          boardElement.classList.add('thinking');
+        }
         
         const aiDelay = getDifficultyDelay();
         setTimeout(() => {
           aiMove();
           aiThinking = false;
-          boardElement.classList.remove('thinking');
+          if (boardElement) {
+            boardElement.classList.remove('thinking');
+          }
           renderBoard(); // Re-render to enable clicks after AI move
         }, aiDelay);
       }
@@ -2771,14 +2939,20 @@
       
       switch(difficulty) {
         case 'easy':
-          // 50% smart moves
-          return Math.random() < 0.5 ? findWinningMove('O') || findBlockingMove() || findBestStrategicMove() || empty[Math.floor(Math.random() * empty.length)] : empty[Math.floor(Math.random() * empty.length)];
+          // 50% smart moves, 50% random moves
+          return Math.random() < 0.5 ? 
+            findWinningMove('O') || findBlockingMove() || findBestStrategicMove() || empty[Math.floor(Math.random() * empty.length)] : 
+            empty[Math.floor(Math.random() * empty.length)];
         case 'medium':
-          // 80% smart moves
-          return Math.random() < 0.8 ? findWinningMove('O') || findBlockingMove() || findBestStrategicMove() || empty[Math.floor(Math.random() * empty.length)] : empty[Math.floor(Math.random() * empty.length)];
+          // 80% smart moves, 20% random moves
+          return Math.random() < 0.8 ? 
+            findWinningMove('O') || findBlockingMove() || findBestStrategicMove() || empty[Math.floor(Math.random() * empty.length)] : 
+            empty[Math.floor(Math.random() * empty.length)];
         case 'hard':
-          // 99% smart moves
-          return Math.random() < 0.99 ? findWinningMove('O') || findBlockingMove() || findBestStrategicMove() || empty[Math.floor(Math.random() * empty.length)] : empty[Math.floor(Math.random() * empty.length)];
+          // 99% smart moves, 1% random moves
+          return Math.random() < 0.99 ? 
+            findWinningMove('O') || findBlockingMove() || findBestStrategicMove() || empty[Math.floor(Math.random() * empty.length)] : 
+            empty[Math.floor(Math.random() * empty.length)];
         default:
           return empty[Math.floor(Math.random() * empty.length)];
       }
@@ -2893,7 +3067,10 @@
       }
       renderBoard();
       confetti.innerHTML = '';
-      boardElement.classList.remove('thinking');
+      const boardElement = document.getElementById('board');
+      if (boardElement) {
+        boardElement.classList.remove('thinking');
+      }
       document.querySelectorAll('.popup').forEach(el => el.remove());
     }
 
@@ -2945,6 +3122,31 @@
   }
 
   function goToWelcome() {
+    // Reset game state
+    board = Array(9).fill(null);
+    gameOver = false;
+    aiThinking = false;
+    currentPlayer = 'X';
+    xWins = 0;
+    oWins = 0;
+    
+    // Hide game containers
+    const aiGameContainer = document.getElementById('aiGameContainer');
+    if (aiGameContainer) {
+      aiGameContainer.style.display = 'none';
+    }
+    
+    const aiSettings = document.querySelector('.ai-settings');
+    if (aiSettings) {
+      aiSettings.style.display = 'block';
+    }
+    
+    // Leave room if in multiplayer
+    if (roomRef && playerId) {
+      leaveRoom();
+    }
+    
+    // Show welcome page
     showPage('welcomePage');
   }
 
@@ -2995,6 +3197,9 @@
     
     // Apply theme
     document.body.className = theme;
+    
+    // Store theme preference
+    localStorage.setItem('selectedTheme', theme);
   }
 
   // Game mode selection
@@ -3042,11 +3247,20 @@
 
   // Initialize the app
   document.addEventListener('DOMContentLoaded', function() {
-    // Test Firebase connection
-    testFirebaseConnection();
+    // Initialize database
+    if (!initializeDatabase()) {
+      console.error('Failed to initialize Firebase database');
+      showPopup('Database connection failed. Some features may not work.');
+    }
     
-    // Set default theme
-    selectTheme('light');
+    // Test Firebase connection
+    if (database) {
+      testFirebaseConnection();
+    }
+    
+    // Load saved theme or set default
+    const savedTheme = localStorage.getItem('selectedTheme') || 'light';
+    selectTheme(savedTheme);
     
     // Set default avatar
     window.selectedAvatar = 'panda';
@@ -3103,8 +3317,25 @@
   
   function joinWithLink() {
     if (window.pendingRoomCode) {
+      // Validate player setup
+      const playerName = document.getElementById('playerName').value.trim();
+      if (!playerName) {
+        showPopup('Please enter your name first!');
+        return;
+      }
+      
+      if (!window.selectedAvatar) {
+        showPopup('Please select an avatar first!');
+        return;
+      }
+      
       showPage('multiplayerJoinPage');
-      document.getElementById('roomCode').value = window.pendingRoomCode;
+      const roomCodeInput = document.getElementById('roomCode');
+      if (roomCodeInput) {
+        roomCodeInput.value = window.pendingRoomCode;
+      }
+    } else {
+      showPopup('No room code found in the link!');
     }
   }
 
@@ -3147,6 +3378,11 @@
 
   // Test Firebase connectivity
   function testFirebaseConnection() {
+    if (!database) {
+      console.error('Database not initialized');
+      return;
+    }
+    
     console.log('Testing Firebase connection...');
     const testRef = database.ref('test');
     testRef.set({
@@ -3157,6 +3393,7 @@
       testRef.remove(); // Clean up test data
     }).catch((error) => {
       console.error('Firebase connection failed:', error);
+      showPopup('Database connection failed. Multiplayer features may not work.');
     });
   }
 
@@ -3165,7 +3402,19 @@
     const joinCode = document.getElementById('joinCodeInput').value.trim();
     
     if (!joinCode || joinCode.length !== 6) {
-      alert('Please enter a valid 6-digit room code!');
+      showPopup('Please enter a valid 6-digit room code!');
+      return;
+    }
+    
+    // Validate player setup
+    const playerName = document.getElementById('playerName').value.trim();
+    if (!playerName) {
+      showPopup('Please enter your name first!');
+      return;
+    }
+    
+    if (!window.selectedAvatar) {
+      showPopup('Please select an avatar first!');
       return;
     }
     
@@ -3194,7 +3443,7 @@
           setTimeout(setRoomCode, 200);
         } else {
           console.error('Failed to set room code after multiple attempts');
-          alert('Error: Could not load join page. Please try again.');
+          showPopup('Error: Could not load join page. Please try again.');
         }
         return false;
       }
@@ -3202,6 +3451,30 @@
     
     // Start trying to set the room code
     setTimeout(setRoomCode, 100);
+  }
+  
+  function startAIGame() {
+    // Hide settings and show game
+    document.querySelector('.ai-settings').style.display = 'none';
+    document.getElementById('aiGameContainer').style.display = 'block';
+    
+    // Reset game state
+    board = Array(9).fill(null);
+    gameOver = false;
+    aiThinking = false;
+    currentPlayer = 'X';
+    xWins = 0;
+    oWins = 0;
+    
+    // Update scoreboard
+    updateScoreboard();
+    
+    // Render the board
+    renderBoard();
+    
+    // Set game mode
+    gameMode = 'ai';
+    multiplayerGame = false;
   }
   
   </script>
