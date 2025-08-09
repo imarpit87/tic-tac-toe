@@ -43,7 +43,6 @@
                     <option value="neon">Neon</option>
                     <option value="kids">Kids</option>
                 </select>
-                <button class="btn tertiary" id="leaderboardBtn" title="View leaderboard">Leaderboard</button>
                 <button class="btn tertiary" id="rateBtn" title="Rate the game">Rate</button>
             </div>
         </header>
@@ -70,9 +69,12 @@
             <div class="challenge-selection" id="challengeSelection" style="display:none;">
                 <h3>Choose a Challenge:</h3>
                 <div class="challenge-cards">
+                    <input id="challengeNameInput" class="text-input" placeholder="Your name (required)" aria-label="Your name for challenges">
                     <button class="btn" id="challengeBeat3Btn">Beat the AI in 3 Moves</button>
                     <button class="btn" id="challengeStreak5Btn">Win 5 in a Row</button>
+                    <button class="btn tertiary" id="challengeLeaderboardBtn">Challenges Leaderboard</button>
                 </div>
+                <div class="muted" id="challengeStatus"></div>
             </div>
 
             <div class="rounds-selection" id="roundsSelection" style="display:none;">
@@ -196,7 +198,7 @@
     <div class="modal hidden" id="leaderboardModal" role="dialog" aria-modal="true" aria-labelledby="leaderboardTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="leaderboardTitle">🏆 Leaderboard</h3>
+                <h3 id="leaderboardTitle">🏆 Challenges Leaderboard</h3>
                 <button class="btn tertiary" id="leaderboardCloseBtn" aria-label="Close">Close</button>
             </div>
             <div id="leaderboardBody" class="leaderboard-body">

@@ -170,6 +170,7 @@ h1 { font-size: 2.2rem; margin-bottom: 16px; font-weight: 700; }
 
 .challenge-selection { margin-top: 8px; }
 .challenge-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+.challenge-cards .text-input { min-width: 220px; }
 .challenge-bar { display: flex; gap: 10px; align-items: center; justify-content: center; margin: 6px 0; }
 .challenge-bar.hidden { display: none; }
 

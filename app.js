@@ -51,10 +51,13 @@ const shareCopyBtn = document.getElementById('shareCopyBtn');
 const shareTwitterBtn = document.getElementById('shareTwitterBtn');
 let lastShareCtx = null; // { winner, mode, challengeMode, aiWinStreak, humanMoves }
 // Leaderboard controls
-const leaderboardBtn = document.getElementById('leaderboardBtn');
 const leaderboardModal = document.getElementById('leaderboardModal');
 const leaderboardCloseBtn = document.getElementById('leaderboardCloseBtn');
 const leaderboardBody = document.getElementById('leaderboardBody');
+// Challenges leaderboard controls
+const challengeNameInput = document.getElementById('challengeNameInput');
+const challengeStatus = document.getElementById('challengeStatus');
+const challengeLeaderboardBtn = document.getElementById('challengeLeaderboardBtn');
 // AI difficulty bar
 const aiDifficultyBar = document.getElementById('aiDifficultyBar');
 const aiDifficultySelect = document.getElementById('aiDifficultySelect');
@@ -193,7 +196,7 @@ shareCopyBtn?.addEventListener('click', () => {
   const msg = buildShareText(lastShareCtx);
   copyToClipboard(`${msg.text} ${msg.link}`.trim());
 });
-leaderboardBtn?.addEventListener('click', () => { openLeaderboard(); });
+challengeLeaderboardBtn?.addEventListener('click', () => { openLeaderboard(); });
 leaderboardCloseBtn?.addEventListener('click', () => { leaderboardModal.classList.add('hidden'); });
 rateBtn?.addEventListener('click', () => openRatingModal('manual'));
 ratingCloseBtn?.addEventListener('click', () => closeRatingModal('close'));
@@ -238,6 +241,7 @@ window.selectMode = (mode) => {
   if (mode === 'challenge') {
     aiDifficultyBar.classList.remove('hidden');
     if (aiDifficultySelect) aiDifficultySelect.value = difficulty = (difficulty === 'easy' ? 'hard' : difficulty);
+    challengeStatus.textContent = 'Enter your name to play challenges and appear on the leaderboard.';
   }
   playClickSound();
 };
@@ -285,6 +289,9 @@ window.startGame = () => {
     player2NameEl.textContent = 'AI (O)';
     aiDifficultyBar.classList.remove('hidden');
     if (aiDifficultySelect) aiDifficultySelect.value = difficulty = (difficulty === 'easy' ? 'hard' : difficulty);
+    // Require name
+    const cName = (challengeNameInput?.value || '').trim();
+    if (!cName) { gameSetupEl.classList.remove('hidden'); gamePlayEl.classList.remove('active'); challengeStatus.textContent = 'Please enter your name to start challenges.'; return; }
     if (challengeMode === 'beat3') {
       challengeHumanMoves = 0;
       challengeLabel.textContent = 'Beat the AI in 3 Moves';
@@ -478,6 +485,8 @@ function endGame(winner) {
         if (winner === 'X' && challengeHumanMoves <= challengeMovesAllowed) {
           gameInfoEl.textContent = 'Challenge cleared! You won within 3 moves 🎯';
           confetti.emitBurst(220);
+          // Log record for moves
+          try { updateChallengesLeaderboard({ type: 'beat3', name: (challengeNameInput?.value||'Player'), moves: challengeHumanMoves, ts: Date.now() }); } catch {}
         } else if (winner === 'O' || (winner === 'draw') || challengeHumanMoves > challengeMovesAllowed) {
           gameInfoEl.textContent = 'Challenge failed. Try again!';
         }
@@ -487,6 +496,8 @@ function endGame(winner) {
         if (challengeStreak >= 5) {
           gameInfoEl.textContent = 'Streak achieved! 5 in a row 🏆';
           confetti.emitBurst(240);
+          // Log record for streak
+          try { updateChallengesLeaderboard({ type: 'streak5', name: (challengeNameInput?.value||'Player'), streak: challengeStreak, ts: Date.now() }); } catch {}
         } else {
           gameInfoEl.textContent = `Streak: ${challengeStreak}/5`;
         }
@@ -939,18 +950,29 @@ async function updateLeaderboard(winner) {
 async function openLeaderboard() {
   if (!leaderboardModal) return;
   leaderboardModal.classList.remove('hidden');
-  if (!window.database) {
-    leaderboardBody.innerHTML = '<div class="muted">Leaderboard requires Firebase database configured.</div>';
-    return;
-  }
-  const snap = await window.database.ref('leaderboard').once('value');
+  if (!window.database) { leaderboardBody.innerHTML = '<div class="muted">Leaderboard requires Firebase configured.</div>'; return; }
+  // Fetch top 5 streak and top 5 best (fewest) moves
+  const snap = await window.database.ref('challengesLeaderboard').once('value');
   const data = snap.val() || {};
-  const arr = Object.entries(data).map(([name, s]) => ({ name, wins: s.wins||0, losses: s.losses||0, draws: s.draws||0, score: (s.wins||0)*3 + (s.draws||0) })).sort((a,b) => b.score - a.score).slice(0, 50);
-  if (arr.length === 0) {
-    leaderboardBody.innerHTML = '<div class="muted">No games recorded yet.</div>';
-    return;
+  const streaks = Object.values(data.streak5 || {}).sort((a,b) => (b.streak||0)-(a.streak||0)).slice(0,5);
+  const moves = Object.values(data.beat3 || {}).sort((a,b) => (a.moves||99)-(b.moves||99)).slice(0,5);
+  const streakHtml = `<h4>Top Streaks</h4>` + (streaks.length? streaks.map((r,i)=>`<div class="leaderboard-row"><div class="rank">${i+1}</div><div class="name">${r.name}</div><div class="score">${r.streak}</div></div>`).join(''):'<div class="muted">No streaks yet.</div>');
+  const movesHtml = `<h4>Best 3-Move Wins</h4>` + (moves.length? moves.map((r,i)=>`<div class="leaderboard-row"><div class="rank">${i+1}</div><div class="name">${r.name}</div><div class="score">${r.moves} moves</div></div>`).join(''):'<div class="muted">No 3-move wins yet.</div>');
+  leaderboardBody.innerHTML = streakHtml + '<hr style="opacity:0.3;">' + movesHtml;
+}
+
+// Write challenge records
+async function updateChallengesLeaderboard({ type, name, streak, moves, ts }) {
+  if (!window.database) return;
+  const safe = (s) => (s||'Player').replace(/[#.$\[\]/]/g,'_');
+  if (type === 'streak5' && streak >= 5) {
+    const ref = window.database.ref(`challengesLeaderboard/streak5`).push();
+    await ref.set({ name: safe(name), streak, ts });
   }
-  leaderboardBody.innerHTML = arr.map((r, i) => `<div class="leaderboard-row"><div class="rank">${i+1}</div><div class="name">${r.name}</div><div class="score">${r.score}</div></div>`).join('');
+  if (type === 'beat3' && moves && moves <= 3) {
+    const ref = window.database.ref(`challengesLeaderboard/beat3`).push();
+    await ref.set({ name: safe(name), moves, ts });
+  }
 }
 
 // Rating logic
