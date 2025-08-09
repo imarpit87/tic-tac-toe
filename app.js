@@ -48,6 +48,10 @@ const shareRoomBtn = document.getElementById('shareRoomBtn');
 const roomCodeWrap = document.getElementById('roomCodeWrap');
 const roomCodeText = document.getElementById('roomCodeText');
 const copyCodeBtn = document.getElementById('copyCodeBtn');
+const createTabBtn = document.getElementById('createTabBtn');
+const joinTabBtn = document.getElementById('joinTabBtn');
+const createPanel = document.getElementById('createPanel');
+const joinPanel = document.getElementById('joinPanel');
 
 // Audio
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -120,6 +124,18 @@ soundToggle.addEventListener('change', () => { soundEnabled = soundToggle.checke
 themeSelect.addEventListener('change', () => setTheme(themeSelect.value));
 roundsSelect.addEventListener('change', () => { bestOf = Number(roundsSelect.value); saveSettings(); });
 undoBtn.addEventListener('click', () => undoMove());
+createTabBtn?.addEventListener('click', () => {
+  createTabBtn.classList.add('active');
+  joinTabBtn.classList.remove('active');
+  createPanel.classList.remove('hidden');
+  joinPanel.classList.add('hidden');
+});
+joinTabBtn?.addEventListener('click', () => {
+  joinTabBtn.classList.add('active');
+  createTabBtn.classList.remove('active');
+  joinPanel.classList.remove('hidden');
+  createPanel.classList.add('hidden');
+});
 
 // Keyboard controls
 boardEl.addEventListener('keydown', (e) => {
@@ -622,6 +638,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     roomCodeInput.value = roomParam.toUpperCase();
     // Hide undo in online always
     undoBtn.style.display = 'none';
+    // Switch to Join tab directly
+    joinTabBtn?.click();
     // Wait for user to optionally set name/avatar, then click Join
   }
 });

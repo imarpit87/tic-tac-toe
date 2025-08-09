@@ -136,6 +136,15 @@ h1 { font-size: 2.2rem; margin-bottom: 16px; font-weight: 700; }
 .room-code { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 8px 0; }
 .room-code code { background: rgba(255,255,255,0.7); padding: 6px 10px; border-radius: 8px; font-weight: 700; }
 
+.online-tabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 8px; }
+.tab-btn { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.6); font-weight: 700; cursor: pointer; }
+.tab-btn.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: white; box-shadow: 0 6px 14px var(--glow); border-color: transparent; }
+
+.online-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.online-panel { background: rgba(255,255,255,0.65); border-radius: 12px; padding: 10px; }
+.online-panel.hidden { display: none; }
+.panel-desc { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+
 @media (max-width: 480px) {
   .container { padding: 18px; margin: 10px; }
   .app-title { font-size: 1.8rem; }
@@ -145,4 +154,8 @@ h1 { font-size: 2.2rem; margin-bottom: 16px; font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+}
+
+@media (min-width: 640px) {
+  .online-grid { grid-template-columns: 1fr 1fr; }
 }
