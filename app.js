@@ -9,6 +9,7 @@ let gameMode = '';
 let difficulty = 'easy';
 let scores = { player1: 0, player2: 0 };
 let isAIThinking = false;
+let aiThinkTimeoutId = null;
 let bestOf = 1;
 let moveHistory = [];
 let online = { roomId: null, isHost: false, mySide: null, myName: '', myAvatar: '🧑‍🚀', suppressNextSound: false, clientId: null };
@@ -176,6 +177,15 @@ aiDifficultySelect?.addEventListener('change', () => {
   saveSettings();
   // If game ended, allow immediate restart with new difficulty; otherwise, keep current game but update AI behavior next move
   if (!gameActive) resetBoard();
+  // If AI is currently thinking, cancel and recompute using new difficulty
+  if (gameActive && isAIThinking && (gameMode === 'ai' || gameMode === 'challenge') && currentPlayer === 'O') {
+    try { if (aiThinkTimeoutId) clearTimeout(aiThinkTimeoutId); } catch {}
+    isAIThinking = false;
+    boardEl.classList.remove('ai-thinking');
+    gameInfoEl.classList.remove('pulse');
+    // Re-trigger AI move immediately with new difficulty
+    makeAIMove();
+  }
 });
 challengeBeat3Btn?.addEventListener('click', () => { challengeMode = 'beat3'; challengeMovesAllowed = 3; startGame(); });
 challengeStreak5Btn?.addEventListener('click', () => { challengeMode = 'streak5'; challengeStreak = 0; startGame(); });
@@ -429,7 +439,7 @@ function makeAIMove() {
   boardEl.classList.add('ai-thinking');
   gameInfoEl.classList.add('pulse');
 
-  setTimeout(() => {
+  aiThinkTimeoutId = setTimeout(() => {
     const move = getBestMove(gameBoard, difficulty, 'O');
     if (move !== -1) {
       gameBoard[move] = 'O';
