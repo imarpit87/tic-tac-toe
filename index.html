@@ -498,7 +498,8 @@
             
             document.querySelectorAll('.cell').forEach(cell => {
                 cell.textContent = '';
-                cell.className = 'cell';
+                cell.className = 'cell'; // This removes all classes and sets only 'cell'
+                cell.classList.remove('winner', 'disabled', 'x', 'o'); // Extra safety cleanup
             });
             
             updateGameInfo();
@@ -651,9 +652,19 @@
                 [0, 4, 8], [2, 4, 6] // Diagonals
             ];
             
+            // First, remove any existing winner highlights
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('winner');
+            });
+            
             for (let pattern of winPatterns) {
                 const [a, b, c] = pattern;
-                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                // Check if all three positions are filled AND all have the same value
+                if (gameBoard[a] !== '' && 
+                    gameBoard[b] !== '' && 
+                    gameBoard[c] !== '' && 
+                    gameBoard[a] === gameBoard[b] && 
+                    gameBoard[a] === gameBoard[c]) {
                     // Highlight winning cells
                     pattern.forEach(index => {
                         document.querySelector(`[data-cell="${index}"]`).classList.add('winner');
