@@ -20,6 +20,9 @@ let challengeMode = null; // 'beat3' | 'streak5' | null
 let challengeMovesAllowed = 0;
 let challengeHumanMoves = 0;
 let challengeStreak = 0;
+// AI normal streak and move count
+let aiWinStreak = 0;
+let humanMoveCountThisGame = 0;
 
 // DOM
 const boardEl = document.getElementById('board');
@@ -61,6 +64,8 @@ const challengeStreak5Btn = document.getElementById('challengeStreak5Btn');
 const challengeBar = document.getElementById('challengeBar');
 const challengeLabel = document.getElementById('challengeLabel');
 const challengeMeta = document.getElementById('challengeMeta');
+const aiStreakBar = document.getElementById('aiStreakBar');
+const aiStreakValue = document.getElementById('aiStreakValue');
 
 // Online elements
 const onlineSetupEl = document.getElementById('onlineSetup');
@@ -233,18 +238,23 @@ window.startGame = () => {
     if (aiDifficultySelect) aiDifficultySelect.value = difficulty;
     challengeBar.classList.add('hidden');
     challengeMode = null;
+    // Show AI streak bar
+    aiStreakBar.classList.remove('hidden');
+    aiStreakValue.textContent = aiWinStreak;
   } else if (gameMode === 'human') {
     player1NameEl.textContent = 'Player 1 (X)';
     player2NameEl.textContent = 'Player 2 (O)';
     aiDifficultyBar.classList.add('hidden');
     challengeBar.classList.add('hidden');
     challengeMode = null;
+    aiStreakBar.classList.add('hidden');
   } else if (gameMode === 'online') {
     player1NameEl.textContent = `${online.myName || 'You'} (X)`;
     player2NameEl.textContent = 'Friend (O)';
     aiDifficultyBar.classList.add('hidden');
     challengeBar.classList.add('hidden');
     challengeMode = null;
+    aiStreakBar.classList.add('hidden');
   } else if (gameMode === 'challenge') {
     // Challenges use AI under the hood
     player1NameEl.textContent = 'You (X)';
@@ -263,6 +273,7 @@ window.startGame = () => {
     } else {
       challengeBar.classList.add('hidden');
     }
+    aiStreakBar.classList.add('hidden');
   }
 
   scores = { player1: 0, player2: 0 };
@@ -279,6 +290,7 @@ function resetBoard() {
   gameActive = true;
   isAIThinking = false;
   moveHistory = [];
+  humanMoveCountThisGame = 0;
 
   document.querySelectorAll('.cell').forEach((cell, i) => {
     cell.textContent = '';
@@ -336,6 +348,10 @@ window.makeMove = (cellIndex) => {
     challengeHumanMoves += 1;
     const left = Math.max(0, challengeMovesAllowed - challengeHumanMoves);
     challengeMeta.textContent = `Moves left: ${left}`;
+  }
+  // Normal human move count for 3-move detection
+  if (gameMode !== 'online' && currentPlayer === 'X') {
+    humanMoveCountThisGame += 1;
   }
 
   if (checkWinner()) { endGame(currentPlayer); if (gameMode === 'online') pushOnlineState(true, currentPlayer); return; }
@@ -457,6 +473,23 @@ function endGame(winner) {
       if (winner === 'X') scores.player1++; else scores.player2++;
       confetti.emitBurst(160);
       setTimeout(() => { playWinSound(); playClapSound(); }, 300);
+    }
+    // Normal AI mode streak and 3-move check
+    if (gameMode === 'ai') {
+      if (winner === 'X') {
+        aiWinStreak++;
+        aiStreakValue.textContent = aiWinStreak;
+        if (aiWinStreak === 5) {
+          gameInfoEl.textContent = 'Amazing! 5 wins in a row vs AI 🏆';
+          confetti.emitBurst(240);
+        }
+        if (humanMoveCountThisGame <= 3) {
+          gameInfoEl.textContent += ` — You did it in ${humanMoveCountThisGame} moves 🎯`;
+        }
+      } else {
+        aiWinStreak = 0;
+        aiStreakValue.textContent = aiWinStreak;
+      }
     }
   }
   updateScores();
@@ -817,6 +850,12 @@ function buildShareText(winner = 'draw') {
       text = winner === 'X' && challengeHumanMoves <= 3 ? 'I beat the AI in 3 moves in XO Duel! 🎯' : 'Took on the 3-move challenge in XO Duel!';
     } else if (challengeMode === 'streak5') {
       text = challengeStreak >= 5 ? 'I hit a 5-win streak in XO Duel! 🏆' : `My streak is ${challengeStreak}/5 in XO Duel!`;
+    }
+  }
+  if (gameMode === 'ai') {
+    if (winner === 'X') {
+      if (aiWinStreak >= 2) text = `I'm on a ${aiWinStreak}-win streak vs AI in XO Duel! 🏆`;
+      if (humanMoveCountThisGame <= 3) text += ` Also beat the AI in ${humanMoveCountThisGame} moves 🎯`;
     }
   }
   return { text, link };
