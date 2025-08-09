@@ -340,12 +340,7 @@ function endGame(winner) {
   updateScores();
   document.querySelectorAll('.cell').forEach(cell => cell.classList.add('disabled'));
 
-  // Do not auto-reset in online; wait for New Game
-  if (gameMode === 'online') return;
-  // For rounds, wait longer to let players see the result
-  if (shouldContinueMatch()) {
-    setTimeout(() => { resetBoard(); }, 2500);
-  }
+  // Do not auto-reset in any mode; wait for New Game button
 }
 
 function shouldContinueMatch() {
