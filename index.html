@@ -67,16 +67,20 @@
                     <button class="avatar-option" data-avatar="👩‍🎤" title="Popstar">👩‍🎤</button>
                 </div>
                 <div class="online-actions">
-                    <input id="playerNameInput" class="text-input" placeholder="Your name" aria-label="Your name">
+                    <input id="playerNameInput" class="text-input" placeholder="Your name (optional)" aria-label="Your name">
                     <button class="btn" id="createRoomBtn">Create Room</button>
                     <button class="btn tertiary" id="shareRoomBtn" style="display:none;" title="Share invite link">Share Link</button>
+                </div>
+                <div class="room-code" id="roomCodeWrap" style="display:none;">
+                    <span>Room code:</span> <code id="roomCodeText"></code>
+                    <button class="btn tertiary" id="copyCodeBtn" title="Copy code">Copy Code</button>
                 </div>
                 <div class="online-actions">
                     <input id="roomCodeInput" class="text-input" placeholder="Room code" aria-label="Room code">
                     <button class="btn" id="joinRoomBtn">Join Room</button>
                 </div>
                 <div class="room-status" id="roomStatus" aria-live="polite"></div>
-                <div class="room-hint" id="roomHint">Game will auto-start when both players have joined.</div>
+                <div class="room-hint" id="roomHint">Game will auto-start when both players have joined. You can share the invite link or the room code.</div>
             </div>
 
             <button class="btn" onclick="startGame()" id="startBtn" style="display: none;">Start Game</button>
