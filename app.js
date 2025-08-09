@@ -502,11 +502,15 @@ function listenRoom(code) {
       // State-driven behavior
       const status = data.status || 'waiting';
       if (status === 'waiting') {
-        // First time both joined: start playing
-        const resetAt = Date.now();
-        window.database.ref(`rooms/${code}`).update({ status: 'playing', currentPlayer: 'X', board: Array(9).fill(''), resetAt, updatedAt: Date.now() });
-        online.lastResetAt = resetAt;
-        roomStatusEl.textContent = 'Both players joined. Starting… X to move';
+        // Only host starts the game to avoid races
+        if (online.isHost) {
+          const resetAt = Date.now();
+          window.database.ref(`rooms/${code}`).update({ status: 'playing', currentPlayer: 'X', board: Array(9).fill(''), resetAt, updatedAt: Date.now() });
+          online.lastResetAt = resetAt;
+          roomStatusEl.textContent = 'Both players joined. Starting… X to move';
+        } else {
+          roomStatusEl.textContent = 'Both players joined. Waiting for host to start…';
+        }
       } else if (status === 'playing') {
         const turnName = currentPlayer === 'X' ? (pX.name || 'X') : (pO.name || 'O');
         roomStatusEl.textContent = `${turnName}'s turn`;
@@ -530,12 +534,13 @@ function listenRoom(code) {
       roomStatusEl.textContent = 'New game started';
     }
 
-    // Disable input if not my turn
-    const myTurn = online.mySide === currentPlayer;
+    // Disable input if not my turn; enable only when status is playing
+    const statusNow = data.status || 'waiting';
+    const myTurn = (statusNow === 'playing') && online.mySide === currentPlayer;
     boardEl.classList.toggle('ai-thinking', !myTurn);
 
-    const statusNow = data.status || 'waiting';
-    gameActive = (statusNow === 'playing') && !checkWinner() && !checkDraw();
+    // Game is active when status is playing
+    gameActive = (statusNow === 'playing');
     updateGameInfo();
   });
 }
