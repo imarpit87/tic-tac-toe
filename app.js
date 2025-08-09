@@ -49,6 +49,7 @@ const shareBarEl = document.getElementById('shareBar');
 const shareNativeBtn = document.getElementById('shareNativeBtn');
 const shareCopyBtn = document.getElementById('shareCopyBtn');
 const shareTwitterBtn = document.getElementById('shareTwitterBtn');
+let lastShareCtx = null; // { winner, mode, challengeMode, aiWinStreak, humanMoves }
 // Leaderboard controls
 const leaderboardBtn = document.getElementById('leaderboardBtn');
 const leaderboardModal = document.getElementById('leaderboardModal');
@@ -178,7 +179,10 @@ joinTabBtn?.addEventListener('click', () => {
   createPanel.classList.add('hidden');
 });
 shareNativeBtn?.addEventListener('click', () => doShare());
-shareCopyBtn?.addEventListener('click', () => copyToClipboard(buildShareText().link));
+shareCopyBtn?.addEventListener('click', () => {
+  const msg = buildShareText(lastShareCtx);
+  copyToClipboard(`${msg.text} ${msg.link}`.trim());
+});
 leaderboardBtn?.addEventListener('click', () => { openLeaderboard(); });
 leaderboardCloseBtn?.addEventListener('click', () => { leaderboardModal.classList.add('hidden'); });
 
@@ -494,7 +498,8 @@ function endGame(winner) {
   }
   updateScores();
   document.querySelectorAll('.cell').forEach(cell => cell.classList.add('disabled'));
-  // Show share bar with auto-generated text
+  // Prepare share context and show bar
+  lastShareCtx = { winner, mode: gameMode, challengeMode, aiWinStreak, humanMoves: humanMoveCountThisGame };
   showShareBar(winner);
 
   // Do not auto-reset in any mode; wait for New Game button
@@ -829,7 +834,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 function showShareBar(winner) {
   if (!shareBarEl) return;
   shareBarEl.classList.remove('hidden');
-  const msg = buildShareText(winner);
+  const msg = buildShareText(lastShareCtx);
   // Update Twitter link with encoded text
   if (shareTwitterBtn) {
     const url = new URL('https://twitter.com/intent/tweet');
@@ -839,30 +844,37 @@ function showShareBar(winner) {
   }
 }
 
-function buildShareText(winner = 'draw') {
+function buildShareText(ctx) {
   const origin = `${location.protocol}//${location.host}`;
   const link = online.roomId ? `${origin}/room/${online.roomId}` : origin;
+  const winner = (ctx && ctx.winner) || 'draw';
+  const mode = (ctx && ctx.mode) || gameMode;
+  const cMode = (ctx && ctx.challengeMode) || challengeMode;
+  const streak = (ctx && typeof ctx.aiWinStreak === 'number') ? ctx.aiWinStreak : aiWinStreak;
+  const moves = (ctx && typeof ctx.humanMoves === 'number') ? ctx.humanMoves : humanMoveCountThisGame;
   let text = 'I just played XO Duel!';
+  // Base outcome
   if (winner === 'draw') text = "It's a draw in XO Duel!";
-  else if (winner === 'X' || winner === 'O') text = `${winner} won in XO Duel!`;
-  if (gameMode === 'challenge') {
-    if (challengeMode === 'beat3') {
-      text = winner === 'X' && challengeHumanMoves <= 3 ? 'I beat the AI in 3 moves in XO Duel! 🎯' : 'Took on the 3-move challenge in XO Duel!';
-    } else if (challengeMode === 'streak5') {
-      text = challengeStreak >= 5 ? 'I hit a 5-win streak in XO Duel! 🏆' : `My streak is ${challengeStreak}/5 in XO Duel!`;
+  else if (winner === 'X') text = 'I won a game of XO Duel! 🎉';
+  else if (winner === 'O') text = 'I lost a game of XO Duel, rematch time! 💪';
+  // Challenge context
+  if (mode === 'challenge') {
+    if (cMode === 'beat3') {
+      text = winner === 'X' && moves <= 3 ? 'I beat the AI in 3 moves in XO Duel! 🎯' : 'Took on the 3-move challenge in XO Duel!';
+    } else if (cMode === 'streak5') {
+      text = (winner === 'X' && streak >= 5) ? 'I hit a 5-win streak in XO Duel! 🏆' : `My streak is ${streak}/5 in XO Duel!`;
     }
   }
-  if (gameMode === 'ai') {
-    if (winner === 'X') {
-      if (aiWinStreak >= 2) text = `I'm on a ${aiWinStreak}-win streak vs AI in XO Duel! 🏆`;
-      if (humanMoveCountThisGame <= 3) text += ` Also beat the AI in ${humanMoveCountThisGame} moves 🎯`;
-    }
+  // Normal AI extras
+  if (mode === 'ai') {
+    if (winner === 'X' && streak >= 2) text = `I'm on a ${streak}-win streak vs AI in XO Duel! 🏆`;
+    if (winner === 'X' && moves <= 3) text += (text.includes('🎯') ? '' : ` Also beat the AI in ${moves} moves 🎯`);
   }
   return { text, link };
 }
 
 function doShare() {
-  const msg = buildShareText('draw');
+  const msg = buildShareText(lastShareCtx);
   if (navigator.share) navigator.share({ title: 'XO Duel', text: msg.text, url: msg.link }).catch(() => copyToClipboard(msg.link));
   else copyToClipboard(msg.link);
 }
