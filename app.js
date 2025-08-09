@@ -191,6 +191,8 @@ function resetBoard() {
     cell.setAttribute('aria-label', `Row ${Math.floor(i/3)+1}, Column ${i%3+1}, empty`);
     cell.classList.remove('winner', 'disabled', 'x', 'o');
   });
+  // ensure board is interactive after reset
+  boardEl.classList.remove('ai-thinking');
   updateGameInfo();
 }
 
@@ -328,8 +330,11 @@ function endGame(winner) {
   updateScores();
   document.querySelectorAll('.cell').forEach(cell => cell.classList.add('disabled'));
 
+  // Do not auto-reset in online; wait for New Game
+  if (gameMode === 'online') return;
+  // For rounds, wait longer to let players see the result
   if (shouldContinueMatch()) {
-    setTimeout(() => { resetBoard(); }, 1200);
+    setTimeout(() => { resetBoard(); }, 2500);
   }
 }
 
@@ -461,6 +466,8 @@ function listenRoom(code) {
         gameSetupEl.classList.add('hidden');
         gamePlayEl.classList.add('active');
       }
+      // Hide undo in online always
+      undoBtn.style.display = 'none';
       if (data.status !== 'playing') {
         // Set start state atomically
         const resetAt = Date.now();
@@ -561,6 +568,8 @@ window.addEventListener('DOMContentLoaded', () => {
     gameMode = 'online';
     onlineSetupEl.style.display = 'block';
     roomCodeInput.value = roomParam.toUpperCase();
+    // Hide undo in online always
+    undoBtn.style.display = 'none';
     // Attempt auto-join after Firebase init
     setTimeout(() => { joinRoomBtn?.click(); }, 300);
   }
