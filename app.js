@@ -491,8 +491,9 @@ function endGame(winner) {
           gameInfoEl.textContent += ` — You did it in ${humanMoveCountThisGame} moves 🎯`;
         }
       } else {
+        // Reset streak on draw or loss
         aiWinStreak = 0;
-        aiStreakValue.textContent = aiWinStreak;
+        if (aiStreakValue) aiStreakValue.textContent = aiWinStreak;
       }
     }
   }
