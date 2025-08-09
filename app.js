@@ -290,6 +290,8 @@ function makeAIMove() {
       const cell = document.querySelector(`[data-cell="${move}"]`);
       cell.textContent = 'O';
       cell.classList.add('o');
+      // Record AI move for proper undo behavior
+      moveHistory.push({ index: move, player: 'O' });
       createSound(600, 0.15, 'square', 0.2);
 
       if (checkWinner()) endGame('O');
