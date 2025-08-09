@@ -36,6 +36,16 @@ const turnIndicatorEl = document.getElementById('turnIndicator');
 const confetti = new Confetti(document.getElementById('confettiCanvas'));
 const appVersionEl = document.getElementById('appVersion');
 let appVersion = '';
+// Share controls
+const shareBarEl = document.getElementById('shareBar');
+const shareNativeBtn = document.getElementById('shareNativeBtn');
+const shareCopyBtn = document.getElementById('shareCopyBtn');
+const shareTwitterBtn = document.getElementById('shareTwitterBtn');
+// Leaderboard controls
+const leaderboardBtn = document.getElementById('leaderboardBtn');
+const leaderboardModal = document.getElementById('leaderboardModal');
+const leaderboardCloseBtn = document.getElementById('leaderboardCloseBtn');
+const leaderboardBody = document.getElementById('leaderboardBody');
 
 // Online elements
 const onlineSetupEl = document.getElementById('onlineSetup');
@@ -139,6 +149,10 @@ joinTabBtn?.addEventListener('click', () => {
   joinPanel.classList.remove('hidden');
   createPanel.classList.add('hidden');
 });
+shareNativeBtn?.addEventListener('click', () => doShare());
+shareCopyBtn?.addEventListener('click', () => copyToClipboard(buildShareText().link));
+leaderboardBtn?.addEventListener('click', () => { openLeaderboard(); });
+leaderboardCloseBtn?.addEventListener('click', () => { leaderboardModal.classList.add('hidden'); });
 
 // Keyboard controls
 boardEl.addEventListener('keydown', (e) => {
@@ -351,6 +365,8 @@ function endGame(winner) {
       gameInfoEl.textContent = `${name} wins! 🎉`;
       confetti.emitBurst(200);
       setTimeout(() => { playWinSound(); playClapSound(); }, 300);
+      // Update leaderboard asynchronously
+      try { updateLeaderboard(winner); } catch {}
     } else {
       gameInfoEl.textContent = `Player ${winner} wins! 🎉`;
       if (winner === 'X') scores.player1++; else scores.player2++;
@@ -360,6 +376,8 @@ function endGame(winner) {
   }
   updateScores();
   document.querySelectorAll('.cell').forEach(cell => cell.classList.add('disabled'));
+  // Show share bar with auto-generated text
+  showShareBar(winner);
 
   // Do not auto-reset in any mode; wait for New Game button
 }
@@ -674,3 +692,71 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Wait for user to optionally set name/avatar, then click Join
   }
 });
+
+function showShareBar(winner) {
+  if (!shareBarEl) return;
+  shareBarEl.classList.remove('hidden');
+  const msg = buildShareText(winner);
+  // Update Twitter link with encoded text
+  if (shareTwitterBtn) {
+    const url = new URL('https://twitter.com/intent/tweet');
+    url.searchParams.set('text', msg.text);
+    url.searchParams.set('url', msg.link);
+    shareTwitterBtn.href = url.toString();
+  }
+}
+
+function buildShareText(winner = 'draw') {
+  const origin = `${location.protocol}//${location.host}`;
+  const link = online.roomId ? `${origin}/room/${online.roomId}` : origin;
+  let text = 'I just played XO Duel!';
+  if (winner === 'draw') text = "It's a draw in XO Duel!";
+  else if (winner === 'X' || winner === 'O') text = `${winner} won in XO Duel!`;
+  return { text, link };
+}
+
+function doShare() {
+  const msg = buildShareText('draw');
+  if (navigator.share) navigator.share({ title: 'XO Duel', text: msg.text, url: msg.link }).catch(() => copyToClipboard(msg.link));
+  else copyToClipboard(msg.link);
+}
+
+// Leaderboard (Firebase Realtime Database simple aggregate)
+async function updateLeaderboard(winner) {
+  if (!window.database || !online.roomId) return;
+  const ref = window.database.ref('leaderboard');
+  const xName = (document.getElementById('player1Name').textContent || 'Player X').replace(/\s*\(X\)$/, '');
+  const oName = (document.getElementById('player2Name').textContent || 'Player O').replace(/\s*\(O\)$/, '');
+  const updates = {};
+  const safe = (s) => s.replace(/[#.$\[\]/]/g, '_');
+  const xKey = safe(xName);
+  const oKey = safe(oName);
+  if (winner === 'X') {
+    updates[`/${xKey}/wins`] = window.firebase.database.ServerValue.increment(1);
+    updates[`/${oKey}/losses`] = window.firebase.database.ServerValue.increment(1);
+  } else if (winner === 'O') {
+    updates[`/${oKey}/wins`] = window.firebase.database.ServerValue.increment(1);
+    updates[`/${xKey}/losses`] = window.firebase.database.ServerValue.increment(1);
+  } else {
+    updates[`/${xKey}/draws`] = window.firebase.database.ServerValue.increment(1);
+    updates[`/${oKey}/draws`] = window.firebase.database.ServerValue.increment(1);
+  }
+  await ref.update(updates);
+}
+
+async function openLeaderboard() {
+  if (!leaderboardModal) return;
+  leaderboardModal.classList.remove('hidden');
+  if (!window.database) {
+    leaderboardBody.innerHTML = '<div class="muted">Leaderboard requires Firebase database configured.</div>';
+    return;
+  }
+  const snap = await window.database.ref('leaderboard').once('value');
+  const data = snap.val() || {};
+  const arr = Object.entries(data).map(([name, s]) => ({ name, wins: s.wins||0, losses: s.losses||0, draws: s.draws||0, score: (s.wins||0)*3 + (s.draws||0) })).sort((a,b) => b.score - a.score).slice(0, 50);
+  if (arr.length === 0) {
+    leaderboardBody.innerHTML = '<div class="muted">No games recorded yet.</div>';
+    return;
+  }
+  leaderboardBody.innerHTML = arr.map((r, i) => `<div class="leaderboard-row"><div class="rank">${i+1}</div><div class="name">${r.name}</div><div class="score">${r.score}</div></div>`).join('');
+}

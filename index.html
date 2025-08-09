@@ -43,6 +43,7 @@
                     <option value="neon">Neon</option>
                     <option value="kids">Kids</option>
                 </select>
+                <button class="btn tertiary" id="leaderboardBtn" title="View leaderboard">Leaderboard</button>
             </div>
         </header>
         
@@ -137,6 +138,12 @@
 
             <div class="game-info" id="gameInfo" aria-live="polite">Player 1's turn</div>
 
+            <div class="share-bar hidden" id="shareBar" aria-label="Share your result">
+                <button class="btn" id="shareNativeBtn">Share</button>
+                <button class="btn tertiary" id="shareCopyBtn">Copy Link</button>
+                <a class="btn tertiary" id="shareTwitterBtn" target="_blank" rel="noopener">Tweet</a>
+            </div>
+
             <div class="board" id="board" role="grid" aria-label="Tic Tac Toe board">
                 <button class="cell" onclick="makeMove(0)" data-cell="0" role="gridcell" tabindex="0" aria-label="Row 1, Column 1, empty"></button>
                 <button class="cell" onclick="makeMove(1)" data-cell="1" role="gridcell" tabindex="0" aria-label="Row 1, Column 2, empty"></button>
@@ -157,6 +164,19 @@
         </div>
     </div>
 
+    <!-- Leaderboard Modal -->
+    <div class="modal hidden" id="leaderboardModal" role="dialog" aria-modal="true" aria-labelledby="leaderboardTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="leaderboardTitle">🏆 Leaderboard</h3>
+                <button class="btn tertiary" id="leaderboardCloseBtn" aria-label="Close">Close</button>
+            </div>
+            <div id="leaderboardBody" class="leaderboard-body">
+                <div class="muted">Loading…</div>
+            </div>
+        </div>
+    </div>
+ 
     <script type="module" src="./app.js?v=2025-08-09-01"></script>
     <script defer src="./firebase-config.js"></script>
 </body>
