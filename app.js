@@ -289,6 +289,8 @@ function resetBoard() {
   // ensure board is interactive after reset
   boardEl.classList.remove('ai-thinking');
   updateGameInfo();
+  // Hide share bar on new game
+  if (shareBarEl) shareBarEl.classList.add('hidden');
 }
 
 function updateTurnIndicator() {
@@ -440,7 +442,8 @@ function endGame(winner) {
           gameInfoEl.textContent = 'Challenge failed. Try again!';
         }
       } else if (challengeMode === 'streak5') {
-        if (winner === 'X') challengeStreak++; else if (winner === 'O') challengeStreak = 0;
+        if (winner === 'X') challengeStreak++;
+        else if (winner === 'O' || winner === 'draw') challengeStreak = 0;
         if (challengeStreak >= 5) {
           gameInfoEl.textContent = 'Streak achieved! 5 in a row 🏆';
           confetti.emitBurst(240);
@@ -480,6 +483,21 @@ window.resetGame = () => {
     requestOnlineNewGame();
   } else {
     resetBoard();
+    // Challenge-specific resets
+    if (gameMode === 'challenge') {
+      if (challengeMode === 'beat3') {
+        challengeHumanMoves = 0;
+        challengeMovesAllowed = 3;
+        challengeLabel.textContent = 'Beat the AI in 3 Moves';
+        challengeMeta.textContent = 'Moves left: 3';
+        challengeBar.classList.remove('hidden');
+      } else if (challengeMode === 'streak5') {
+        // Keep current streak value; just refresh UI
+        challengeLabel.textContent = 'Win 5 in a Row';
+        challengeMeta.textContent = `Current streak: ${challengeStreak}/5`;
+        challengeBar.classList.remove('hidden');
+      }
+    }
   }
   playClickSound();
 };
