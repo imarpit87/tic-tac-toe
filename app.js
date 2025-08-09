@@ -477,7 +477,6 @@ function listenRoom(code) {
     updateScores();
     renderBoard();
 
-    // Auto-start when both joined
     const bothJoined = pX.joined && pO.joined;
     if (bothJoined) {
       if (!gameSetupEl.classList.contains('hidden')) {
@@ -486,16 +485,20 @@ function listenRoom(code) {
       }
       // Hide undo in online always
       undoBtn.style.display = 'none';
-      if (data.status !== 'playing') {
-        // Set start state atomically
+
+      // State-driven behavior
+      const status = data.status || 'waiting';
+      if (status === 'waiting') {
+        // First time both joined: start playing
         const resetAt = Date.now();
         window.database.ref(`rooms/${code}`).update({ status: 'playing', currentPlayer: 'X', board: Array(9).fill(''), resetAt, updatedAt: Date.now() });
         online.lastResetAt = resetAt;
-        roomStatusEl.textContent = 'Ready! X to move.';
-      } else {
-        // In-progress status
+        roomStatusEl.textContent = 'Both players joined. Starting… X to move';
+      } else if (status === 'playing') {
         const turnName = currentPlayer === 'X' ? (pX.name || 'X') : (pO.name || 'O');
         roomStatusEl.textContent = `${turnName}'s turn`;
+      } else if (status === 'ended') {
+        roomStatusEl.textContent = 'Game over. Click New Game to play again';
       }
     }
 
