@@ -67,6 +67,16 @@ const challengeLabel = document.getElementById('challengeLabel');
 const challengeMeta = document.getElementById('challengeMeta');
 const aiStreakBar = document.getElementById('aiStreakBar');
 const aiStreakValue = document.getElementById('aiStreakValue');
+// Rating UI
+const rateBtn = document.getElementById('rateBtn');
+const ratingModal = document.getElementById('ratingModal');
+const ratingCloseBtn = document.getElementById('ratingCloseBtn');
+const ratingNotNowBtn = document.getElementById('ratingNotNowBtn');
+const ratingSubmitBtn = document.getElementById('ratingSubmitBtn');
+const ratingStars = document.getElementById('ratingStars');
+const ratingFeedback = document.getElementById('ratingFeedback');
+const ratingNote = document.getElementById('ratingNote');
+let ratingSelected = 0;
 
 // Online elements
 const onlineSetupEl = document.getElementById('onlineSetup');
@@ -185,6 +195,16 @@ shareCopyBtn?.addEventListener('click', () => {
 });
 leaderboardBtn?.addEventListener('click', () => { openLeaderboard(); });
 leaderboardCloseBtn?.addEventListener('click', () => { leaderboardModal.classList.add('hidden'); });
+rateBtn?.addEventListener('click', () => openRatingModal('manual'));
+ratingCloseBtn?.addEventListener('click', () => closeRatingModal('close'));
+ratingNotNowBtn?.addEventListener('click', () => closeRatingModal('snooze'));
+ratingSubmitBtn?.addEventListener('click', () => submitRating());
+ratingStars?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.star'); if (!btn) return;
+  ratingSelected = Number(btn.dataset.star) || 0;
+  [...ratingStars.querySelectorAll('.star')].forEach(s => s.classList.toggle('selected', Number(s.dataset.star) <= ratingSelected));
+  ratingNote.textContent = ratingSelected >= 4 ? 'Thank you! Would you recommend XO Duel to a friend?' : 'Sorry it wasn\'t great. What should we improve?';
+});
 
 // Keyboard controls
 boardEl.addEventListener('keydown', (e) => {
@@ -510,6 +530,8 @@ function endGame(winner) {
     challengeMoves: challengeHumanMoves
   };
   showShareBar(winner);
+  // Prompt for rating at positive moments
+  maybeAskForRating(winner);
 
   // Do not auto-reset in any mode; wait for New Game button
 }
@@ -929,4 +951,67 @@ async function openLeaderboard() {
     return;
   }
   leaderboardBody.innerHTML = arr.map((r, i) => `<div class="leaderboard-row"><div class="rank">${i+1}</div><div class="name">${r.name}</div><div class="score">${r.score}</div></div>`).join('');
+}
+
+// Rating logic
+const RATING_KEY = 'ttt_rating_meta_v1';
+function getRatingMeta() {
+  try { return JSON.parse(localStorage.getItem(RATING_KEY)) || {}; } catch { return {}; }
+}
+function setRatingMeta(patch) {
+  const curr = getRatingMeta();
+  localStorage.setItem(RATING_KEY, JSON.stringify({ ...curr, ...patch }));
+}
+function shouldAskForRating(trigger) {
+  const meta = getRatingMeta();
+  const now = Date.now();
+  const lastAsked = meta.lastAskedAt || 0;
+  const timesAsked = meta.timesAsked || 0;
+  const lastRated = meta.lastRatedAt || 0;
+  if (meta.optOut) return false;
+  // At most once/day and at most 3 times overall
+  if (now - lastAsked < 24*60*60*1000) return false;
+  if (timesAsked >= 3 && now - lastRated < 30*24*60*60*1000) return false;
+  // Prefer positive triggers
+  if (trigger === 'win' || trigger === 'challenge') return true;
+  return false;
+}
+function maybeAskForRating(winner) {
+  let trigger = null;
+  if (gameMode === 'ai' && winner === 'X') trigger = 'win';
+  if (gameMode === 'challenge' && ((challengeMode === 'beat3' && winner === 'X' && challengeHumanMoves <= 3) || (challengeMode === 'streak5' && challengeStreak >= 5))) trigger = 'challenge';
+  if (!trigger) return;
+  if (!shouldAskForRating(trigger)) return;
+  openRatingModal(trigger);
+}
+function openRatingModal(trigger) {
+  if (!ratingModal) return;
+  ratingModal.classList.remove('hidden');
+  ratingSelected = 0;
+  ratingFeedback.value = '';
+  ratingNote.textContent = '';
+  [...ratingStars.querySelectorAll('.star')].forEach(s => s.classList.remove('selected'));
+}
+function closeRatingModal(reason) {
+  if (!ratingModal) return;
+  ratingModal.classList.add('hidden');
+  if (reason === 'snooze') {
+    const meta = getRatingMeta();
+    setRatingMeta({ lastAskedAt: Date.now(), timesAsked: (meta.timesAsked || 0) + 1 });
+  }
+}
+async function submitRating() {
+  const stars = ratingSelected;
+  const feedback = ratingFeedback.value.trim();
+  const meta = getRatingMeta();
+  setRatingMeta({ lastAskedAt: Date.now(), lastRatedAt: Date.now(), timesAsked: (meta.timesAsked || 0) + 1 });
+  // Save to Firebase if available
+  try {
+    if (window.database) {
+      await window.database.ref('feedback').push({
+        stars, feedback, mode: gameMode, challengeMode, difficulty, timestamp: Date.now()
+      });
+    }
+  } catch {}
+  closeRatingModal('submit');
 }
