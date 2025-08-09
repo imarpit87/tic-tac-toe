@@ -11,7 +11,7 @@ let scores = { player1: 0, player2: 0 };
 let isAIThinking = false;
 let bestOf = 1;
 let moveHistory = [];
-let online = { roomId: null, isHost: false };
+let online = { roomId: null, isHost: false, mySide: null, myName: '', myAvatar: '🧑‍🚀', suppressNextSound: false };
 
 // DOM
 const boardEl = document.getElementById('board');
@@ -39,6 +39,7 @@ const roomCodeInput = document.getElementById('roomCodeInput');
 const createRoomBtn = document.getElementById('createRoomBtn');
 const joinRoomBtn = document.getElementById('joinRoomBtn');
 const roomStatusEl = document.getElementById('roomStatus');
+const avatarPickerEl = document.getElementById('avatarPicker');
 
 // Audio
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -60,6 +61,8 @@ function createSound(frequency, duration, type = 'sine', volume = 0.25) {
 }
 
 function playClickSound() { createSound(820, 0.08, 'sine', 0.18); }
+function playXSound() { createSound(740, 0.12, 'triangle', 0.22); }
+function playOSound() { createSound(540, 0.12, 'square', 0.22); }
 function playWinSound() {
   createSound(523, 0.22, 'sine', 0.28); // C
   setTimeout(() => createSound(659, 0.22, 'sine', 0.28), 80); // E
@@ -158,7 +161,7 @@ window.startGame = () => {
     player1NameEl.textContent = 'Player 1 (X)';
     player2NameEl.textContent = 'Player 2 (O)';
   } else if (gameMode === 'online') {
-    player1NameEl.textContent = 'You (X)';
+    player1NameEl.textContent = `${online.myName || 'You'} (X)`;
     player2NameEl.textContent = 'Friend (O)';
   }
 
@@ -196,12 +199,20 @@ function updateTurnIndicator() {
 function updateGameInfo() {
   if (!gameActive) return;
   if (gameMode === 'ai') gameInfoEl.textContent = currentPlayer === 'X' ? 'Your turn' : 'AI is thinking…';
-  else gameInfoEl.textContent = `Player ${currentPlayer}'s turn`;
+  else if (gameMode === 'online') {
+    const name = currentPlayer === 'X' ? (player1NameEl.textContent || 'Player X') : (player2NameEl.textContent || 'Player O');
+    gameInfoEl.textContent = `${name}'s turn`;
+  } else gameInfoEl.textContent = `Player ${currentPlayer}'s turn`;
   updateTurnIndicator();
 }
 
 window.makeMove = (cellIndex) => {
   if (!gameActive || gameBoard[cellIndex] !== '' || isAIThinking) return;
+  if (gameMode === 'online') {
+    // Enforce turn ownership
+    const myTurn = online.mySide === currentPlayer;
+    if (!myTurn) return;
+  }
   if (audioContext.state === 'suspended') audioContext.resume();
 
   gameBoard[cellIndex] = currentPlayer;
@@ -211,11 +222,14 @@ window.makeMove = (cellIndex) => {
   cell.setAttribute('aria-label', `Row ${Math.floor(cellIndex/3)+1}, Column ${cellIndex%3+1}, ${currentPlayer}`);
   moveHistory.push({ index: cellIndex, player: currentPlayer });
 
-  playClickSound();
+  if (!online.suppressNextSound) {
+    if (currentPlayer === 'X') playXSound(); else playOSound();
+  }
+  online.suppressNextSound = false;
   vibrate(10);
 
-  if (checkWinner()) { endGame(currentPlayer); return; }
-  if (checkDraw()) { endGame('draw'); return; }
+  if (checkWinner()) { endGame(currentPlayer); if (gameMode === 'online') pushOnlineState(true); return; }
+  if (checkDraw()) { endGame('draw'); if (gameMode === 'online') pushOnlineState(true); return; }
 
   currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   updateGameInfo();
@@ -323,24 +337,38 @@ window.backToMenu = () => {
   playClickSound();
 };
 
-// Online (basic)
+// Online (enhanced)
 function initOnline() {
   if (!window.database) { roomStatusEl.textContent = 'Online mode unavailable: Firebase not configured.'; return; }
-  roomStatusEl.textContent = 'Ready.';
+  roomStatusEl.textContent = 'Ready. Pick name and avatar, then create or join a room.';
 }
+
+// avatar selection
+avatarPickerEl?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.avatar-option');
+  if (!btn) return;
+  avatarPickerEl.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  online.myAvatar = btn.dataset.avatar;
+});
 
 async function createRoom() {
   try {
     const code = Math.random().toString(36).slice(2, 7).toUpperCase();
+    online.myName = (playerNameInput.value || 'Player').trim();
     await window.database.ref(`rooms/${code}`).set({
       status: 'waiting',
       board: Array(9).fill(''),
       currentPlayer: 'X',
       scores: { player1: 0, player2: 0 },
+      players: {
+        X: { name: online.myName, avatar: online.myAvatar, joined: true },
+        O: { name: '', avatar: '', joined: false }
+      },
       updatedAt: Date.now()
     });
-    online.roomId = code; online.isHost = true;
-    roomStatusEl.textContent = `Room created: ${code}`;
+    online.roomId = code; online.isHost = true; online.mySide = 'X';
+    roomStatusEl.textContent = `Room created: ${code} (share this code)`;
     listenRoom(code);
   } catch (e) { roomStatusEl.textContent = `Error creating room: ${e.message}`; }
 }
@@ -350,8 +378,17 @@ async function joinRoom() {
   if (!code) { roomStatusEl.textContent = 'Enter room code'; return; }
   const snap = await window.database.ref(`rooms/${code}`).once('value');
   if (!snap.exists()) { roomStatusEl.textContent = 'Room not found'; return; }
-  online.roomId = code; online.isHost = false;
-  roomStatusEl.textContent = `Joined room: ${code}`;
+  const data = snap.val();
+  online.myName = (playerNameInput.value || 'Player').trim();
+  // Claim side O if available, otherwise X if O occupied but X empty
+  let side = 'O';
+  if (data.players && data.players.O && data.players.O.joined) {
+    if (data.players.X && !data.players.X.joined) side = 'X'; else { roomStatusEl.textContent = 'Room full'; return; }
+  }
+  await window.database.ref(`rooms/${code}/players/${side}`).update({ name: online.myName, avatar: online.myAvatar, joined: true });
+  await window.database.ref(`rooms/${code}`).update({ updatedAt: Date.now() });
+  online.roomId = code; online.isHost = false; online.mySide = side;
+  roomStatusEl.textContent = `Joined room: ${code} as ${side}`;
   listenRoom(code);
 }
 
@@ -361,26 +398,54 @@ function listenRoom(code) {
     gameBoard = data.board || Array(9).fill('');
     currentPlayer = data.currentPlayer || 'X';
     scores = data.scores || scores;
+
+    // Players & names/avatars
+    const pX = data.players?.X || { name: 'X', avatar: '❌', joined: false };
+    const pO = data.players?.O || { name: 'O', avatar: '⭕', joined: false };
+    player1NameEl.textContent = `${pX.name || 'Player X'} (X)`;
+    player2NameEl.textContent = `${pO.name || 'Player O'} (O)`;
+    document.getElementById('player1Avatar').textContent = pX.avatar || '❌';
+    document.getElementById('player2Avatar').textContent = pO.avatar || '⭕';
+
     updateScores();
     renderBoard();
+
+    // Auto-start when both joined
+    const bothJoined = pX.joined && pO.joined;
+    if (bothJoined && gameSetupEl.classList.contains('hidden') === false) {
+      // Start game UI once
+      gameSetupEl.classList.add('hidden');
+      gamePlayEl.classList.add('active');
+      resetBoard();
+    }
+
+    // Disable input if not my turn
+    const myTurn = online.mySide === currentPlayer;
+    boardEl.classList.toggle('ai-thinking', !myTurn);
+
     gameActive = !checkWinner() && !checkDraw();
     updateGameInfo();
   });
 }
 
-function pushOnlineState() {
+function pushOnlineState(end = false) {
   if (!online.roomId) return;
   window.database.ref(`rooms/${online.roomId}`).update({
     board: gameBoard,
     currentPlayer,
     scores,
-    updatedAt: Date.now()
+    updatedAt: Date.now(),
+    status: end ? 'ended' : 'playing'
   });
 }
 
 function renderBoard() {
   document.querySelectorAll('.cell').forEach((cell, i) => {
     const val = gameBoard[i];
+    // Avoid double playing sound on remote updates
+    if (cell.textContent !== val && gameMode === 'online') {
+      online.suppressNextSound = true;
+    }
     cell.textContent = val;
     cell.classList.toggle('x', val === 'X');
     cell.classList.toggle('o', val === 'O');
