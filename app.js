@@ -45,6 +45,8 @@ const createRoomBtn = document.getElementById('createRoomBtn');
 const joinRoomBtn = document.getElementById('joinRoomBtn');
 const roomStatusEl = document.getElementById('roomStatus');
 const avatarPickerEl = document.getElementById('avatarPicker');
+const avatarPickerJoinEl = document.getElementById('avatarPickerJoin');
+const playerNameJoinInput = document.getElementById('playerNameJoinInput');
 const shareRoomBtn = document.getElementById('shareRoomBtn');
 const roomCodeWrap = document.getElementById('roomCodeWrap');
 const roomCodeText = document.getElementById('roomCodeText');
@@ -405,6 +407,13 @@ avatarPickerEl?.addEventListener('click', (e) => {
   btn.classList.add('selected');
   online.myAvatar = btn.dataset.avatar;
 });
+avatarPickerJoinEl?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.avatar-option');
+  if (!btn) return;
+  avatarPickerJoinEl.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  online.myAvatar = btn.dataset.avatar;
+});
 
 async function createRoom() {
   try {
@@ -445,7 +454,7 @@ async function joinRoom() {
   const snap = await window.database.ref(`rooms/${code}`).once('value');
   if (!snap.exists()) { roomStatusEl.textContent = 'Room not found'; return; }
   const data = snap.val();
-  online.myName = (playerNameInput.value || '').trim();
+  online.myName = ((playerNameJoinInput?.value || playerNameInput?.value) || '').trim();
   const players = data.players || {};
   const xJoined = !!(players.X && players.X.joined === true);
   const oJoined = !!(players.O && players.O.joined === true);
@@ -530,7 +539,7 @@ function listenRoom(code) {
       // State-driven behavior
       const status = statusNow;
       if (status === 'waiting') {
-        // Only host starts the game to avoid races
+        // Only host starts the game to avoid races. If host missed it previously, ensure a start occurs.
         if (online.isHost) {
           const resetAt = Date.now();
           window.database.ref(`rooms/${code}`).update({ status: 'playing', currentPlayer: 'X', board: Array(9).fill(''), resetAt, updatedAt: Date.now() });

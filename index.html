@@ -89,7 +89,16 @@
 
                     <section class="online-panel hidden" id="joinPanel" aria-labelledby="joinTabBtn">
                         <p class="panel-desc">Enter your name (optional) and the room code you received to join your friend.</p>
+                        <div class="avatar-picker" id="avatarPickerJoin" aria-label="Choose an avatar (optional)">
+                            <button class="avatar-option" data-avatar="🧑‍🚀" title="Astronaut">🧑‍🚀</button>
+                            <button class="avatar-option" data-avatar="🧑‍🎤" title="Rocker">🧑‍🎤</button>
+                            <button class="avatar-option" data-avatar="🦸‍♂️" title="Superhero (M)">🦸‍♂️</button>
+                            <button class="avatar-option" data-avatar="🦸‍♀️" title="Superhero (F)">🦸‍♀️</button>
+                            <button class="avatar-option" data-avatar="🤠" title="Cowboy">🤠</button>
+                            <button class="avatar-option" data-avatar="👩‍🎤" title="Popstar">👩‍🎤</button>
+                        </div>
                         <div class="online-actions">
+                            <input id="playerNameJoinInput" class="text-input" placeholder="Your name (optional)" aria-label="Your name">
                             <input id="roomCodeInput" class="text-input" placeholder="Room code (e.g., ABCDE)" aria-label="Room code">
                             <button class="btn" id="joinRoomBtn">Join Room</button>
                         </div>
