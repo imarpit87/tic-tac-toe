@@ -14,6 +14,7 @@ let moveHistory = [];
 let online = { roomId: null, isHost: false, mySide: null, myName: '', myAvatar: '🧑‍🚀', suppressNextSound: false, clientId: null };
 online.lastResetAt = 0;
 online.prevJoined = { X: false, O: false };
+online.lastResultShownAt = 0;
 
 // DOM
 const boardEl = document.getElementById('board');
@@ -470,6 +471,34 @@ function listenRoom(code) {
     // Players & names/avatars
     const pX = data.players?.X || { name: 'X', avatar: '❌', joined: false };
     const pO = data.players?.O || { name: 'O', avatar: '⭕', joined: false };
+
+    // Render board first so winner highlighting can run
+    renderBoard();
+
+    // Handle end-of-game messaging for both clients regardless of join state
+    const statusNow = data.status || 'waiting';
+    if (statusNow === 'ended') {
+      const res = data.result || {};
+      if (res.winner === 'draw') {
+        gameInfoEl.textContent = "It's a draw! 🤝";
+      } else if (res.winner === 'X' || res.winner === 'O') {
+        const winName = res.winner === 'X' ? (pX.name || 'Player X') : (pO.name || 'Player O');
+        gameInfoEl.textContent = `${winName} wins! 🎉`;
+      }
+      // Highlight winners if present
+      checkWinner();
+      // Disable cells
+      document.querySelectorAll('.cell').forEach(cell => cell.classList.add('disabled'));
+      // Confetti/clap once per result
+      const stamp = data.updatedAt || Date.now();
+      if (stamp !== online.lastResultShownAt) {
+        online.lastResultShownAt = stamp;
+        confetti.emitBurst(180);
+        setTimeout(() => { playWinSound(); playClapSound(); }, 200);
+      }
+      roomStatusEl.textContent = 'Game over. Click New Game to play again';
+    }
+
     // Join/leave messages and status
     if (!pO.joined || !pX.joined) {
       roomStatusEl.textContent = 'Waiting for player to join…';
@@ -488,7 +517,6 @@ function listenRoom(code) {
     document.getElementById('player2Avatar').textContent = pO.avatar || '⭕';
 
     updateScores();
-    renderBoard();
 
     const bothJoined = pX.joined && pO.joined;
     if (bothJoined) {
@@ -500,7 +528,7 @@ function listenRoom(code) {
       undoBtn.style.display = 'none';
 
       // State-driven behavior
-      const status = data.status || 'waiting';
+      const status = statusNow;
       if (status === 'waiting') {
         // Only host starts the game to avoid races
         if (online.isHost) {
@@ -514,16 +542,6 @@ function listenRoom(code) {
       } else if (status === 'playing') {
         const turnName = currentPlayer === 'X' ? (pX.name || 'X') : (pO.name || 'O');
         roomStatusEl.textContent = `${turnName}'s turn`;
-      } else if (status === 'ended') {
-        // Show winner/draw message on both clients
-        const res = data.result || {};
-        if (res.winner === 'draw') {
-          gameInfoEl.textContent = "It's a draw! 🤝";
-        } else if (res.winner === 'X' || res.winner === 'O') {
-          const winName = res.winner === 'X' ? (pX.name || 'Player X') : (pO.name || 'Player O');
-          gameInfoEl.textContent = `${winName} wins! 🎉`;
-        }
-        roomStatusEl.textContent = 'Game over. Click New Game to play again';
       }
     }
 
@@ -535,7 +553,6 @@ function listenRoom(code) {
     }
 
     // Disable input if not my turn; enable only when status is playing
-    const statusNow = data.status || 'waiting';
     const myTurn = (statusNow === 'playing') && online.mySide === currentPlayer;
     boardEl.classList.toggle('ai-thinking', !myTurn);
 
