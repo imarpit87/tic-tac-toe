@@ -133,6 +133,9 @@ h1 { font-size: 2.2rem; margin-bottom: 16px; font-weight: 700; }
 .avatar-option.selected { outline: 2px solid var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2); }
 .room-hint { margin-top: 6px; color: var(--muted); font-size: 12px; }
 
+.room-code { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 8px 0; }
+.room-code code { background: rgba(255,255,255,0.7); padding: 6px 10px; border-radius: 8px; font-weight: 700; }
+
 @media (max-width: 480px) {
   .container { padding: 18px; margin: 10px; }
   .app-title { font-size: 1.8rem; }

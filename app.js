@@ -43,6 +43,9 @@ const joinRoomBtn = document.getElementById('joinRoomBtn');
 const roomStatusEl = document.getElementById('roomStatus');
 const avatarPickerEl = document.getElementById('avatarPicker');
 const shareRoomBtn = document.getElementById('shareRoomBtn');
+const roomCodeWrap = document.getElementById('roomCodeWrap');
+const roomCodeText = document.getElementById('roomCodeText');
+const copyCodeBtn = document.getElementById('copyCodeBtn');
 
 // Audio
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -385,14 +388,14 @@ avatarPickerEl?.addEventListener('click', (e) => {
 async function createRoom() {
   try {
     const code = Math.random().toString(36).slice(2, 7).toUpperCase();
-    online.myName = (playerNameInput.value || 'Player').trim();
+    online.myName = (playerNameInput.value || '');
     await window.database.ref(`rooms/${code}`).set({
       status: 'waiting',
       board: Array(9).fill(''),
       currentPlayer: 'X',
       scores: { player1: 0, player2: 0 },
       players: {
-        X: { name: online.myName, avatar: online.myAvatar, joined: true, clientId: online.clientId },
+        X: { name: online.myName || 'Player X', avatar: online.myAvatar, joined: true, clientId: online.clientId },
         O: { name: '', avatar: '', joined: false, clientId: null }
       },
       updatedAt: Date.now()
@@ -400,11 +403,16 @@ async function createRoom() {
     online.roomId = code; online.isHost = true; online.mySide = 'X';
     // onDisconnect: free up X seat if host disconnects
     window.database.ref(`rooms/${code}/players/X`).onDisconnect().update({ joined: false, clientId: null });
-    roomStatusEl.textContent = `Room created: ${code} (share this code)`;
-    // Enable share button with deep link
+    roomStatusEl.textContent = `Room created: ${code} (share link or code)`;
+    // Enable share button with deep link and show code
     if (shareRoomBtn) {
       shareRoomBtn.style.display = 'inline-block';
       shareRoomBtn.onclick = () => shareInviteLink(code);
+    }
+    if (roomCodeWrap && roomCodeText && copyCodeBtn) {
+      roomCodeWrap.style.display = 'flex';
+      roomCodeText.textContent = code;
+      copyCodeBtn.onclick = () => copyToClipboard(code);
     }
     listenRoom(code);
   } catch (e) { roomStatusEl.textContent = `Error creating room: ${e.message}`; }
@@ -416,14 +424,14 @@ async function joinRoom() {
   const snap = await window.database.ref(`rooms/${code}`).once('value');
   if (!snap.exists()) { roomStatusEl.textContent = 'Room not found'; return; }
   const data = snap.val();
-  online.myName = (playerNameInput.value || 'Player').trim();
+  online.myName = (playerNameInput.value || '').trim();
   const players = data.players || {};
   const xJoined = !!(players.X && players.X.joined === true);
   const oJoined = !!(players.O && players.O.joined === true);
   let side = null;
   if (!oJoined) side = 'O'; else if (!xJoined) side = 'X'; else { roomStatusEl.textContent = 'Room full'; return; }
 
-  await window.database.ref(`rooms/${code}/players/${side}`).update({ name: online.myName, avatar: online.myAvatar, joined: true, clientId: online.clientId });
+  await window.database.ref(`rooms/${code}/players/${side}`).update({ name: online.myName || (side === 'X' ? 'Player X' : 'Player O'), avatar: online.myAvatar, joined: true, clientId: online.clientId });
   // onDisconnect: free seat when this client disconnects
   window.database.ref(`rooms/${code}/players/${side}`).onDisconnect().update({ joined: false, clientId: null });
   await window.database.ref(`rooms/${code}`).update({ updatedAt: Date.now() });
@@ -560,7 +568,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./service-worker.js').catch(() => {});
   }
-  // Deep link auto-join
+  // Deep link behavior: prefill code but do not auto-join so user can set name/avatar
   const params = new URLSearchParams(window.location.search);
   const roomParam = params.get('room');
   if (roomParam) {
@@ -570,7 +578,6 @@ window.addEventListener('DOMContentLoaded', () => {
     roomCodeInput.value = roomParam.toUpperCase();
     // Hide undo in online always
     undoBtn.style.display = 'none';
-    // Attempt auto-join after Firebase init
-    setTimeout(() => { joinRoomBtn?.click(); }, 300);
+    // Wait for user to optionally set name/avatar, then click Join
   }
 });
