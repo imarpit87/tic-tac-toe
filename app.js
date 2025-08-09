@@ -46,6 +46,9 @@ const leaderboardBtn = document.getElementById('leaderboardBtn');
 const leaderboardModal = document.getElementById('leaderboardModal');
 const leaderboardCloseBtn = document.getElementById('leaderboardCloseBtn');
 const leaderboardBody = document.getElementById('leaderboardBody');
+// AI difficulty bar
+const aiDifficultyBar = document.getElementById('aiDifficultyBar');
+const aiDifficultySelect = document.getElementById('aiDifficultySelect');
 
 // Online elements
 const onlineSetupEl = document.getElementById('onlineSetup');
@@ -137,6 +140,12 @@ soundToggle.addEventListener('change', () => { soundEnabled = soundToggle.checke
 themeSelect.addEventListener('change', () => setTheme(themeSelect.value));
 roundsSelect.addEventListener('change', () => { bestOf = Number(roundsSelect.value); saveSettings(); });
 undoBtn.addEventListener('click', () => undoMove());
+aiDifficultySelect?.addEventListener('change', () => {
+  difficulty = aiDifficultySelect.value;
+  saveSettings();
+  // If game ended, allow immediate restart with new difficulty; otherwise, keep current game but update AI behavior next move
+  if (!gameActive) resetBoard();
+});
 createTabBtn?.addEventListener('click', () => {
   createTabBtn.classList.add('active');
   joinTabBtn.classList.remove('active');
@@ -200,12 +209,16 @@ window.startGame = () => {
   if (gameMode === 'ai') {
     player1NameEl.textContent = 'You (X)';
     player2NameEl.textContent = 'AI (O)';
+    aiDifficultyBar.classList.remove('hidden');
+    if (aiDifficultySelect) aiDifficultySelect.value = difficulty;
   } else if (gameMode === 'human') {
     player1NameEl.textContent = 'Player 1 (X)';
     player2NameEl.textContent = 'Player 2 (O)';
+    aiDifficultyBar.classList.add('hidden');
   } else if (gameMode === 'online') {
     player1NameEl.textContent = `${online.myName || 'You'} (X)`;
     player2NameEl.textContent = 'Friend (O)';
+    aiDifficultyBar.classList.add('hidden');
   }
 
   scores = { player1: 0, player2: 0 };

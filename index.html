@@ -136,6 +136,16 @@
                 <div class="score"><span id="player2Avatar" class="avatar">🤖</span> <span id="player2Name">Player 2</span>: <span id="score2">0</span></div>
             </div>
 
+            <div class="ai-difficulty hidden" id="aiDifficultyBar">
+                <span class="muted">AI Difficulty:</span>
+                <select id="aiDifficultySelect" class="rounds-select" aria-label="AI difficulty select">
+                    <option value="easy">Easy (50%)</option>
+                    <option value="medium">Medium (75%)</option>
+                    <option value="hard">Hard (90%)</option>
+                    <option value="god">God Mode (120%)</option>
+                </select>
+            </div>
+
             <div class="game-info" id="gameInfo" aria-live="polite">Player 1's turn</div>
 
             <div class="share-bar hidden" id="shareBar" aria-label="Share your result">

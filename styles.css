@@ -159,6 +159,9 @@ h1 { font-size: 2.2rem; margin-bottom: 16px; font-weight: 700; }
 .leaderboard-row .score { text-align: right; font-weight: 700; }
 .muted { color: var(--muted); font-size: 13px; }
 
+.ai-difficulty { display: flex; gap: 8px; align-items: center; justify-content: center; margin: 6px 0; }
+.ai-difficulty.hidden { display: none; }
+
 @media (max-width: 480px) {
   .container { padding: 18px; margin: 10px; }
   .app-title { font-size: 1.8rem; }
