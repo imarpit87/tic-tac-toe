@@ -15,6 +15,11 @@ let online = { roomId: null, isHost: false, mySide: null, myName: '', myAvatar: 
 online.lastResetAt = 0;
 online.prevJoined = { X: false, O: false };
 online.lastResultShownAt = 0;
+// Challenge state
+let challengeMode = null; // 'beat3' | 'streak5' | null
+let challengeMovesAllowed = 0;
+let challengeHumanMoves = 0;
+let challengeStreak = 0;
 
 // DOM
 const boardEl = document.getElementById('board');
@@ -49,6 +54,13 @@ const leaderboardBody = document.getElementById('leaderboardBody');
 // AI difficulty bar
 const aiDifficultyBar = document.getElementById('aiDifficultyBar');
 const aiDifficultySelect = document.getElementById('aiDifficultySelect');
+// Challenge UI
+const challengeSelection = document.getElementById('challengeSelection');
+const challengeBeat3Btn = document.getElementById('challengeBeat3Btn');
+const challengeStreak5Btn = document.getElementById('challengeStreak5Btn');
+const challengeBar = document.getElementById('challengeBar');
+const challengeLabel = document.getElementById('challengeLabel');
+const challengeMeta = document.getElementById('challengeMeta');
 
 // Online elements
 const onlineSetupEl = document.getElementById('onlineSetup');
@@ -146,6 +158,8 @@ aiDifficultySelect?.addEventListener('change', () => {
   // If game ended, allow immediate restart with new difficulty; otherwise, keep current game but update AI behavior next move
   if (!gameActive) resetBoard();
 });
+challengeBeat3Btn?.addEventListener('click', () => { challengeMode = 'beat3'; challengeMovesAllowed = 3; startGame(); });
+challengeStreak5Btn?.addEventListener('click', () => { challengeMode = 'streak5'; challengeStreak = 0; startGame(); });
 createTabBtn?.addEventListener('click', () => {
   createTabBtn.classList.add('active');
   joinTabBtn.classList.remove('active');
@@ -190,6 +204,12 @@ window.selectMode = (mode) => {
   startBtn.style.display = 'inline-block';
   // Show undo only for AI mode
   undoBtn.style.display = mode === 'ai' ? 'inline-block' : 'none';
+  // Challenges panel
+  challengeSelection.style.display = mode === 'challenge' ? 'block' : 'none';
+  if (mode === 'challenge') {
+    aiDifficultyBar.classList.remove('hidden');
+    if (aiDifficultySelect) aiDifficultySelect.value = difficulty = (difficulty === 'easy' ? 'hard' : difficulty);
+  }
   playClickSound();
 };
 
@@ -211,14 +231,38 @@ window.startGame = () => {
     player2NameEl.textContent = 'AI (O)';
     aiDifficultyBar.classList.remove('hidden');
     if (aiDifficultySelect) aiDifficultySelect.value = difficulty;
+    challengeBar.classList.add('hidden');
+    challengeMode = null;
   } else if (gameMode === 'human') {
     player1NameEl.textContent = 'Player 1 (X)';
     player2NameEl.textContent = 'Player 2 (O)';
     aiDifficultyBar.classList.add('hidden');
+    challengeBar.classList.add('hidden');
+    challengeMode = null;
   } else if (gameMode === 'online') {
     player1NameEl.textContent = `${online.myName || 'You'} (X)`;
     player2NameEl.textContent = 'Friend (O)';
     aiDifficultyBar.classList.add('hidden');
+    challengeBar.classList.add('hidden');
+    challengeMode = null;
+  } else if (gameMode === 'challenge') {
+    // Challenges use AI under the hood
+    player1NameEl.textContent = 'You (X)';
+    player2NameEl.textContent = 'AI (O)';
+    aiDifficultyBar.classList.remove('hidden');
+    if (aiDifficultySelect) aiDifficultySelect.value = difficulty = (difficulty === 'easy' ? 'hard' : difficulty);
+    if (challengeMode === 'beat3') {
+      challengeHumanMoves = 0;
+      challengeLabel.textContent = 'Beat the AI in 3 Moves';
+      challengeMeta.textContent = 'Moves left: 3';
+      challengeBar.classList.remove('hidden');
+    } else if (challengeMode === 'streak5') {
+      challengeLabel.textContent = 'Win 5 in a Row';
+      challengeMeta.textContent = `Current streak: ${challengeStreak}/5`;
+      challengeBar.classList.remove('hidden');
+    } else {
+      challengeBar.classList.add('hidden');
+    }
   }
 
   scores = { player1: 0, player2: 0 };
@@ -285,13 +329,20 @@ window.makeMove = (cellIndex) => {
   if (currentPlayer === 'X') playXSound(); else playOSound();
   vibrate(10);
 
+  // Challenge: count human moves
+  if (gameMode === 'challenge' && currentPlayer === 'X' && challengeMode === 'beat3') {
+    challengeHumanMoves += 1;
+    const left = Math.max(0, challengeMovesAllowed - challengeHumanMoves);
+    challengeMeta.textContent = `Moves left: ${left}`;
+  }
+
   if (checkWinner()) { endGame(currentPlayer); if (gameMode === 'online') pushOnlineState(true, currentPlayer); return; }
   if (checkDraw()) { endGame('draw'); if (gameMode === 'online') pushOnlineState(true, 'draw'); return; }
 
   currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   updateGameInfo();
 
-  if (gameMode === 'ai' && currentPlayer === 'O' && gameActive) {
+  if ((gameMode === 'ai' || gameMode === 'challenge') && currentPlayer === 'O' && gameActive) {
     makeAIMove();
   }
 
@@ -380,6 +431,24 @@ function endGame(winner) {
       setTimeout(() => { playWinSound(); playClapSound(); }, 300);
       // Update leaderboard asynchronously
       try { updateLeaderboard(winner); } catch {}
+    } else if (gameMode === 'challenge') {
+      if (challengeMode === 'beat3') {
+        if (winner === 'X' && challengeHumanMoves <= challengeMovesAllowed) {
+          gameInfoEl.textContent = 'Challenge cleared! You won within 3 moves 🎯';
+          confetti.emitBurst(220);
+        } else if (winner === 'O' || (winner === 'draw') || challengeHumanMoves > challengeMovesAllowed) {
+          gameInfoEl.textContent = 'Challenge failed. Try again!';
+        }
+      } else if (challengeMode === 'streak5') {
+        if (winner === 'X') challengeStreak++; else if (winner === 'O') challengeStreak = 0;
+        if (challengeStreak >= 5) {
+          gameInfoEl.textContent = 'Streak achieved! 5 in a row 🏆';
+          confetti.emitBurst(240);
+        } else {
+          gameInfoEl.textContent = `Streak: ${challengeStreak}/5`;
+        }
+        challengeMeta.textContent = `Current streak: ${challengeStreak}/5`;
+      }
     } else {
       gameInfoEl.textContent = `Player ${winner} wins! 🎉`;
       if (winner === 'X') scores.player1++; else scores.player2++;
@@ -725,6 +794,13 @@ function buildShareText(winner = 'draw') {
   let text = 'I just played XO Duel!';
   if (winner === 'draw') text = "It's a draw in XO Duel!";
   else if (winner === 'X' || winner === 'O') text = `${winner} won in XO Duel!`;
+  if (gameMode === 'challenge') {
+    if (challengeMode === 'beat3') {
+      text = winner === 'X' && challengeHumanMoves <= 3 ? 'I beat the AI in 3 moves in XO Duel! 🎯' : 'Took on the 3-move challenge in XO Duel!';
+    } else if (challengeMode === 'streak5') {
+      text = challengeStreak >= 5 ? 'I hit a 5-win streak in XO Duel! 🏆' : `My streak is ${challengeStreak}/5 in XO Duel!`;
+    }
+  }
   return { text, link };
 }
 

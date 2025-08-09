@@ -53,6 +53,7 @@
                 <button class="mode-btn" onclick="selectMode('ai')">🤖 Play vs AI</button>
                 <button class="mode-btn" onclick="selectMode('human')">👥 Play vs Human</button>
                 <button class="mode-btn" onclick="selectMode('online')">🌐 Play Online</button>
+                <button class="mode-btn" onclick="selectMode('challenge')">🏁 Challenges</button>
             </div>
 
             <div class="difficulty-selection" id="difficultySelection">
@@ -62,6 +63,14 @@
                     <button class="difficulty-btn" onclick="setDifficulty('medium')" data-difficulty="medium">😐 Medium (75% - adults)</button>
                     <button class="difficulty-btn" onclick="setDifficulty('hard')" data-difficulty="hard">😤 Hard (90% - adults hard)</button>
                     <button class="difficulty-btn" onclick="setDifficulty('god')" data-difficulty="god">💀 God Mode (120% - unbeatable)</button>
+                </div>
+            </div>
+
+            <div class="challenge-selection" id="challengeSelection" style="display:none;">
+                <h3>Choose a Challenge:</h3>
+                <div class="challenge-cards">
+                    <button class="btn" id="challengeBeat3Btn">Beat the AI in 3 Moves</button>
+                    <button class="btn" id="challengeStreak5Btn">Win 5 in a Row</button>
                 </div>
             </div>
 
@@ -144,6 +153,10 @@
                     <option value="hard">Hard (90%)</option>
                     <option value="god">God Mode (120%)</option>
                 </select>
+            </div>
+            <div class="challenge-bar hidden" id="challengeBar">
+                <span class="muted" id="challengeLabel"></span>
+                <span class="muted" id="challengeMeta"></span>
             </div>
 
             <div class="game-info" id="gameInfo" aria-live="polite">Player 1's turn</div>
