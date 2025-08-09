@@ -500,7 +500,15 @@ function endGame(winner) {
   updateScores();
   document.querySelectorAll('.cell').forEach(cell => cell.classList.add('disabled'));
   // Prepare share context and show bar
-  lastShareCtx = { winner, mode: gameMode, challengeMode, aiWinStreak, humanMoves: humanMoveCountThisGame };
+  lastShareCtx = { 
+    winner, 
+    mode: gameMode, 
+    challengeMode, 
+    aiWinStreak, 
+    humanMoves: humanMoveCountThisGame,
+    challengeStreak,
+    challengeMoves: challengeHumanMoves
+  };
   showShareBar(winner);
 
   // Do not auto-reset in any mode; wait for New Game button
@@ -851,8 +859,10 @@ function buildShareText(ctx) {
   const winner = (ctx && ctx.winner) || 'draw';
   const mode = (ctx && ctx.mode) || gameMode;
   const cMode = (ctx && ctx.challengeMode) || challengeMode;
-  const streak = (ctx && typeof ctx.aiWinStreak === 'number') ? ctx.aiWinStreak : aiWinStreak;
+  const aiStreak = (ctx && typeof ctx.aiWinStreak === 'number') ? ctx.aiWinStreak : aiWinStreak;
   const moves = (ctx && typeof ctx.humanMoves === 'number') ? ctx.humanMoves : humanMoveCountThisGame;
+  const cStreak = (ctx && typeof ctx.challengeStreak === 'number') ? ctx.challengeStreak : challengeStreak;
+  const cMoves = (ctx && typeof ctx.challengeMoves === 'number') ? ctx.challengeMoves : challengeHumanMoves;
   let text = 'I just played XO Duel!';
   // Base outcome
   if (winner === 'draw') text = "It's a draw in XO Duel!";
@@ -861,14 +871,15 @@ function buildShareText(ctx) {
   // Challenge context
   if (mode === 'challenge') {
     if (cMode === 'beat3') {
-      text = winner === 'X' && moves <= 3 ? 'I beat the AI in 3 moves in XO Duel! 🎯' : 'Took on the 3-move challenge in XO Duel!';
+      const used = cMoves || moves;
+      text = winner === 'X' && used <= 3 ? 'I beat the AI in 3 moves in XO Duel! 🎯' : 'Took on the 3-move challenge in XO Duel!';
     } else if (cMode === 'streak5') {
-      text = (winner === 'X' && streak >= 5) ? 'I hit a 5-win streak in XO Duel! 🏆' : `My streak is ${streak}/5 in XO Duel!`;
+      text = (cStreak >= 5) ? 'I hit a 5-win streak in XO Duel! 🏆' : `My streak is ${cStreak}/5 in XO Duel!`;
     }
   }
   // Normal AI extras
   if (mode === 'ai') {
-    if (winner === 'X' && streak >= 2) text = `I'm on a ${streak}-win streak vs AI in XO Duel! 🏆`;
+    if (winner === 'X' && aiStreak >= 2) text = `I'm on a ${aiStreak}-win streak vs AI in XO Duel! 🏆`;
     if (winner === 'X' && moves <= 3) text += (text.includes('🎯') ? '' : ` Also beat the AI in ${moves} moves 🎯`);
   }
   return { text, link };
