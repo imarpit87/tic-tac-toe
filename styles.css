@@ -177,6 +177,13 @@ h1 { font-size: 2.2rem; margin-bottom: 16px; font-weight: 700; }
 .rating-stars .star.selected { transform: scale(1.1); }
 .rating-actions { display: flex; gap: 10px; justify-content: center; }
 
+.ad-slot { background: rgba(0,0,0,0.04); border: 1px dashed rgba(0,0,0,0.2); border-radius: 8px; min-height: 60px; display: flex; align-items: center; justify-content: center; color: #666; font-size: 12px; }
+.ad-below { margin: 10px auto; width: 100%; max-width: 360px; }
+.ad-challenge { min-width: 220px; min-height: 60px; }
+.ad-between { margin: 10px auto; width: 100%; max-width: 360px; }
+.ad-right { display: none; position: fixed; right: 10px; top: 120px; width: 300px; min-height: 250px; }
+@media (min-width: 1024px) { .ad-right { display: flex; } }
+
 @media (max-width: 480px) {
   .container { padding: 18px; margin: 10px; }
   .app-title { font-size: 1.8rem; }

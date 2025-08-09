@@ -77,6 +77,15 @@ const ratingStars = document.getElementById('ratingStars');
 const ratingFeedback = document.getElementById('ratingFeedback');
 const ratingNote = document.getElementById('ratingNote');
 let ratingSelected = 0;
+// Ads
+const adBelowBoard = document.getElementById('adBelowBoard');
+const adRightRail = document.getElementById('adRightRail');
+const adChallengePanel = document.getElementById('adChallengePanel');
+const adBetweenRounds = document.getElementById('adBetweenRounds');
+const removeAdsBtn = document.getElementById('removeAdsBtn');
+const ADS_KEY = 'ttt_ads_pref_v1';
+function getAdsPref() { try { return JSON.parse(localStorage.getItem(ADS_KEY)) || {}; } catch { return {}; } }
+function setAdsPref(p) { const c=getAdsPref(); localStorage.setItem(ADS_KEY, JSON.stringify({ ...c, ...p })); }
 
 // Online elements
 const onlineSetupEl = document.getElementById('onlineSetup');
@@ -204,6 +213,10 @@ ratingStars?.addEventListener('click', (e) => {
   ratingSelected = Number(btn.dataset.star) || 0;
   [...ratingStars.querySelectorAll('.star')].forEach(s => s.classList.toggle('selected', Number(s.dataset.star) <= ratingSelected));
   ratingNote.textContent = ratingSelected >= 4 ? 'Thank you! Would you recommend XO Duel to a friend?' : 'Sorry it wasn\'t great. What should we improve?';
+});
+removeAdsBtn?.addEventListener('click', () => {
+  setAdsPref({ hide: true });
+  applyAdsVisibility();
 });
 
 // Keyboard controls
@@ -532,6 +545,8 @@ function endGame(winner) {
   showShareBar(winner);
   // Prompt for rating at positive moments
   maybeAskForRating(winner);
+  // Show between-round ad occasionally
+  maybeShowBetweenAd();
 
   // Do not auto-reset in any mode; wait for New Game button
 }
@@ -832,6 +847,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     else btn.classList.remove('active');
   });
   initOnline();
+  // Ads
+  applyAdsVisibility();
+  renderAds();
   // Fetch and show version; trigger SW update if changed
   try {
     const res = await fetch('./version.json', { cache: 'no-store' });
@@ -1014,4 +1032,26 @@ async function submitRating() {
     }
   } catch {}
   closeRatingModal('submit');
+}
+
+// Ads helpers
+function applyAdsVisibility() {
+  const pref = getAdsPref();
+  const hide = !!pref.hide;
+  [adBelowBoard, adRightRail, adChallengePanel, adBetweenRounds].forEach(el => { if (el) el.style.display = hide ? 'none' : ''; });
+}
+function renderAds() {
+  // Placeholder content or ad network tags can be inserted here
+  if (adBelowBoard && !adBelowBoard.innerHTML) adBelowBoard.textContent = 'Ad';
+  if (adRightRail && !adRightRail.innerHTML) adRightRail.textContent = 'Ad';
+  if (adChallengePanel && !adChallengePanel.innerHTML) adChallengePanel.textContent = 'Ad';
+}
+function maybeShowBetweenAd() {
+  const pref = getAdsPref();
+  if (pref.hide) return;
+  const now = Date.now();
+  const last = pref.lastBetween || 0;
+  if (now - last < 2*60*1000) return; // min 2 minutes between
+  if (adBetweenRounds) adBetweenRounds.classList.remove('hidden');
+  setAdsPref({ lastBetween: now });
 }

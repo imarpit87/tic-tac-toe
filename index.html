@@ -17,6 +17,9 @@
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
+    <!-- Google AdSense (replace client id when available) -->
+    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+    
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-SJ5LDFKE4E"></script>
     <script>
@@ -45,6 +48,7 @@
                 </select>
                 <button class="btn tertiary" id="leaderboardBtn" title="View leaderboard">Leaderboard</button>
                 <button class="btn tertiary" id="rateBtn" title="Rate the game">Rate</button>
+                <button class="btn tertiary" id="removeAdsBtn" title="Remove ads (hide)">Remove Ads</button>
             </div>
         </header>
         
@@ -70,9 +74,13 @@
             <div class="challenge-selection" id="challengeSelection" style="display:none;">
                 <h3>Choose a Challenge:</h3>
                 <div class="challenge-cards">
+                    <input id="challengeNameInput" class="text-input" placeholder="Your name (required)" aria-label="Your name for challenges">
                     <button class="btn" id="challengeBeat3Btn">Beat the AI in 3 Moves</button>
                     <button class="btn" id="challengeStreak5Btn">Win 5 in a Row</button>
+                    <button class="btn tertiary" id="challengeLeaderboardBtn">Challenges Leaderboard</button>
+                    <div class="ad-slot ad-challenge" id="adChallengePanel" aria-label="advertisement"></div>
                 </div>
+                <div class="muted" id="challengeStatus"></div>
             </div>
 
             <div class="rounds-selection" id="roundsSelection" style="display:none;">
@@ -166,12 +174,6 @@
 
             <div class="game-info" id="gameInfo" aria-live="polite">Player 1's turn</div>
 
-            <div class="share-bar hidden" id="shareBar" aria-label="Share your result">
-                <button class="btn" id="shareNativeBtn">Share</button>
-                <button class="btn tertiary" id="shareCopyBtn">Copy Link</button>
-                <a class="btn tertiary" id="shareTwitterBtn" target="_blank" rel="noopener">Tweet</a>
-            </div>
-
             <div class="board" id="board" role="grid" aria-label="Tic Tac Toe board">
                 <button class="cell" onclick="makeMove(0)" data-cell="0" role="gridcell" tabindex="0" aria-label="Row 1, Column 1, empty"></button>
                 <button class="cell" onclick="makeMove(1)" data-cell="1" role="gridcell" tabindex="0" aria-label="Row 1, Column 2, empty"></button>
@@ -184,13 +186,26 @@
                 <button class="cell" onclick="makeMove(8)" data-cell="8" role="gridcell" tabindex="0" aria-label="Row 3, Column 3, empty"></button>
             </div>
 
+            <div class="ad-slot ad-below" id="adBelowBoard" aria-label="advertisement"></div>
+
+            <div class="share-bar hidden" id="shareBar" aria-label="Share your result">
+                <button class="btn" id="shareNativeBtn">Share</button>
+                <button class="btn tertiary" id="shareCopyBtn">Copy Link</button>
+                <a class="btn tertiary" id="shareTwitterBtn" target="_blank" rel="noopener">Tweet</a>
+            </div>
+
             <div class="controls">
                 <button class="btn" onclick="resetGame()">New Game</button>
                 <button class="btn secondary" onclick="backToMenu()">Back to Menu</button>
                 <button class="btn tertiary" id="undoBtn" title="Undo move (local modes only)">Undo</button>
             </div>
+
+            <div class="ad-slot ad-between hidden" id="adBetweenRounds" aria-label="advertisement"></div>
         </div>
     </div>
+
+    <!-- Right rail ad (desktop) -->
+    <aside class="ad-slot ad-right" id="adRightRail" aria-label="advertisement"></aside>
 
     <!-- Leaderboard Modal -->
     <div class="modal hidden" id="leaderboardModal" role="dialog" aria-modal="true" aria-labelledby="leaderboardTitle">
