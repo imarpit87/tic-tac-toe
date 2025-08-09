@@ -12,6 +12,8 @@ let isAIThinking = false;
 let bestOf = 1;
 let moveHistory = [];
 let online = { roomId: null, isHost: false, mySide: null, myName: '', myAvatar: '🧑‍🚀', suppressNextSound: false, clientId: null };
+online.lastResetAt = 0;
+online.prevJoined = { X: false, O: false };
 
 // DOM
 const boardEl = document.getElementById('board');
@@ -227,10 +229,7 @@ window.makeMove = (cellIndex) => {
   cell.setAttribute('aria-label', `Row ${Math.floor(cellIndex/3)+1}, Column ${cellIndex%3+1}, ${currentPlayer}`);
   moveHistory.push({ index: cellIndex, player: currentPlayer });
 
-  if (!online.suppressNextSound) {
-    if (currentPlayer === 'X') playXSound(); else playOSound();
-  }
-  online.suppressNextSound = false;
+  if (currentPlayer === 'X') playXSound(); else playOSound();
   vibrate(10);
 
   if (checkWinner()) { endGame(currentPlayer); if (gameMode === 'online') pushOnlineState(true); return; }
@@ -345,7 +344,14 @@ function updateScores() {
   score2El.textContent = scores.player2;
 }
 
-window.resetGame = () => { resetBoard(); playClickSound(); };
+window.resetGame = () => {
+  if (gameMode === 'online' && online.roomId) {
+    requestOnlineNewGame();
+  } else {
+    resetBoard();
+  }
+  playClickSound();
+};
 window.backToMenu = () => {
   gameSetupEl.classList.remove('hidden');
   gamePlayEl.classList.remove('active');
@@ -431,6 +437,15 @@ function listenRoom(code) {
     // Players & names/avatars
     const pX = data.players?.X || { name: 'X', avatar: '❌', joined: false };
     const pO = data.players?.O || { name: 'O', avatar: '⭕', joined: false };
+    // Join/leave messages
+    if (pX.joined !== online.prevJoined.X) {
+      roomStatusEl.textContent = pX.joined ? `${pX.name || 'Player X'} joined as X` : `Player X left`;
+      online.prevJoined.X = pX.joined;
+    }
+    if (pO.joined !== online.prevJoined.O) {
+      roomStatusEl.textContent = pO.joined ? `${pO.name || 'Player O'} joined as O` : `Player O left`;
+      online.prevJoined.O = pO.joined;
+    }
     player1NameEl.textContent = `${pX.name || 'Player X'} (X)`;
     player2NameEl.textContent = `${pO.name || 'Player O'} (O)`;
     document.getElementById('player1Avatar').textContent = pX.avatar || '❌';
@@ -448,8 +463,16 @@ function listenRoom(code) {
       }
       if (data.status !== 'playing') {
         // Set start state atomically
-        window.database.ref(`rooms/${code}`).update({ status: 'playing', currentPlayer: 'X', board: Array(9).fill(''), updatedAt: Date.now() });
+        const resetAt = Date.now();
+        window.database.ref(`rooms/${code}`).update({ status: 'playing', currentPlayer: 'X', board: Array(9).fill(''), resetAt, updatedAt: Date.now() });
+        online.lastResetAt = resetAt;
       }
+    }
+
+    // React to server-initiated reset
+    if (data.resetAt && data.resetAt !== online.lastResetAt) {
+      online.lastResetAt = data.resetAt;
+      resetBoard();
     }
 
     // Disable input if not my turn
@@ -468,17 +491,26 @@ function pushOnlineState(end = false) {
     currentPlayer,
     scores,
     updatedAt: Date.now(),
-    status: end ? 'ended' : 'playing'
+    status: end ? 'ended' : 'playing',
+    lastMoveBy: online.clientId
+  });
+}
+
+function requestOnlineNewGame() {
+  if (!online.roomId) return;
+  const resetAt = Date.now();
+  window.database.ref(`rooms/${online.roomId}`).update({
+    board: Array(9).fill(''),
+    currentPlayer: 'X',
+    status: 'playing',
+    resetAt,
+    updatedAt: Date.now()
   });
 }
 
 function renderBoard() {
   document.querySelectorAll('.cell').forEach((cell, i) => {
     const val = gameBoard[i];
-    // Avoid double playing sound on remote updates
-    if (cell.textContent !== val && gameMode === 'online') {
-      online.suppressNextSound = true;
-    }
     cell.textContent = val;
     cell.classList.toggle('x', val === 'X');
     cell.classList.toggle('o', val === 'O');
