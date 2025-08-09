@@ -4,793 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe - Apple Style</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #333;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 30px;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .game-modes {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .mode-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .mode-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .mode-btn.active {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-        }
-
-        .difficulty-selection {
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .difficulty-selection.show {
-            display: block;
-        }
-
-        .difficulty-btn {
-            background: #f0f0f0;
-            border: 2px solid #ddd;
-            padding: 10px 20px;
-            margin: 5px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .difficulty-btn:hover {
-            background: #e0e0e0;
-            transform: translateY(-1px);
-        }
-
-        .difficulty-btn.active {
-            background: #4CAF50;
-            color: white;
-            border-color: #4CAF50;
-        }
-
-        .scoreboard {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 12px;
-            font-weight: 600;
-        }
-
-        .score {
-            font-size: 18px;
-        }
-
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .cell {
-            aspect-ratio: 1;
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 12px;
-            font-size: 3em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cell:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .cell.x {
-            color: #e74c3c;
-            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .cell.o {
-            color: #3498db;
-            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .cell.winner {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            animation: winner 0.6s ease-in-out;
-        }
-
-        .cell.disabled {
-            pointer-events: none;
-            opacity: 0.6;
-        }
-
-        @keyframes popIn {
-            0% {
-                transform: scale(0) rotate(180deg);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.3) rotate(90deg);
-            }
-            100% {
-                transform: scale(1) rotate(0deg);
-                opacity: 1;
-            }
-        }
-
-        @keyframes winner {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
-
-        .game-info {
-            margin: 20px 0;
-            font-size: 18px;
-            font-weight: 500;
-            min-height: 25px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn.secondary {
-            background: #6c757d;
-        }
-
-        .btn.secondary:hover {
-            background: #5a6268;
-        }
-
-        .confetti {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            background: #f39c12;
-            top: -10px;
-            animation: confetti-fall 3s linear forwards;
-            z-index: 1000;
-        }
-
-        @keyframes confetti-fall {
-            to {
-                transform: translateY(100vh) rotate(360deg);
-            }
-        }
-
-        .ai-thinking {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        .pulse {
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.05);
-                opacity: 0.7;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .game-setup {
-            display: block;
-        }
-
-        .game-play {
-            display: none;
-        }
-
-        .game-play.active {
-            display: block;
-        }
-
-        .game-setup.hidden {
-            display: none;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
-            }
-
-            h1 {
-                font-size: 2em;
-            }
-
-            .cell {
-                font-size: 2.5em;
-            }
-
-            .game-modes {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .mode-btn {
-                width: 200px;
-            }
-        }
-    </style>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <link rel="stylesheet" href="./styles.css">
+    <!-- Firebase SDKs for optional online mode (only used if firebase-config.js is present) -->
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
     <div class="container">
-        <h1>🎮 Tic Tac Toe</h1>
+        <header class="app-header">
+            <h1 class="app-title" aria-label="Tic Tac Toe">🎮 Tic Tac Toe</h1>
+            <div class="header-controls">
+                <label class="switch" title="Toggle sounds">
+                    <input type="checkbox" id="soundToggle" checked>
+                    <span>🔊</span>
+                </label>
+                <select id="themeSelect" class="theme-select" aria-label="Theme select">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="neon">Neon</option>
+                    <option value="kids">Kids</option>
+                </select>
+            </div>
+        </header>
         
         <!-- Game Setup -->
         <div class="game-setup" id="gameSetup">
             <div class="game-modes">
-                <button class="mode-btn" onclick="selectMode('ai')">
-                    🤖 Play vs AI
-                </button>
-                <button class="mode-btn" onclick="selectMode('human')">
-                    👥 Play vs Human
-                </button>
+                <button class="mode-btn" onclick="selectMode('ai')">🤖 Play vs AI</button>
+                <button class="mode-btn" onclick="selectMode('human')">👥 Play vs Human</button>
+                <button class="mode-btn" onclick="selectMode('online')">🌐 Play Online</button>
             </div>
 
             <div class="difficulty-selection" id="difficultySelection">
                 <h3>Choose Difficulty:</h3>
                 <div>
-                    <button class="difficulty-btn active" onclick="setDifficulty('easy')" data-difficulty="easy">
-                        😊 Easy (50%)
-                    </button>
-                    <button class="difficulty-btn" onclick="setDifficulty('medium')" data-difficulty="medium">
-                        😐 Medium (80%)
-                    </button>
-                    <button class="difficulty-btn" onclick="setDifficulty('hard')" data-difficulty="hard">
-                        😤 Hard (99%)
-                    </button>
+                    <button class="difficulty-btn active" onclick="setDifficulty('easy')" data-difficulty="easy">😊 Easy</button>
+                    <button class="difficulty-btn" onclick="setDifficulty('medium')" data-difficulty="medium">😐 Medium</button>
+                    <button class="difficulty-btn" onclick="setDifficulty('hard')" data-difficulty="hard">😤 Hard</button>
                 </div>
             </div>
 
-            <button class="btn" onclick="startGame()" id="startBtn" style="display: none;">
-                Start Game
-            </button>
+            <div class="rounds-selection" id="roundsSelection" style="display:none;">
+                <h3>Rounds:</h3>
+                <select id="roundsSelect" class="rounds-select" aria-label="Select number of rounds">
+                    <option value="1" selected>Single</option>
+                    <option value="3">Best of 3</option>
+                    <option value="5">Best of 5</option>
+                </select>
+            </div>
+
+            <div class="online-setup" id="onlineSetup" style="display:none;">
+                <h3>Online Room</h3>
+                <div class="online-actions">
+                    <input id="playerNameInput" class="text-input" placeholder="Your name" aria-label="Your name">
+                    <button class="btn" id="createRoomBtn">Create Room</button>
+                </div>
+                <div class="online-actions">
+                    <input id="roomCodeInput" class="text-input" placeholder="Room code" aria-label="Room code">
+                    <button class="btn" id="joinRoomBtn">Join Room</button>
+                </div>
+                <div class="room-status" id="roomStatus" aria-live="polite"></div>
+            </div>
+
+            <button class="btn" onclick="startGame()" id="startBtn" style="display: none;">Start Game</button>
         </div>
 
         <!-- Game Play -->
         <div class="game-play" id="gamePlay">
             <div class="scoreboard">
-                <div class="score">
-                    <span id="player1Name">Player 1</span>: <span id="score1">0</span>
-                </div>
-                <div class="score">
-                    <span id="player2Name">Player 2</span>: <span id="score2">0</span>
-                </div>
+                <div class="score"><span id="player1Avatar" class="avatar">🧑</span> <span id="player1Name">Player 1</span>: <span id="score1">0</span></div>
+                <div class="turn-indicator" id="turnIndicator" aria-live="polite"></div>
+                <div class="score"><span id="player2Avatar" class="avatar">🤖</span> <span id="player2Name">Player 2</span>: <span id="score2">0</span></div>
             </div>
 
-            <div class="game-info" id="gameInfo">Player 1's turn</div>
+            <div class="game-info" id="gameInfo" aria-live="polite">Player 1's turn</div>
 
-            <div class="board" id="board">
-                <button class="cell" onclick="makeMove(0)" data-cell="0"></button>
-                <button class="cell" onclick="makeMove(1)" data-cell="1"></button>
-                <button class="cell" onclick="makeMove(2)" data-cell="2"></button>
-                <button class="cell" onclick="makeMove(3)" data-cell="3"></button>
-                <button class="cell" onclick="makeMove(4)" data-cell="4"></button>
-                <button class="cell" onclick="makeMove(5)" data-cell="5"></button>
-                <button class="cell" onclick="makeMove(6)" data-cell="6"></button>
-                <button class="cell" onclick="makeMove(7)" data-cell="7"></button>
-                <button class="cell" onclick="makeMove(8)" data-cell="8"></button>
+            <div class="board" id="board" role="grid" aria-label="Tic Tac Toe board">
+                <button class="cell" onclick="makeMove(0)" data-cell="0" role="gridcell" tabindex="0" aria-label="Row 1, Column 1, empty"></button>
+                <button class="cell" onclick="makeMove(1)" data-cell="1" role="gridcell" tabindex="0" aria-label="Row 1, Column 2, empty"></button>
+                <button class="cell" onclick="makeMove(2)" data-cell="2" role="gridcell" tabindex="0" aria-label="Row 1, Column 3, empty"></button>
+                <button class="cell" onclick="makeMove(3)" data-cell="3" role="gridcell" tabindex="0" aria-label="Row 2, Column 1, empty"></button>
+                <button class="cell" onclick="makeMove(4)" data-cell="4" role="gridcell" tabindex="0" aria-label="Row 2, Column 2, empty"></button>
+                <button class="cell" onclick="makeMove(5)" data-cell="5" role="gridcell" tabindex="0" aria-label="Row 2, Column 3, empty"></button>
+                <button class="cell" onclick="makeMove(6)" data-cell="6" role="gridcell" tabindex="0" aria-label="Row 3, Column 1, empty"></button>
+                <button class="cell" onclick="makeMove(7)" data-cell="7" role="gridcell" tabindex="0" aria-label="Row 3, Column 2, empty"></button>
+                <button class="cell" onclick="makeMove(8)" data-cell="8" role="gridcell" tabindex="0" aria-label="Row 3, Column 3, empty"></button>
             </div>
 
             <div class="controls">
                 <button class="btn" onclick="resetGame()">New Game</button>
                 <button class="btn secondary" onclick="backToMenu()">Back to Menu</button>
+                <button class="btn tertiary" id="undoBtn" title="Undo move (local modes only)">Undo</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Game State
-        let currentPlayer = 'X';
-        let gameBoard = ['', '', '', '', '', '', '', '', ''];
-        let gameActive = true;
-        let gameMode = '';
-        let difficulty = 'easy';
-        let scores = { player1: 0, player2: 0 };
-        let isAIThinking = false;
-
-        // Sound creation using Web Audio API
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        function createSound(frequency, duration, type = 'sine', volume = 0.3) {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.value = frequency;
-            oscillator.type = type;
-            
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration);
-        }
-
-        function playClickSound() {
-            createSound(800, 0.1, 'sine', 0.2);
-        }
-
-        function playWinSound() {
-            // Play a victory chord
-            createSound(523, 0.3, 'sine', 0.3); // C
-            setTimeout(() => createSound(659, 0.3, 'sine', 0.3), 100); // E
-            setTimeout(() => createSound(784, 0.5, 'sine', 0.3), 200); // G
-        }
-
-        function playClapSound() {
-            // Simulate clap with noise
-            const bufferSize = audioContext.sampleRate * 0.1;
-            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-            const data = buffer.getChannelData(0);
-            
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * 0.3 * Math.exp(-i / (bufferSize * 0.1));
-            }
-            
-            const source = audioContext.createBufferSource();
-            source.buffer = buffer;
-            source.connect(audioContext.destination);
-            source.start();
-        }
-
-        // Game Mode Selection
-        function selectMode(mode) {
-            gameMode = mode;
-            
-            // Update button states
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Show/hide difficulty selection
-            const difficultyDiv = document.getElementById('difficultySelection');
-            const startBtn = document.getElementById('startBtn');
-            
-            if (mode === 'ai') {
-                difficultyDiv.classList.add('show');
-                startBtn.style.display = 'inline-block';
-            } else {
-                difficultyDiv.classList.remove('show');
-                startBtn.style.display = 'inline-block';
-            }
-            
-            playClickSound();
-        }
-
-        // Difficulty Selection
-        function setDifficulty(level) {
-            difficulty = level;
-            
-            document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            playClickSound();
-        }
-
-        // Start Game
-        function startGame() {
-            document.getElementById('gameSetup').classList.add('hidden');
-            document.getElementById('gamePlay').classList.add('active');
-            
-            // Update player names
-            if (gameMode === 'ai') {
-                document.getElementById('player1Name').textContent = 'You (X)';
-                document.getElementById('player2Name').textContent = 'AI (O)';
-            } else {
-                document.getElementById('player1Name').textContent = 'Player 1 (X)';
-                document.getElementById('player2Name').textContent = 'Player 2 (O)';
-            }
-            
-            resetBoard();
-            playClickSound();
-        }
-
-        // Reset Board
-        function resetBoard() {
-            gameBoard = ['', '', '', '', '', '', '', '', ''];
-            currentPlayer = 'X';
-            gameActive = true;
-            isAIThinking = false;
-            
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.textContent = '';
-                cell.className = 'cell'; // This removes all classes and sets only 'cell'
-                cell.classList.remove('winner', 'disabled', 'x', 'o'); // Extra safety cleanup
-            });
-            
-            updateGameInfo();
-        }
-
-        // Update Game Info
-        function updateGameInfo() {
-            const gameInfo = document.getElementById('gameInfo');
-            
-            if (!gameActive) return;
-            
-            if (gameMode === 'ai') {
-                if (currentPlayer === 'X') {
-                    gameInfo.textContent = "Your turn";
-                } else {
-                    gameInfo.textContent = "AI is thinking...";
-                }
-            } else {
-                gameInfo.textContent = `Player ${currentPlayer}'s turn`;
-            }
-        }
-
-        // Make Move
-        function makeMove(cellIndex) {
-            if (!gameActive || gameBoard[cellIndex] !== '' || isAIThinking) return;
-            
-            // Resume audio context on user interaction
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            
-            gameBoard[cellIndex] = currentPlayer;
-            const cell = document.querySelector(`[data-cell="${cellIndex}"]`);
-            cell.textContent = currentPlayer;
-            cell.classList.add(currentPlayer.toLowerCase());
-            
-            playClickSound();
-            
-            if (checkWinner()) {
-                endGame(currentPlayer);
-                return;
-            }
-            
-            if (checkDraw()) {
-                endGame('draw');
-                return;
-            }
-            
-            // Switch players
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            updateGameInfo();
-            
-            // AI move
-            if (gameMode === 'ai' && currentPlayer === 'O' && gameActive) {
-                makeAIMove();
-            }
-        }
-
-        // AI Move
-        function makeAIMove() {
-            isAIThinking = true;
-            document.getElementById('board').classList.add('ai-thinking');
-            document.getElementById('gameInfo').classList.add('pulse');
-            
-            // Add delay to make AI response visible
-            setTimeout(() => {
-                const move = getBestMove();
-                if (move !== -1) {
-                    gameBoard[move] = 'O';
-                    const cell = document.querySelector(`[data-cell="${move}"]`);
-                    cell.textContent = 'O';
-                    cell.classList.add('o');
-                    
-                    createSound(600, 0.15, 'square', 0.2); // AI move sound
-                    
-                    if (checkWinner()) {
-                        endGame('O');
-                    } else if (checkDraw()) {
-                        endGame('draw');
-                    } else {
-                        currentPlayer = 'X';
-                        updateGameInfo();
-                    }
-                }
-                
-                isAIThinking = false;
-                document.getElementById('board').classList.remove('ai-thinking');
-                document.getElementById('gameInfo').classList.remove('pulse');
-            }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
-        }
-
-        // Get Best Move for AI
-        function getBestMove() {
-            const availableMoves = gameBoard.map((cell, index) => cell === '' ? index : null).filter(val => val !== null);
-            
-            if (availableMoves.length === 0) return -1;
-            
-            let difficultyChance;
-            switch (difficulty) {
-                case 'easy': difficultyChance = 0.5; break;
-                case 'medium': difficultyChance = 0.8; break;
-                case 'hard': difficultyChance = 0.99; break;
-                default: difficultyChance = 0.8;
-            }
-            
-            // Random chance to play optimally
-            if (Math.random() > difficultyChance) {
-                return availableMoves[Math.floor(Math.random() * availableMoves.length)];
-            }
-            
-            // Try to win
-            for (let move of availableMoves) {
-                gameBoard[move] = 'O';
-                if (checkWinningPattern()) {
-                    gameBoard[move] = '';
-                    return move;
-                }
-                gameBoard[move] = '';
-            }
-            
-            // Try to block player from winning
-            for (let move of availableMoves) {
-                gameBoard[move] = 'X';
-                if (checkWinningPattern()) {
-                    gameBoard[move] = '';
-                    return move;
-                }
-                gameBoard[move] = '';
-            }
-            
-            // Take center if available
-            if (gameBoard[4] === '') return 4;
-            
-            // Take corners
-            const corners = [0, 2, 6, 8];
-            const availableCorners = corners.filter(corner => gameBoard[corner] === '');
-            if (availableCorners.length > 0) {
-                return availableCorners[Math.floor(Math.random() * availableCorners.length)];
-            }
-            
-            // Take any available move
-            return availableMoves[Math.floor(Math.random() * availableMoves.length)];
-        }
-
-        // Check for winning pattern (for AI logic - no visual effects)
-        function checkWinningPattern() {
-            const winPatterns = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-                [0, 4, 8], [2, 4, 6] // Diagonals
-            ];
-            
-            for (let pattern of winPatterns) {
-                const [a, b, c] = pattern;
-                // Check if all three positions are filled AND all have the same value
-                if (gameBoard[a] !== '' && 
-                    gameBoard[b] !== '' && 
-                    gameBoard[c] !== '' && 
-                    gameBoard[a] === gameBoard[b] && 
-                    gameBoard[a] === gameBoard[c]) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        // Check Winner (with visual effects for actual game)
-        function checkWinner() {
-            const winPatterns = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-                [0, 4, 8], [2, 4, 6] // Diagonals
-            ];
-            
-            // First, remove any existing winner highlights
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.classList.remove('winner');
-            });
-            
-            for (let pattern of winPatterns) {
-                const [a, b, c] = pattern;
-                // Check if all three positions are filled AND all have the same value
-                if (gameBoard[a] !== '' && 
-                    gameBoard[b] !== '' && 
-                    gameBoard[c] !== '' && 
-                    gameBoard[a] === gameBoard[b] && 
-                    gameBoard[a] === gameBoard[c]) {
-                    // Highlight winning cells
-                    pattern.forEach(index => {
-                        document.querySelector(`[data-cell="${index}"]`).classList.add('winner');
-                    });
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        // Check Draw
-        function checkDraw() {
-            return gameBoard.every(cell => cell !== '');
-        }
-
-        // End Game
-        function endGame(winner) {
-            gameActive = false;
-            const gameInfo = document.getElementById('gameInfo');
-            
-            if (winner === 'draw') {
-                gameInfo.textContent = "It's a draw! 🤝";
-            } else {
-                if (gameMode === 'ai') {
-                    if (winner === 'X') {
-                        gameInfo.textContent = "You win! 🎉";
-                        scores.player1++;
-                        showConfetti();
-                        setTimeout(() => {
-                            playWinSound();
-                            playClapSound();
-                        }, 500);
-                    } else {
-                        gameInfo.textContent = "AI wins! 🤖";
-                        scores.player2++;
-                    }
-                } else {
-                    gameInfo.textContent = `Player ${winner} wins! 🎉`;
-                    if (winner === 'X') {
-                        scores.player1++;
-                    } else {
-                        scores.player2++;
-                    }
-                    showConfetti();
-                    setTimeout(() => {
-                        playWinSound();
-                        playClapSound();
-                    }, 500);
-                }
-            }
-            
-            updateScores();
-            
-            // Disable all cells
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.classList.add('disabled');
-            });
-        }
-
-        // Update Scores
-        function updateScores() {
-            document.getElementById('score1').textContent = scores.player1;
-            document.getElementById('score2').textContent = scores.player2;
-        }
-
-        // Show Confetti
-        function showConfetti() {
-            const colors = ['#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71', '#f1c40f'];
-            
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.classList.add('confetti');
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
-                    document.body.appendChild(confetti);
-                    
-                    setTimeout(() => {
-                        confetti.remove();
-                    }, 4000);
-                }, i * 50);
-            }
-        }
-
-        // Reset Game
-        function resetGame() {
-            resetBoard();
-            playClickSound();
-        }
-
-        // Back to Menu
-        function backToMenu() {
-            document.getElementById('gameSetup').classList.remove('hidden');
-            document.getElementById('gamePlay').classList.remove('active');
-            scores = { player1: 0, player2: 0 };
-            updateScores();
-            playClickSound();
-        }
-
-        // Initialize game
-        document.addEventListener('DOMContentLoaded', function() {
-            updateScores();
-        });
-    </script>
+    <script type="module" src="./app.js"></script>
+    <script defer src="./firebase-config.js"></script>
 </body>
 </html>
