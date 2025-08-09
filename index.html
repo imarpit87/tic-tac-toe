@@ -6,7 +6,7 @@
     <title>Tic Tac Toe - Apple Style</title>
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#667eea">
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css?v=2025-08-09-01">
     <!-- Firebase SDKs for optional online mode (only used if firebase-config.js is present) -->
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -17,6 +17,7 @@
         <header class="app-header">
             <h1 class="app-title" aria-label="Tic Tac Toe">🎮 Tic Tac Toe</h1>
             <div class="header-controls">
+                <span id="appVersion" title="App version" style="font-size:12px;color:#888;margin-right:6px;"></span>
                 <label class="switch" title="Toggle sounds">
                     <input type="checkbox" id="soundToggle" checked>
                     <span>🔊</span>
@@ -116,7 +117,7 @@
         </div>
     </div>
 
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js?v=2025-08-09-01"></script>
     <script defer src="./firebase-config.js"></script>
 </body>
 </html>

@@ -33,6 +33,8 @@ const score1El = document.getElementById('score1');
 const score2El = document.getElementById('score2');
 const turnIndicatorEl = document.getElementById('turnIndicator');
 const confetti = new Confetti(document.getElementById('confettiCanvas'));
+const appVersionEl = document.getElementById('appVersion');
+let appVersion = '';
 
 // Online elements
 const onlineSetupEl = document.getElementById('onlineSetup');
@@ -323,6 +325,11 @@ function endGame(winner) {
     if (gameMode === 'ai') {
       if (winner === 'X') { gameInfoEl.textContent = 'You win! 🎉'; scores.player1++; confetti.emitBurst(160); setTimeout(() => { playWinSound(); playClapSound(); }, 300); }
       else { gameInfoEl.textContent = 'AI wins! 🤖'; scores.player2++; }
+    } else if (gameMode === 'online') {
+      const name = winner === 'X' ? (player1NameEl.textContent || 'Player X') : (player2NameEl.textContent || 'Player O');
+      gameInfoEl.textContent = `${name} wins! 🎉`;
+      confetti.emitBurst(200);
+      setTimeout(() => { playWinSound(); playClapSound(); }, 300);
     } else {
       gameInfoEl.textContent = `Player ${winner} wins! 🎉`;
       if (winner === 'X') scores.player1++; else scores.player2++;
@@ -450,7 +457,10 @@ function listenRoom(code) {
     // Players & names/avatars
     const pX = data.players?.X || { name: 'X', avatar: '❌', joined: false };
     const pO = data.players?.O || { name: 'O', avatar: '⭕', joined: false };
-    // Join/leave messages
+    // Join/leave messages and status
+    if (!pO.joined || !pX.joined) {
+      roomStatusEl.textContent = 'Waiting for player to join…';
+    }
     if (pX.joined !== online.prevJoined.X) {
       roomStatusEl.textContent = pX.joined ? `${pX.name || 'Player X'} joined as X` : `Player X left`;
       online.prevJoined.X = pX.joined;
@@ -481,6 +491,11 @@ function listenRoom(code) {
         const resetAt = Date.now();
         window.database.ref(`rooms/${code}`).update({ status: 'playing', currentPlayer: 'X', board: Array(9).fill(''), resetAt, updatedAt: Date.now() });
         online.lastResetAt = resetAt;
+        roomStatusEl.textContent = 'Ready! X to move.';
+      } else {
+        // In-progress status
+        const turnName = currentPlayer === 'X' ? (pX.name || 'X') : (pO.name || 'O');
+        roomStatusEl.textContent = `${turnName}'s turn`;
       }
     }
 
@@ -488,6 +503,7 @@ function listenRoom(code) {
     if (data.resetAt && data.resetAt !== online.lastResetAt) {
       online.lastResetAt = data.resetAt;
       resetBoard();
+      roomStatusEl.textContent = 'New game started';
     }
 
     // Disable input if not my turn
@@ -559,14 +575,24 @@ function fallbackCopy(text) {
 }
 
 // Init
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   loadSettings();
   updateScores();
   setTheme(themeSelect.value || 'light');
   initOnline();
+  // Fetch and show version; trigger SW update if changed
+  try {
+    const res = await fetch('./version.json', { cache: 'no-store' });
+    const data = await res.json();
+    appVersion = data.version || '';
+    if (appVersionEl) appVersionEl.textContent = `v${appVersion}`;
+  } catch {}
   // PWA service worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+    try {
+      const reg = await navigator.serviceWorker.register('./service-worker.js');
+      if (reg.waiting) { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }
+    } catch {}
   }
   // Deep link behavior: prefill code but do not auto-join so user can set name/avatar
   const params = new URLSearchParams(window.location.search);
