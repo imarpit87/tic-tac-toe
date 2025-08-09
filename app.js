@@ -239,8 +239,8 @@ window.makeMove = (cellIndex) => {
   if (currentPlayer === 'X') playXSound(); else playOSound();
   vibrate(10);
 
-  if (checkWinner()) { endGame(currentPlayer); if (gameMode === 'online') pushOnlineState(true); return; }
-  if (checkDraw()) { endGame('draw'); if (gameMode === 'online') pushOnlineState(true); return; }
+  if (checkWinner()) { endGame(currentPlayer); if (gameMode === 'online') pushOnlineState(true, currentPlayer); return; }
+  if (checkDraw()) { endGame('draw'); if (gameMode === 'online') pushOnlineState(true, 'draw'); return; }
 
   currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   updateGameInfo();
@@ -493,6 +493,14 @@ function listenRoom(code) {
         const turnName = currentPlayer === 'X' ? (pX.name || 'X') : (pO.name || 'O');
         roomStatusEl.textContent = `${turnName}'s turn`;
       } else if (status === 'ended') {
+        // Show winner/draw message on both clients
+        const res = data.result || {};
+        if (res.winner === 'draw') {
+          gameInfoEl.textContent = "It's a draw! 🤝";
+        } else if (res.winner === 'X' || res.winner === 'O') {
+          const winName = res.winner === 'X' ? (pX.name || 'Player X') : (pO.name || 'Player O');
+          gameInfoEl.textContent = `${winName} wins! 🎉`;
+        }
         roomStatusEl.textContent = 'Game over. Click New Game to play again';
       }
     }
@@ -508,21 +516,26 @@ function listenRoom(code) {
     const myTurn = online.mySide === currentPlayer;
     boardEl.classList.toggle('ai-thinking', !myTurn);
 
-    gameActive = !checkWinner() && !checkDraw();
+    const statusNow = data.status || 'waiting';
+    gameActive = (statusNow === 'playing') && !checkWinner() && !checkDraw();
     updateGameInfo();
   });
 }
 
-function pushOnlineState(end = false) {
+function pushOnlineState(end = false, winner = null) {
   if (!online.roomId) return;
-  window.database.ref(`rooms/${online.roomId}`).update({
+  const update = {
     board: gameBoard,
     currentPlayer,
     scores,
     updatedAt: Date.now(),
     status: end ? 'ended' : 'playing',
     lastMoveBy: online.clientId
-  });
+  };
+  if (end) {
+    update.result = { winner };
+  }
+  window.database.ref(`rooms/${online.roomId}`).update(update);
 }
 
 function requestOnlineNewGame() {
