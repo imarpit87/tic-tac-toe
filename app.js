@@ -40,6 +40,7 @@ const createRoomBtn = document.getElementById('createRoomBtn');
 const joinRoomBtn = document.getElementById('joinRoomBtn');
 const roomStatusEl = document.getElementById('roomStatus');
 const avatarPickerEl = document.getElementById('avatarPicker');
+const shareRoomBtn = document.getElementById('shareRoomBtn');
 
 // Audio
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -138,6 +139,8 @@ window.selectMode = (mode) => {
   roundsDiv.classList.add('show');
   onlineSetupEl.style.display = mode === 'online' ? 'block' : 'none';
   startBtn.style.display = 'inline-block';
+  // Show undo only for AI mode
+  undoBtn.style.display = mode === 'ai' ? 'inline-block' : 'none';
   playClickSound();
 };
 
@@ -168,6 +171,8 @@ window.startGame = () => {
   scores = { player1: 0, player2: 0 };
   updateScores();
   resetBoard();
+  // Show undo only for AI mode
+  undoBtn.style.display = gameMode === 'ai' ? 'inline-block' : 'none';
   playClickSound();
 };
 
@@ -244,14 +249,26 @@ window.makeMove = (cellIndex) => {
 };
 
 function undoMove() {
-  if (gameMode !== 'human') return; // limit to local human vs human for now
-  if (moveHistory.length === 0 || !gameActive) return;
+  if (gameMode !== 'ai') return;
+  if (!gameActive) return;
+  if (moveHistory.length === 0) return;
   const last = moveHistory.pop();
   gameBoard[last.index] = '';
-  const cell = document.querySelector(`[data-cell="${last.index}"]`);
+  let cell = document.querySelector(`[data-cell="${last.index}"]`);
   cell.textContent = '';
-  cell.classList.remove('x', 'o');
-  currentPlayer = last.player;
+  cell.classList.remove('x', 'o', 'winner', 'disabled');
+  if (moveHistory.length > 0) {
+    const prev = moveHistory[moveHistory.length - 1];
+    if (prev.player !== last.player) {
+      moveHistory.pop();
+      gameBoard[prev.index] = '';
+      cell = document.querySelector(`[data-cell="${prev.index}"]`);
+      cell.textContent = '';
+      cell.classList.remove('x', 'o', 'winner', 'disabled');
+    }
+  }
+  document.querySelectorAll('.cell').forEach(c => c.classList.remove('winner', 'disabled'));
+  currentPlayer = 'X';
   updateGameInfo();
 }
 
@@ -373,6 +390,11 @@ async function createRoom() {
     // onDisconnect: free up X seat if host disconnects
     window.database.ref(`rooms/${code}/players/X`).onDisconnect().update({ joined: false, clientId: null });
     roomStatusEl.textContent = `Room created: ${code} (share this code)`;
+    // Enable share button with deep link
+    if (shareRoomBtn) {
+      shareRoomBtn.style.display = 'inline-block';
+      shareRoomBtn.onclick = () => shareInviteLink(code);
+    }
     listenRoom(code);
   } catch (e) { roomStatusEl.textContent = `Error creating room: ${e.message}`; }
 }
@@ -466,6 +488,29 @@ function renderBoard() {
 createRoomBtn?.addEventListener('click', () => { if (!window.database) { roomStatusEl.textContent = 'Firebase not configured'; return; } createRoom(); });
 joinRoomBtn?.addEventListener('click', () => { if (!window.database) { roomStatusEl.textContent = 'Firebase not configured'; return; } joinRoom(); });
 
+function shareInviteLink(code) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('room', code);
+  const link = url.toString();
+  if (navigator.share) {
+    navigator.share({ title: 'Join my Tic Tac Toe game', text: 'Tap to join my game', url: link }).catch(() => copyToClipboard(link));
+  } else {
+    copyToClipboard(link);
+  }
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => roomStatusEl.textContent = 'Invite link copied to clipboard').catch(() => fallbackCopy(text));
+  } else fallbackCopy(text);
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); roomStatusEl.textContent = 'Invite link copied to clipboard'; } finally { ta.remove(); }
+}
+
 // Init
 window.addEventListener('DOMContentLoaded', () => {
   loadSettings();
@@ -475,5 +520,16 @@ window.addEventListener('DOMContentLoaded', () => {
   // PWA service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  }
+  // Deep link auto-join
+  const params = new URLSearchParams(window.location.search);
+  const roomParam = params.get('room');
+  if (roomParam) {
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    gameMode = 'online';
+    onlineSetupEl.style.display = 'block';
+    roomCodeInput.value = roomParam.toUpperCase();
+    // Attempt auto-join after Firebase init
+    setTimeout(() => { joinRoomBtn?.click(); }, 300);
   }
 });
