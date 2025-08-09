@@ -127,6 +127,11 @@ h1 { font-size: 2.2rem; margin-bottom: 16px; font-weight: 700; }
 .game-play.active { display: block; }
 .game-setup.hidden { display: none; }
 
+.avatar-picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 8px; }
+.avatar-option { font-size: 22px; padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.7); cursor: pointer; }
+.avatar-option.selected { outline: 2px solid var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2); }
+.room-hint { margin-top: 6px; color: var(--muted); font-size: 12px; }
+
 @media (max-width: 480px) {
   .container { padding: 18px; margin: 10px; }
   .app-title { font-size: 1.8rem; }
