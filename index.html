@@ -44,6 +44,7 @@
                     <option value="kids">Kids</option>
                 </select>
                 <button class="btn tertiary" id="leaderboardBtn" title="View leaderboard">Leaderboard</button>
+                <button class="btn tertiary" id="rateBtn" title="Rate the game">Rate</button>
             </div>
         </header>
         
@@ -200,6 +201,31 @@
             </div>
             <div id="leaderboardBody" class="leaderboard-body">
                 <div class="muted">Loading…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div class="modal hidden" id="ratingModal" role="dialog" aria-modal="true" aria-labelledby="ratingTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="ratingTitle">How was this match?</h3>
+                <button class="btn tertiary" id="ratingCloseBtn" aria-label="Close">Close</button>
+            </div>
+            <div class="rating-body">
+                <div id="ratingStars" class="rating-stars" role="radiogroup" aria-label="Rate from 1 to 5">
+                    <button class="star" data-star="1" aria-label="1 star">⭐</button>
+                    <button class="star" data-star="2" aria-label="2 stars">⭐</button>
+                    <button class="star" data-star="3" aria-label="3 stars">⭐</button>
+                    <button class="star" data-star="4" aria-label="4 stars">⭐</button>
+                    <button class="star" data-star="5" aria-label="5 stars">⭐</button>
+                </div>
+                <div class="rating-note muted" id="ratingNote"></div>
+                <textarea id="ratingFeedback" class="text-input" rows="3" placeholder="Optional: What could we improve?"></textarea>
+                <div class="rating-actions">
+                    <button class="btn" id="ratingSubmitBtn">Submit</button>
+                    <button class="btn tertiary" id="ratingNotNowBtn">Not now</button>
+                </div>
             </div>
         </div>
     </div>
