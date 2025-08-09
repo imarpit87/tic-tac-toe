@@ -101,23 +101,44 @@ const joinTabBtn = document.getElementById('joinTabBtn');
 const createPanel = document.getElementById('createPanel');
 const joinPanel = document.getElementById('joinPanel');
 
-// Audio
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-let soundEnabled = true;
+// Audio (lazy init + unlock on first interaction)
+let audioContext = null;
+function initAudioContext() {
+  try {
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') audioContext.resume();
+    // Play a very short, silent buffer to unlock on iOS
+    const buffer = audioContext.createBuffer(1, 1, audioContext.sampleRate);
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer; source.connect(audioContext.destination);
+    try { source.start(0); } catch {}
+    return audioContext;
+  } catch { return null; }
+}
+function setupAudioUnlock() {
+  const handler = () => { initAudioContext(); cleanup(); };
+  const cleanup = () => {
+    ['pointerdown','touchstart','mousedown','keydown','click'].forEach(ev => window.removeEventListener(ev, handler));
+  };
+  ['pointerdown','touchstart','mousedown','keydown','click'].forEach(ev => window.addEventListener(ev, handler, { once: true }));
+}
 
 function createSound(frequency, duration, type = 'sine', volume = 0.25) {
   if (!soundEnabled) return;
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-  oscillator.frequency.value = frequency;
-  oscillator.type = type;
-  gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-  gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-  oscillator.start(audioContext.currentTime);
-  oscillator.stop(audioContext.currentTime + duration);
+  const ctx = initAudioContext(); if (!ctx) return;
+  try {
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.frequency.value = frequency;
+    oscillator.type = type;
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + duration);
+  } catch {}
 }
 
 function playClickSound() { createSound(820, 0.08, 'sine', 0.18); }
@@ -130,15 +151,16 @@ function playWinSound() {
 }
 function playClapSound() {
   if (!soundEnabled) return;
-  const bufferSize = audioContext.sampleRate * 0.1;
-  const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+  const ctx = initAudioContext(); if (!ctx) return;
+  const bufferSize = ctx.sampleRate * 0.1;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
     data[i] = (Math.random() * 2 - 1) * 0.3 * Math.exp(-i / (bufferSize * 0.1));
   }
-  const source = audioContext.createBufferSource();
+  const source = ctx.createBufferSource();
   source.buffer = buffer;
-  source.connect(audioContext.destination);
+  source.connect(ctx.destination);
   source.start();
 }
 
@@ -372,7 +394,7 @@ window.makeMove = (cellIndex) => {
     const myTurn = online.mySide === currentPlayer;
     if (!myTurn) return;
   }
-  if (audioContext.state === 'suspended') audioContext.resume();
+  initAudioContext();
 
   gameBoard[cellIndex] = currentPlayer;
   const cell = document.querySelector(`[data-cell="${cellIndex}"]`);
@@ -847,6 +869,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   loadSettings();
   updateScores();
   setTheme(themeSelect.value || 'light');
+  setupAudioUnlock();
   // Reflect saved difficulty selection button
   document.querySelectorAll('.difficulty-btn').forEach(btn => {
     if (btn.dataset.difficulty === difficulty) btn.classList.add('active');
