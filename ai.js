@@ -45,10 +45,18 @@ export function getBestMove(board, difficulty, aiPlayer) {
   const empty = board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
   if (empty.length === 0) return -1;
 
+  // God mode: always optimal
+  if (difficulty === 'god') {
+    // First move: prefer center, else a corner
+    if (board.every(v => v === '')) return 4;
+    const move = getBestMoveMinimax(board, aiPlayer);
+    return move !== -1 ? move : empty[0];
+  }
+
   let optimalChance = 0.8;
-  if (difficulty === 'easy') optimalChance = 0.35;
-  else if (difficulty === 'medium') optimalChance = 0.7;
-  else if (difficulty === 'hard') optimalChance = 1.0;
+  if (difficulty === 'easy') optimalChance = 0.5;      // 50%
+  else if (difficulty === 'medium') optimalChance = 0.75; // 75%
+  else if (difficulty === 'hard') optimalChance = 0.9;    // 90%
 
   if (Math.random() > optimalChance) {
     return empty[Math.floor(Math.random() * empty.length)];

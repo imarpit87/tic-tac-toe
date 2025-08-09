@@ -577,6 +577,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   loadSettings();
   updateScores();
   setTheme(themeSelect.value || 'light');
+  // Reflect saved difficulty selection button
+  document.querySelectorAll('.difficulty-btn').forEach(btn => {
+    if (btn.dataset.difficulty === difficulty) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
   initOnline();
   // Fetch and show version; trigger SW update if changed
   try {
