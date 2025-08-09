@@ -103,6 +103,7 @@ const joinPanel = document.getElementById('joinPanel');
 
 // Audio (lazy init + unlock on first interaction)
 let audioContext = null;
+let soundEnabled = true;
 function initAudioContext() {
   try {
     if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
