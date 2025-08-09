@@ -11,7 +11,7 @@ let scores = { player1: 0, player2: 0 };
 let isAIThinking = false;
 let bestOf = 1;
 let moveHistory = [];
-let online = { roomId: null, isHost: false, mySide: null, myName: '', myAvatar: '🧑‍🚀', suppressNextSound: false };
+let online = { roomId: null, isHost: false, mySide: null, myName: '', myAvatar: '🧑‍🚀', suppressNextSound: false, clientId: null };
 
 // DOM
 const boardEl = document.getElementById('board');
@@ -341,6 +341,8 @@ window.backToMenu = () => {
 function initOnline() {
   if (!window.database) { roomStatusEl.textContent = 'Online mode unavailable: Firebase not configured.'; return; }
   roomStatusEl.textContent = 'Ready. Pick name and avatar, then create or join a room.';
+  // Generate a simple clientId for presence tracking
+  online.clientId = Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
 // avatar selection
@@ -362,12 +364,14 @@ async function createRoom() {
       currentPlayer: 'X',
       scores: { player1: 0, player2: 0 },
       players: {
-        X: { name: online.myName, avatar: online.myAvatar, joined: true },
-        O: { name: '', avatar: '', joined: false }
+        X: { name: online.myName, avatar: online.myAvatar, joined: true, clientId: online.clientId },
+        O: { name: '', avatar: '', joined: false, clientId: null }
       },
       updatedAt: Date.now()
     });
     online.roomId = code; online.isHost = true; online.mySide = 'X';
+    // onDisconnect: free up X seat if host disconnects
+    window.database.ref(`rooms/${code}/players/X`).onDisconnect().update({ joined: false, clientId: null });
     roomStatusEl.textContent = `Room created: ${code} (share this code)`;
     listenRoom(code);
   } catch (e) { roomStatusEl.textContent = `Error creating room: ${e.message}`; }
@@ -380,12 +384,15 @@ async function joinRoom() {
   if (!snap.exists()) { roomStatusEl.textContent = 'Room not found'; return; }
   const data = snap.val();
   online.myName = (playerNameInput.value || 'Player').trim();
-  // Claim side O if available, otherwise X if O occupied but X empty
-  let side = 'O';
-  if (data.players && data.players.O && data.players.O.joined) {
-    if (data.players.X && !data.players.X.joined) side = 'X'; else { roomStatusEl.textContent = 'Room full'; return; }
-  }
-  await window.database.ref(`rooms/${code}/players/${side}`).update({ name: online.myName, avatar: online.myAvatar, joined: true });
+  const players = data.players || {};
+  const xJoined = !!(players.X && players.X.joined === true);
+  const oJoined = !!(players.O && players.O.joined === true);
+  let side = null;
+  if (!oJoined) side = 'O'; else if (!xJoined) side = 'X'; else { roomStatusEl.textContent = 'Room full'; return; }
+
+  await window.database.ref(`rooms/${code}/players/${side}`).update({ name: online.myName, avatar: online.myAvatar, joined: true, clientId: online.clientId });
+  // onDisconnect: free seat when this client disconnects
+  window.database.ref(`rooms/${code}/players/${side}`).onDisconnect().update({ joined: false, clientId: null });
   await window.database.ref(`rooms/${code}`).update({ updatedAt: Date.now() });
   online.roomId = code; online.isHost = false; online.mySide = side;
   roomStatusEl.textContent = `Joined room: ${code} as ${side}`;
@@ -412,11 +419,15 @@ function listenRoom(code) {
 
     // Auto-start when both joined
     const bothJoined = pX.joined && pO.joined;
-    if (bothJoined && gameSetupEl.classList.contains('hidden') === false) {
-      // Start game UI once
-      gameSetupEl.classList.add('hidden');
-      gamePlayEl.classList.add('active');
-      resetBoard();
+    if (bothJoined) {
+      if (!gameSetupEl.classList.contains('hidden')) {
+        gameSetupEl.classList.add('hidden');
+        gamePlayEl.classList.add('active');
+      }
+      if (data.status !== 'playing') {
+        // Set start state atomically
+        window.database.ref(`rooms/${code}`).update({ status: 'playing', currentPlayer: 'X', board: Array(9).fill(''), updatedAt: Date.now() });
+      }
     }
 
     // Disable input if not my turn
