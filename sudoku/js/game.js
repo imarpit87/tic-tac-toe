@@ -23,13 +23,15 @@ export class SudokuGame {
     this.difficulty = 'easy';
     this.solution = null;
     this.selected = null; // { r, c }
+    this.theme = 'light';
   }
 
-  newGame({ name, avatar, difficulty }) {
+  newGame({ name, avatar, difficulty, theme }) {
     this.reset();
     this.player.name = name || '';
     this.player.avatar = avatar || '🧑';
     this.difficulty = difficulty || 'easy';
+    this.theme = theme || this.theme;
     const { puzzle, solution } = generatePuzzle(this.difficulty);
     this.board = puzzle;
     this.solution = solution;
@@ -57,6 +59,7 @@ export class SudokuGame {
       difficulty: s.difficulty || 'easy',
       solution: s.solution || null,
       selected: s.selected || null,
+      theme: s.theme || 'light',
     });
     this.onUpdate('Loaded saved game');
     return true;
@@ -83,6 +86,7 @@ export class SudokuGame {
       difficulty: this.difficulty,
       solution: this.solution ? this.solution.map(r => [...r]) : null,
       selected: this.selected ? { ...this.selected } : null,
+      theme: this.theme,
     };
   }
 
@@ -92,7 +96,7 @@ export class SudokuGame {
   }
 
   selectCell(r, c) {
-    if (r < 0 || c < 0) return;
+    if (r < 0 || c < 0) { this.selected = null; this.onUpdate('Cell unselected'); return; }
     this.selected = { r, c };
     this.onUpdate('Cell selected');
   }
@@ -108,15 +112,17 @@ export class SudokuGame {
     }
     if (prev === val) return false;
     if (!isValidPlacement(this.board, r, c, val) && val !== 0) {
-      this.board[r][c] = val;
-      this.commitState('Invalid move');
-      return true;
+      // reject invalid without changing state
+      this.onUpdate('Invalid move');
+      return false;
     }
     this.board[r][c] = val;
     if (this.autoNotes && val !== 0) this.removeNoteFromPeers(r, c, val);
     this.commitState(val === 0 ? 'Cleared' : 'Number placed');
     return true;
   }
+
+  isReadonly(r, c) { return this.fixed[r][c]; }
 
   removeNoteFromPeers(r, c, val) {
     for (let rr = 0; rr < 9; rr++) if (rr !== r) this.notes[rr][c].delete(val);
@@ -175,6 +181,7 @@ export class SudokuGame {
     this.difficulty = s.difficulty;
     this.solution = s.solution ? s.solution.map(r => [...r]) : null;
     this.selected = s.selected ? { ...s.selected } : null;
+    this.theme = s.theme || 'light';
   }
 
   tick(nowMs) {

@@ -40,7 +40,8 @@ function setTheme(theme) {
 }
 
 ;(() => { // initialize theme from saved or default
-  const saved = (loadState() && loadState().theme) || 'light';
+  const savedState = loadState();
+  const saved = (savedState && savedState.theme) || 'light';
   setTheme(saved);
 })();
 
@@ -50,19 +51,20 @@ themeSelectInline.addEventListener('change', () => setTheme(themeSelectInline.va
 
 const game = new SudokuGame(onUpdate);
 
-// Continue last game prompt
 if (loadState()) continueBtn.style.display = '';
 
 startGameBtn.addEventListener('click', () => {
   const name = playerNameInput.value.trim();
   const avatar = selectedAvatar || '🧑';
   const difficulty = difficultySelect.value;
-  game.newGame({ name, avatar, difficulty });
+  const theme = themeSelectInline.value;
+  setTheme(theme);
+  game.newGame({ name, avatar, difficulty, theme });
   enterGameUI(name, avatar, difficulty);
 });
 
 continueBtn.addEventListener('click', () => {
-  if (game.continueLast()) enterGameUI(game.player.name, game.player.avatar, game.difficulty);
+  if (game.continueLast()) { setTheme(game.theme); enterGameUI(game.player.name, game.player.avatar, game.difficulty); }
 });
 
 newGameBtn.addEventListener('click', () => {
@@ -89,11 +91,11 @@ keypad.addEventListener('click', (e) => {
   if (!game.selected) { showToast('Tap a cell, then choose a number'); return; }
   const val = Number(key.getAttribute('data-num'));
   const { r, c } = game.selected;
-  game.placeNumber(r, c, val);
+  const ok = game.placeNumber(r, c, val);
+  if (!ok) showToast('That conflicts with this row/column/box');
   render();
 });
 
-// Build grid buttons once
 function buildGrid() {
   const frag = document.createDocumentFragment();
   for (let r = 0; r < 9; r++) {
@@ -115,8 +117,8 @@ function selectCell(r, c) { game.selectCell(r, c); render(); }
 
 function onCellKeyDown(e, r, c) {
   const key = e.key;
-  if (/^[1-9]$/.test(key)) { game.placeNumber(r, c, Number(key)); render(); e.preventDefault(); }
-  else if (key === 'Backspace' || key === 'Delete' || key === '0') { game.placeNumber(r, c, 0); render(); e.preventDefault(); }
+  if (/^[1-9]$/.test(key)) { const ok = game.placeNumber(r, c, Number(key)); if (!ok) showToast('That conflicts with this row/column/box'); render(); e.preventDefault(); }
+  else if (key === 'Backspace' || key === 'Delete' || key === '0') { const ok = game.placeNumber(r, c, 0); if (!ok) showToast('That conflicts with this row/column/box'); render(); e.preventDefault(); }
   else if (key === 'ArrowUp') { r = (r + 8) % 9; selectCell(r, c); e.preventDefault(); }
   else if (key === 'ArrowDown') { r = (r + 1) % 9; selectCell(r, c); e.preventDefault(); }
   else if (key === 'ArrowLeft') { c = (c + 8) % 9; selectCell(r, c); e.preventDefault(); }
@@ -149,30 +151,26 @@ function enterGameUI(name, avatar, difficulty) {
 function showToast(msg) { toast.textContent = msg; }
 
 function render() {
-  // timer
   game.tick(Date.now());
   timerEl.textContent = formatTime(game.elapsedMs);
 
-  // update grid
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       const btn = gridEl.children[r * 9 + c];
       const val = game.board[r][c];
       btn.className = 'cell';
-      if (game.fixed[r][c]) btn.classList.add('fixed');
+      if (game.fixed[r][c]) { btn.classList.add('fixed'); btn.setAttribute('data-given', 'true'); btn.setAttribute('aria-disabled', 'true'); }
+      else { btn.removeAttribute('data-given'); btn.removeAttribute('aria-disabled'); }
       if (game.selected && game.selected.r === r && game.selected.c === c) btn.classList.add('selected');
       if (game.selected && (game.selected.r === r || game.selected.c === c || (Math.floor(game.selected.r/3) === Math.floor(r/3) && Math.floor(game.selected.c/3) === Math.floor(c/3)))) btn.classList.add('highlight');
-      // conflicts
       if (val !== 0) {
-        // check conflicts by temporarily clearing and testing
         const temp = game.board[r][c];
         game.board[r][c] = 0;
-        const invalid = !isValidPlacement(game.board, r, c, temp);
+        const invalid = !game.isReadonly(r, c) && !isValidPlacement(game.board, r, c, temp);
         game.board[r][c] = temp;
         if (invalid) btn.classList.add('conflict');
       }
       btn.textContent = val === 0 ? '' : String(val);
-      // notes
       if (val === 0) {
         let notesEl = btn.querySelector('.notes');
         if (!notesEl) { notesEl = document.createElement('div'); notesEl.className = 'notes'; btn.appendChild(notesEl); }
