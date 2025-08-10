@@ -1,7 +1,8 @@
 import { SudokuGame } from './game.js';
 import { loadState } from './storage.js';
+import { isValidPlacement } from './board.js';
 
-const gridEl = document.getElementById('sudokuGrid');
+// Elements
 const startScreen = document.getElementById('startScreen');
 const gameScreen = document.getElementById('gameScreen');
 const startGameBtn = document.getElementById('startGameBtn');
@@ -11,17 +12,17 @@ const hintBtn = document.getElementById('hintBtn');
 const notesToggleBtn = document.getElementById('notesToggleBtn');
 const undoBtn = document.getElementById('undoBtn');
 const redoBtn = document.getElementById('redoBtn');
-const keypad = document.getElementById('keypad');
+const keypad = document.getElementById('sud-keypad');
 const toast = document.getElementById('toast');
 const timerEl = document.getElementById('timer');
 const winModal = document.getElementById('winModal');
 const winStats = document.getElementById('winStats');
 const playAgainBtn = document.getElementById('playAgainBtn');
 const closeWinBtn = document.getElementById('closeWinBtn');
-const playerAvatar = document.getElementById('playerAvatar');
-const playerLabel = document.getElementById('playerLabel');
-const currentDifficulty = document.getElementById('currentDifficulty');
+const currentDifficultyEl = document.getElementById('sud-difficulty');
+const gridEl = document.getElementById('sud-grid');
 
+// Start inputs
 const playerNameInput = document.getElementById('playerName');
 const avatarPicker = document.getElementById('avatarPicker');
 const avatarSkipBtn = document.getElementById('avatarSkipBtn');
@@ -38,8 +39,11 @@ function setTheme(theme) {
 }
 
 ;(() => {
+  console.log('Grid ready');
   const saved = loadState();
   if (saved?.theme) setTheme(saved.theme);
+  // Keypad height custom prop
+  document.documentElement.style.setProperty('--keypad-h', '220px');
 })();
 
 const game = new SudokuGame(onUpdate);
@@ -80,117 +84,122 @@ themeGroup.addEventListener('click', (e) => {
   setTheme(pill.getAttribute('data-theme') || 'light');
 });
 
-hintBtn.addEventListener('click', () => { const h = game.hint(); if (!h) showToast('No logical hint available right now—try another area'); else { selectCell(h.r, h.c); showToast('Hint used'); } });
+// Delegated grid input: pointerdown and keyboard
+gridEl.addEventListener('pointerdown', (e) => {
+  const target = e.target.closest('.cell');
+  if (!target || !gridEl.contains(target)) return;
+  const r = Number(target.getAttribute('data-row'));
+  const c = Number(target.getAttribute('data-col'));
+  if (Number.isNaN(r) || Number.isNaN(c)) return;
+  if (target.classList.contains('given')) return; // ignore givens selection for editing
+  selectCell(r, c);
+}, { passive: true });
+
+document.addEventListener('keydown', (e) => {
+  if (!game.selected) return;
+  const { r, c } = game.selected;
+  if (/^[1-9]$/.test(e.key)) { const ok = game.placeNumber(r, c, Number(e.key)); showToast(ok ? 'Nice move!' : 'Conflicts in row'); render(); e.preventDefault(); }
+  else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') { const ok = game.placeNumber(r, c, 0); if (!ok) showToast('Conflicts in row'); render(); e.preventDefault(); }
+});
+
+// Keypad input
+keypad.addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  if (!game.selected) { showToast('Tap a cell, then choose a number'); return; }
+  const { r, c } = game.selected;
+  if (btn.hasAttribute('data-clear')) { const ok = game.placeNumber(r, c, 0); if (!ok) showToast('Conflicts in row'); render(); return; }
+  const n = Number(btn.getAttribute('data-num'));
+  if (!n) return;
+  const ok = game.placeNumber(r, c, n);
+  showToast(ok ? 'Nice move!' : 'Conflicts in row');
+  render();
+});
+
+hintBtn.addEventListener('click', () => { const h = game.hint(); if (!h) showToast('No logical hint available'); else { selectCell(h.r, h.c); showToast('Hint used'); } });
 notesToggleBtn.addEventListener('click', () => { game.toggleNotesMode(); notesToggleBtn.setAttribute('aria-pressed', String(game.notesMode)); showToast(game.notesMode ? 'Notes enabled' : 'Notes disabled'); });
 undoBtn.addEventListener('click', () => { if (game.undo()) showToast('Undone'); updateUndoRedo(); render(); });
 redoBtn.addEventListener('click', () => { if (game.redo()) showToast('Redone'); updateUndoRedo(); render(); });
-
-keypad.addEventListener('click', (e) => {
-  const key = e.target.closest('.key'); if (!key) return;
-  if (!game.selected) { showToast('Tap a cell, then choose a number'); return; }
-  const val = Number(key.getAttribute('data-num'));
-  const { r, c } = game.selected;
-  const ok = game.placeNumber(r, c, val);
-  if (!ok) showToast('That conflicts with this row/column/box'); else showToast('Nice move!');
-  render();
-});
 
 function buildGrid() {
   const frag = document.createDocumentFragment();
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
-      const btn = document.createElement('button');
-      btn.className = 'cell';
-      btn.setAttribute('data-r', String(r));
-      btn.setAttribute('data-c', String(c));
-      btn.setAttribute('role', 'gridcell');
-      btn.addEventListener('click', () => selectCell(r, c));
-      btn.addEventListener('keydown', (e) => onCellKeyDown(e, r, c));
-      frag.appendChild(btn);
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.setAttribute('role', 'gridcell');
+      cell.setAttribute('tabindex', '0');
+      cell.setAttribute('data-row', String(r));
+      cell.setAttribute('data-col', String(c));
+      cell.setAttribute('aria-label', `Row ${r+1}, Column ${c+1}`);
+      cell.setAttribute('data-r', String(r)); // for 3x3 border rules
+      cell.setAttribute('data-c', String(c));
+      frag.appendChild(cell);
     }
   }
+  gridEl.innerHTML = '';
   gridEl.appendChild(frag);
 }
 
-function selectCell(r, c) { game.selectCell(r, c); render(); }
+function selectCell(r, c) { game.selectCell(r, c); console.log('Selected', r, c); render(); }
 
-function onCellKeyDown(e, r, c) {
-  const key = e.key;
-  if (/^[1-9]$/.test(key)) { const ok = game.placeNumber(r, c, Number(key)); showToast(ok ? 'Nice move!' : 'That conflicts with this row/column/box'); render(); e.preventDefault(); }
-  else if (key === 'Backspace' || key === 'Delete' || key === '0') { const ok = game.placeNumber(r, c, 0); if (!ok) showToast('That conflicts with this row/column/box'); render(); e.preventDefault(); }
-  else if (key === 'ArrowUp') { r = (r + 8) % 9; selectCell(r, c); e.preventDefault(); }
-  else if (key === 'ArrowDown') { r = (r + 1) % 9; selectCell(r, c); e.preventDefault(); }
-  else if (key === 'ArrowLeft') { c = (c + 8) % 9; selectCell(r, c); e.preventDefault(); }
-  else if (key === 'ArrowRight') { c = (c + 1) % 9; selectCell(r, c); e.preventDefault(); }
-}
-
-function onUpdate(message) {
-  if (!message) return;
-  updateUndoRedo();
-}
+function onUpdate(message) { updateUndoRedo(); }
 
 function updateUndoRedo() { undoBtn.disabled = game.undoStack.length <= 1; redoBtn.disabled = game.redoStack.length === 0; }
 
 function enterGameUI(name, avatar, difficulty) {
   startScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
-  playerAvatar.textContent = avatar || '🧑';
-  playerLabel.textContent = name ? name : 'Player';
-  currentDifficulty.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+  currentDifficultyEl.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+  buildGrid();
   render();
 }
 
 let toastTimeout;
-function showToast(msg) {
-  clearTimeout(toastTimeout);
-  toast.textContent = msg;
-  toast.classList.add('show');
-  toastTimeout = setTimeout(() => toast.classList.remove('show'), 2200);
+function showToast(msg) { clearTimeout(toastTimeout); toast.textContent = msg; toast.classList.add('show'); toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000); }
+
+function highlightPeers(selected) {
+  const { r, c } = selected;
+  for (let rr = 0; rr < 9; rr++) {
+    for (let cc = 0; cc < 9; cc++) {
+      const el = gridEl.children[rr * 9 + cc];
+      el.classList.remove('peer');
+      if (selected && (rr === r || cc === c || (Math.floor(rr/3) === Math.floor(r/3) && Math.floor(cc/3) === Math.floor(c/3)))) el.classList.add('peer');
+    }
+  }
 }
 
 function render() {
   timerEl.textContent = formatTime(game.elapsedMs);
+  const sel = game.selected;
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
-      const btn = gridEl.children[r * 9 + c];
+      const el = gridEl.children[r * 9 + c];
       const val = game.board[r][c];
-      btn.className = 'cell';
-      if (game.fixed[r][c]) { btn.classList.add('fixed'); btn.setAttribute('data-given', 'true'); btn.setAttribute('aria-disabled', 'true'); }
-      else { btn.removeAttribute('data-given'); btn.removeAttribute('aria-disabled'); }
-      if (game.selected && game.selected.r === r && game.selected.c === c) btn.classList.add('selected');
-      if (game.selected && (game.selected.r === r || game.selected.c === c || (Math.floor(game.selected.r/3) === Math.floor(r/3) && Math.floor(game.selected.c/3) === Math.floor(c/3)))) btn.classList.add('highlight');
-      if (val !== 0) {
-        const temp = game.board[r][c];
-        game.board[r][c] = 0;
-        const invalid = !game.isReadonly(r, c) && !isValidPlacement(game.board, r, c, temp);
-        game.board[r][c] = temp;
-        if (invalid) btn.classList.add('conflict');
-      }
-      btn.textContent = val === 0 ? '' : String(val);
-      if (val === 0) {
-        let notesEl = btn.querySelector('.notes');
-        if (!notesEl) { notesEl = document.createElement('div'); notesEl.className = 'notes'; btn.appendChild(notesEl); }
-        notesEl.innerHTML = '';
-        for (let n = 1; n <= 9; n++) {
-          const d = document.createElement('div'); d.className = 'note'; d.textContent = game.notes[r][c].has(n) ? n : '';
-          notesEl.appendChild(d);
-        }
-      } else {
-        const notesEl = btn.querySelector('.notes'); if (notesEl) notesEl.remove();
+      el.className = 'cell';
+      if (game.fixed[r][c]) el.classList.add('given');
+      if (sel && sel.r === r && sel.c === c) el.classList.add('selected');
+      el.textContent = val === 0 ? '' : String(val);
+      // conflicts highlight (strict off by default: allow entry, show conflict)
+      if (val !== 0 && !game.fixed[r][c]) {
+        const temp = val; game.board[r][c] = 0; const invalid = !isValidPlacement(game.board, r, c, temp); game.board[r][c] = temp; if (invalid) el.classList.add('conflict');
       }
     }
   }
-
-  if (game.solved()) {
-    winStats.textContent = `Puzzle solved! Great job 🎉\nTime: ${formatTime(game.elapsedMs)}`;
-    winModal.classList.remove('hidden');
-  }
+  if (sel) highlightPeers(sel);
+  if (game.solved()) { winStats.textContent = `Puzzle solved! Great job 🎉\nTime: ${formatTime(game.elapsedMs)}`; winModal.classList.remove('hidden'); }
 }
 
 function formatTime(ms) { const s = Math.floor(ms / 1000); const m = Math.floor(s / 60); const sec = s % 60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
 
-buildGrid();
-render();
-
 playAgainBtn.addEventListener('click', () => { winModal.classList.add('hidden'); newGameBtn.click(); });
 closeWinBtn.addEventListener('click', () => winModal.classList.add('hidden'));
+
+// Console guards for placement and clear
+(function wrapPlace() {
+  const orig = game.placeNumber.bind(game);
+  game.placeNumber = (r, c, val) => {
+    const res = orig(r, c, val);
+    if (val === 0) console.log('Cleared', r, c); else console.log('Placed', val, 'at', r, c);
+    return res;
+  };
+})();

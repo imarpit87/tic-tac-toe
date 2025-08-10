@@ -75,37 +75,31 @@
 
     <!-- Game Screen -->
     <section id="gameScreen" class="game-screen hidden" aria-live="polite">
-      <div class="topbar fixed">
+      <header class="sud-toolbar" role="toolbar" aria-label="Sudoku toolbar">
         <a class="btn icon-btn" href="/index.html" title="Home">🏠 Home</a>
         <button id="newGameBtn" class="btn icon-btn" title="New Game">🆕 New</button>
         <button id="hintBtn" class="btn icon-btn" title="Hint">💡 Hint</button>
         <button id="notesToggleBtn" class="btn icon-btn" aria-pressed="false" title="Notes">📝 Notes</button>
         <button id="undoBtn" class="btn icon-btn" disabled title="Undo">↩ Undo</button>
         <button id="redoBtn" class="btn icon-btn" disabled title="Redo">↪ Redo</button>
-        <div class="difficulty-label">Difficulty: <strong id="currentDifficulty">Easy</strong></div>
-        <div class="timer" aria-label="Timer">⏱ <span id="timer">00:00</span></div>
-      </div>
-
-      <div class="player-bar">
-        <div id="playerBadge" class="player-badge"><span id="playerAvatar" class="avatar">🧑</span><span id="playerLabel">Player</span></div>
-      </div>
-
-      <div class="sudoku-wrap">
-        <div id="sudokuGrid" class="sudoku-grid" role="grid" aria-label="Sudoku board" tabindex="0"></div>
-        <div class="keypad docked" id="keypad" aria-label="Number pad">
-          <button class="btn key k1" data-num="1">1</button>
-          <button class="btn key k2" data-num="2">2</button>
-          <button class="btn key k3" data-num="3">3</button>
-          <button class="btn key k4" data-num="4">4</button>
-          <button class="btn key k5" data-num="5">5</button>
-          <button class="btn key k6" data-num="6">6</button>
-          <button class="btn key k7" data-num="7">7</button>
-          <button class="btn key k8" data-num="8">8</button>
-          <button class="btn key k9" data-num="9">9</button>
-          <button class="btn key clear" data-num="0" title="Clear">Clear</button>
-        </div>
-      </div>
-
+        <span class="sud-timer" aria-label="Timer">⏱ <span id="timer">00:00</span></span>
+      </header>
+      <div class="sud-meta">Difficulty: <span id="sud-difficulty">Easy</span></div>
+      <main class="sud-stage">
+        <div id="sud-grid" role="grid" aria-label="Sudoku grid"></div>
+      </main>
+      <nav id="sud-keypad" class="sud-keypad" aria-label="Number pad">
+        <button data-num="1">1</button>
+        <button data-num="2">2</button>
+        <button data-num="3">3</button>
+        <button data-num="4">4</button>
+        <button data-num="5">5</button>
+        <button data-num="6">6</button>
+        <button data-num="7">7</button>
+        <button data-num="8">8</button>
+        <button data-num="9">9</button>
+        <button data-clear>Clear</button>
+      </nav>
       <div id="toast" class="toast" aria-live="polite" role="status"></div>
     </section>
 
