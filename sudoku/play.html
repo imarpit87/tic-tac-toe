@@ -38,9 +38,15 @@
       </nav>
 
       <aside class="play-side">
+        <div class="side-actions">
+          <a id="homeLink" href="/sudoku/index.html" class="btn tertiary">Home</a>
+          <button id="newBtn" class="btn">New</button>
+          <button id="hintBtn" class="btn">Hint</button>
+          <button id="notesToggleBtn" class="btn" aria-pressed="false">Notes</button>
+        </div>
         <div class="side-row">
-          <button id="d-undo" aria-label="Undo">↩ Undo</button>
-          <button id="d-redo" aria-label="Redo">↪ Redo</button>
+          <button id="d-undo" class="btn" aria-label="Undo">Undo</button>
+          <button id="d-redo" class="btn" aria-label="Redo">Redo</button>
         </div>
         <div id="desk-keypad" class="keypad keypad--desk" aria-label="Number pad">
           <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button>

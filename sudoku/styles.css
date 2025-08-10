@@ -192,41 +192,63 @@ html,body{overflow-x:hidden;touch-action:manipulation;-webkit-tap-highlight-colo
 .actionbar::-webkit-scrollbar { display: none; }
 .actionbar .btn { white-space: nowrap; }
 
-/* Clean stable PLAY layout per requirements */
-:root{ --pad:16px; --gap:12px; --grid-cap:640px; --keypad-h:240px; }
+/* Stable PLAY layout and actionbar updates */
+:root{ --pad:16px; --gap:12px; --grid-cap:720px; --keypad-h:240px; }
 html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
 
-/* Remove any legacy floating elements */
-.play [class*="fab"], .play [data-floating], .play .floating, .play .sticky-card { display:none !important; }
-
 .play{ min-height:100vh; display:grid; grid-template-columns:1fr; }
+.play-topbar{ position:sticky; top:0; z-index:5; padding:8px var(--pad); background:var(--bg-card,#fff); }
+.actionbar{ display:grid; grid-auto-flow:column; gap:8px; align-items:center; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.actionbar::-webkit-scrollbar{ display:none; }
+.actionbar .btn{ white-space:nowrap; }
+
 .play-stage{ padding:12px var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); }
 .grid-wrap{ display:flex; justify-content:center; }
-#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; width:min(92vw, var(--grid-cap)); aspect-ratio:1/1; max-width:var(--grid-cap); padding:8px; border-radius:16px; background:var(--bg-grid,rgba(0,0,0,.05)); box-sizing:border-box; }
+#sudoku-grid{
+  display:grid; grid-template-columns:repeat(9,1fr); gap:6px;
+  width:min(92vw, var(--grid-cap)); aspect-ratio:1/1; max-width:var(--grid-cap);
+  background:var(--bg-grid,rgba(0,0,0,.05)); padding:10px; border-radius:16px; box-sizing:border-box;
+}
 #sudoku-grid .cell{ aspect-ratio:1/1; border-radius:10px; display:flex; align-items:center; justify-content:center; padding:0; margin:0; }
 
-/* MOBILE/TABLET */
+.keypad{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.keypad button{
+  border-radius:14px; padding:14px 0; font-weight:700; font-size:18px;
+  background: linear-gradient(180deg, #6A5AE0, #7D4BE0); color:#fff;
+  box-shadow:0 8px 18px rgba(0,0,0,.12);
+  transition: transform .08s, filter .12s, box-shadow .12s;
+}
+.keypad button:active{ transform:scale(.96); filter:brightness(.95); }
+.keypad button.flash{ transform:scale(.94); box-shadow:0 0 0 3px rgba(0,0,0,.08) inset; }
+.keypad button[data-clear]{ background:#e9ecef; color:#111; box-shadow:0 6px 16px rgba(0,0,0,.1); }
+
 @media (max-width:1023px){
   .play-side{ display:none; }
   #sudoku-keypad{
     position:fixed; left:0; right:0; bottom:0;
-    height:auto; /* measured in JS */
+    height:auto; /* real height measured in JS */
     padding:12px var(--pad) calc(12px + env(safe-area-inset-bottom));
-    display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
-    background:var(--bg-card,#fff); box-shadow:0 -8px 24px rgba(0,0,0,.12); z-index:10;
+    background:var(--bg-card,#fff); z-index:10; box-shadow:0 -8px 24px rgba(0,0,0,.12);
     transform:translateZ(0);
   }
 }
 
-/* DESKTOP */
 @media (min-width:1024px){
   html,body{ overflow:hidden; }
-  .play{ grid-template-columns:minmax(0,1fr) 340px; gap:var(--gap); padding:16px; box-sizing:border-box; }
+  .play{ grid-template-columns:minmax(0,1fr) 360px; gap:20px; padding:16px; box-sizing:border-box; }
   .play-topbar{ display:none; }
   .play-stage, .play-side{ height:calc(100vh - 32px); }
   .play-stage{ padding:0; display:flex; align-items:center; justify-content:center; }
-  #sudoku-grid{ width:min(var(--grid-cap), calc(100vh - 32px)); height:auto; }
-  .play-side{ display:grid; grid-template-rows:auto 1fr; gap:var(--gap); align-content:start; }
-  .keypad--desk{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap); align-content:start; }
+  #sudoku-grid{
+    width: min( min(72vw, var(--grid-cap)), calc(100vh - 48px) );
+    height: auto; aspect-ratio:1/1;
+  }
+  .play-side{ display:grid; grid-template-rows:auto auto 1fr; gap:12px; align-content:start; }
+  .side-actions{ display:grid; grid-auto-flow:column; gap:8px; align-items:center; overflow-x:auto; }
+  .side-row{ display:flex; gap:8px; }
+  .keypad--desk{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; align-content:start; }
   #sudoku-keypad{ display:none; }
 }
+
+/* Remove legacy floating overlaps */
+.play [class*="fab"], .play [data-floating], .play .floating, .play .sticky-card { display:none !important; }

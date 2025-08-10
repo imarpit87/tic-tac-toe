@@ -210,14 +210,17 @@ function render() {
 function formatTime(ms){ const s=Math.floor(ms/1000); const h=Math.floor(s/3600); const m=Math.floor((s%3600)/60); const sec=s%60; return h>0?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
 function persistTimer(){ try{ localStorage.setItem(TIMER_KEY, String(timer.valueMs)); }catch{} }
 
-/* Fit grid on desktop to stay within 100vh alongside side panel */
+/* Fit grid on desktop to fill available height and stay square */
 (function fitGrid(){
   function resize(){
     if(!window.matchMedia('(min-width:1024px)').matches) return;
     const grid=document.getElementById('sudoku-grid');
     const stage=document.querySelector('.play-stage'); if(!grid||!stage) return;
-    const size=Math.min(stage.clientHeight, stage.clientWidth, 640);
-    grid.style.width=size+'px'; grid.style.height=size+'px';
+    // CSS handles width via calc; ensure height remains square when container changes
+    const rect = stage.getBoundingClientRect();
+    const size = Math.min(Math.min(window.innerWidth*0.72, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--grid-cap')) || 720), rect.height - 16);
+    grid.style.width = size + 'px';
+    grid.style.height = size + 'px';
   }
   window.addEventListener('load',resize);
   window.addEventListener('resize',resize);
@@ -230,8 +233,8 @@ function persistTimer(){ try{ localStorage.setItem(TIMER_KEY, String(timer.value
   const mobilePad = document.getElementById('sudoku-keypad');
   if(!mobilePad) return;
   function syncKeypadPadding(){
-    const h = mobilePad.getBoundingClientRect().height || 240;
-    document.documentElement.style.setProperty('--keypad-h', `${Math.round(h)}px`);
+    const h = Math.round(mobilePad.getBoundingClientRect().height || 240);
+    document.documentElement.style.setProperty('--keypad-h', h + 'px');
   }
   window.addEventListener('load', syncKeypadPadding);
   window.addEventListener('resize', syncKeypadPadding);
