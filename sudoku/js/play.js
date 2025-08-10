@@ -1,13 +1,16 @@
 import { SudokuGame } from './game.js';
-import { loadState } from './storage.js';
 import { isValidPlacement } from './board.js';
 
+const setupRaw = localStorage.getItem('sudoka:setup');
+const continueFlag = localStorage.getItem('sudoka:continue') === '1';
+if (!setupRaw && !continueFlag) { location.href = '/sudoku/index.html'; }
+const setup = setupRaw ? JSON.parse(setupRaw) : null;
+
+// Apply theme from setup
+if (setup?.theme) document.documentElement.setAttribute('data-theme', setup.theme);
+document.documentElement.style.setProperty('--keypad-h', '220px');
+
 // Elements
-const startScreen = document.getElementById('startScreen');
-const gameScreen = document.getElementById('gameScreen');
-const startGameBtn = document.getElementById('startGameBtn');
-const continueLink = document.getElementById('continueLink');
-const newGameBtn = document.getElementById('newGameBtn');
 const hintBtn = document.getElementById('hintBtn');
 const notesToggleBtn = document.getElementById('notesToggleBtn');
 const undoBtn = document.getElementById('undoBtn');
@@ -17,67 +20,35 @@ const toast = document.getElementById('toast');
 const timerEl = document.getElementById('timer');
 const winModal = document.getElementById('winModal');
 const winStats = document.getElementById('winStats');
-const playAgainBtn = document.getElementById('playAgainBtn');
 const closeWinBtn = document.getElementById('closeWinBtn');
 const currentDifficultyEl = document.getElementById('sud-difficulty');
+const playerEl = document.getElementById('sud-player');
 const gridEl = document.getElementById('sudoku-grid');
 
-// Start inputs
-const playerNameInput = document.getElementById('playerName');
-const avatarPicker = document.getElementById('avatarPicker');
-const difficultyGroup = document.getElementById('difficultyGroup');
-const themeGroup = document.getElementById('themeGroup');
+const game = new SudokuGame(onUpdate);
 
-let selectedAvatar = null; // allow null when none chosen
-let selectedDifficulty = 'easy';
-let selectedTheme = 'light';
-
-function setTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  selectedTheme = theme;
+// Initialize game according to setup or continue
+if (continueFlag && game.continueLast()) {
+  localStorage.removeItem('sudoka:continue');
+  currentDifficultyEl.textContent = game.difficulty.charAt(0).toUpperCase() + game.difficulty.slice(1);
+  renderHeader();
+  buildGrid();
+  render();
+} else {
+  const name = setup?.name || '';
+  const avatar = setup?.avatar || null;
+  const difficulty = setup?.difficulty || 'easy';
+  const theme = setup?.theme || 'light';
+  currentDifficultyEl.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+  renderHeader(name, avatar);
+  game.newGame({ name, avatar, difficulty, theme });
+  buildGrid();
+  render();
 }
 
-;(() => {
-  console.log('Grid ready');
-  const saved = loadState();
-  if (saved?.theme) setTheme(saved.theme);
-  document.documentElement.style.setProperty('--keypad-h', '220px');
-})();
-
-// Only show continue if a saved game exists
-const hasSave = !!loadState();
-if (!hasSave && continueLink) continueLink.style.display = 'none';
-continueLink?.addEventListener('click', (e) => { e.preventDefault(); localStorage.setItem('sudoka:continue', '1'); location.href = '/sudoku/play.html'; });
-
-startGameBtn.addEventListener('click', () => {
-  const name = playerNameInput.value.trim();
-  const setup = { name: name || '', avatar: selectedAvatar || null, difficulty: selectedDifficulty, theme: selectedTheme };
-  localStorage.setItem('sudoka:setup', JSON.stringify(setup));
-  location.href = '/sudoku/play.html';
-});
-
-newGameBtn.addEventListener('click', () => { startScreen.classList.remove('hidden'); gameScreen.classList.add('hidden'); });
-
-avatarPicker.addEventListener('click', (e) => {
-  const btn = e.target.closest('.avatar-option'); if (!btn) return;
-  [...avatarPicker.querySelectorAll('.avatar-option')].forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedAvatar = btn.getAttribute('data-avatar');
-});
-
-difficultyGroup.addEventListener('click', (e) => {
-  const pill = e.target.closest('.pill'); if (!pill) return;
-  [...difficultyGroup.querySelectorAll('.pill')].forEach(p => p.classList.remove('active'));
-  pill.classList.add('active');
-  selectedDifficulty = pill.getAttribute('data-diff') || 'easy';
-});
-
-themeGroup.addEventListener('click', (e) => {
-  const pill = e.target.closest('.pill'); if (!pill) return;
-  [...themeGroup.querySelectorAll('.pill')].forEach(p => p.classList.remove('active'));
-  pill.classList.add('active');
-  setTheme(pill.getAttribute('data-theme') || 'light');
-});
+function renderHeader(name = setup?.name || '', avatar = setup?.avatar || null) {
+  playerEl.textContent = name ? `${avatar ? avatar + ' ' : ''}${name}` : '';
+}
 
 // Delegated grid input
 gridEl.addEventListener('pointerdown', (e) => {
@@ -97,7 +68,7 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') { const ok = game.placeNumber(r, c, 0); if (!ok) showToast('Conflicts in row'); render(); e.preventDefault(); }
 });
 
-// Keypad input
+// Keypad
 keypad.addEventListener('click', (e) => {
   const btn = e.target.closest('button'); if (!btn) return;
   if (!game.selected) { showToast('Tap a cell, then choose a number'); return; }
@@ -114,6 +85,7 @@ hintBtn.addEventListener('click', () => { const h = game.hint(); if (!h) showToa
 notesToggleBtn.addEventListener('click', () => { game.toggleNotesMode(); notesToggleBtn.setAttribute('aria-pressed', String(game.notesMode)); showToast(game.notesMode ? 'Notes enabled' : 'Notes disabled'); });
 undoBtn.addEventListener('click', () => { if (game.undo()) showToast('Undone'); updateUndoRedo(); render(); });
 redoBtn.addEventListener('click', () => { if (game.redo()) showToast('Redone'); updateUndoRedo(); render(); });
+closeWinBtn.addEventListener('click', () => winModal.classList.add('hidden'));
 
 function buildGrid() {
   const frag = document.createDocumentFragment();
@@ -136,18 +108,8 @@ function buildGrid() {
 }
 
 function selectCell(r, c) { game.selectCell(r, c); console.log('Selected', r, c); render(); }
-
-function onUpdate(message) { updateUndoRedo(); }
-
+function onUpdate() { updateUndoRedo(); }
 function updateUndoRedo() { undoBtn.disabled = game.undoStack.length <= 1; redoBtn.disabled = game.redoStack.length === 0; }
-
-function enterGameUI(name, avatar, difficulty) {
-  startScreen.classList.add('hidden');
-  gameScreen.classList.remove('hidden');
-  currentDifficultyEl.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
-  buildGrid();
-  render();
-}
 
 let toastTimeout;
 function showToast(msg) { clearTimeout(toastTimeout); toast.textContent = msg; toast.classList.add('show'); toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000); }
@@ -184,11 +146,3 @@ function render() {
 }
 
 function formatTime(ms) { const s = Math.floor(ms / 1000); const m = Math.floor(s / 60); const sec = s % 60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
-
-playAgainBtn.addEventListener('click', () => { winModal.classList.add('hidden'); newGameBtn.click(); });
-closeWinBtn.addEventListener('click', () => winModal.classList.add('hidden'));
-
-(function wrapPlace() {
-  const orig = game.placeNumber.bind(game);
-  game.placeNumber = (r, c, val) => { const res = orig(r, c, val); if (val === 0) console.log('Cleared', r, c); else console.log('Placed', val, 'at', r, c); return res; };
-})();
