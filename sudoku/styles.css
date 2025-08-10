@@ -1,5 +1,5 @@
 /* Touch and base */
-html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
 [hidden] { display: none !important; }
 
 :root {
@@ -13,6 +13,11 @@ html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparen
   --btn-grad-end: #7D4BE0;
   --danger: #E57373;
   --muted: #94A3B8;
+  /* New sizing vars */
+  --grid-max: 420px;
+  --grid-side-pad: 16px;
+  --cell-gap: 6px;
+  --keypad-h: 220px;
 }
 
 [data-theme="dark"] {
@@ -35,21 +40,21 @@ html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparen
 .sud-meta { margin: 8px 0; text-align: center; font-size: 14px; color: var(--muted); }
 
 /* Stage */
-.sud-stage { padding: 12px; padding-bottom: calc(var(--keypad-h, 220px) + 16px); }
-#sud-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: var(--gap); background: var(--bg-grid); padding: 8px; border-radius: 16px; }
-.cell { min-width: 48px; min-height: 48px; display: flex; align-items: center; justify-content: center; font-size: 22px; border-radius: 12px; user-select: none; background: rgba(255,255,255,0.98); color: #111; position: relative; outline: none; transition: transform 120ms ease, opacity 120ms ease, box-shadow 160ms ease; }
+.sud-stage { padding: 12px var(--grid-side-pad); padding-bottom: calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); }
+#sud-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: var(--cell-gap); width: min(calc(100vw - (var(--grid-side-pad) * 2) - env(safe-area-inset-left) - env(safe-area-inset-right)), var(--grid-max)); margin: 0 auto; padding: 8px; border-radius: 16px; box-sizing: border-box; background: var(--bg-grid); }
+.cell { aspect-ratio: 1 / 1; width: 100%; min-width: 0; display: flex; align-items: center; justify-content: center; font-size: clamp(18px, 4.2vw, 24px); border-radius: 12px; user-select: none; box-sizing: border-box; background: rgba(255,255,255,0.98); color: #111; position: relative; outline: none; transition: transform 120ms ease, opacity 120ms ease, box-shadow 160ms ease; }
 .cell.given { background: var(--cell-given); font-weight: 800; }
-.cell.selected { outline: 3px solid var(--cell-selected); outline-offset: 0; }
+.cell.selected { box-shadow: 0 0 0 3px var(--cell-selected) inset; }
 .cell.peer { background: var(--cell-peer); }
 .cell.conflict { box-shadow: inset 0 0 0 2px var(--danger); }
 .cell:focus-visible { box-shadow: 0 0 0 3px var(--cell-selected); }
 
-/* Thick 3x3 borders using extra spacing lines */
+/* Thick 3x3 borders using inner cell strokes so width is unchanged */
 .cell[data-r="2"], .cell[data-r="5"] { border-bottom: 2px solid rgba(0,0,0,0.35); }
 .cell[data-c="2"], .cell[data-c="5"] { border-right: 2px solid rgba(0,0,0,0.35); }
 
 /* Keypad */
-.sud-keypad { position: fixed; left: 0; right: 0; bottom: 0; height: var(--keypad-h, 220px); background: var(--bg-card); box-shadow: 0 -8px 24px rgba(0,0,0,.12); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; z-index: 10; pointer-events: auto; }
+.sud-keypad { position: fixed; left: 0; right: 0; bottom: 0; height: var(--keypad-h); background: var(--bg-card); box-shadow: 0 -8px 24px rgba(0,0,0,.12); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; z-index: 10; pointer-events: auto; }
 .sud-keypad button { border-radius: 14px; padding: 14px 0; font-size: 18px; font-weight: 700; background: linear-gradient(180deg, var(--btn-grad-start), var(--btn-grad-end)); color: #fff; }
 .sud-keypad button[data-clear] { background: #e9ecef; color: #111; }
 
@@ -59,10 +64,10 @@ html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparen
 .sud-stage * { pointer-events: auto; }
 
 /* Toast */
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--keypad-h, 220px) + 10px); background: rgba(0,0,0,.8); color: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 700; opacity: 0; transition: opacity .25s; pointer-events: none; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--keypad-h) + 10px + env(safe-area-inset-bottom)); background: rgba(0,0,0,.8); color: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 700; opacity: 0; transition: opacity .25s; pointer-events: none; }
 .toast.show { opacity: 1; }
 
-/* Start screen (kept from previous redesign, tweaked) */
+/* Start screen (kept) */
 .start-screen { display: grid; place-items: center; min-height: 60vh; }
 .start-card { background: var(--bg-card); border-radius: 20px; box-shadow: 0 16px 40px rgba(0,0,0,0.18); padding: 18px; width: min(96vw, 480px); }
 .start-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
@@ -76,11 +81,15 @@ html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparen
 .pill { padding: 10px 16px; border-radius: 999px; border: none; cursor: pointer; background: rgba(255,255,255,0.9); box-shadow: 0 6px 16px rgba(0,0,0,0.08); font-weight: 800; min-height: 44px; }
 .pill.active { outline: 3px solid var(--cell-selected); }
 
-/* Typography scaling for Large Text Mode (optional) */
-.large-text .cell { font-size: 26px; }
+/* Large Text Mode (optional) */
+.large-text .cell { font-size: clamp(20px, 4.8vw, 28px); }
 .large-text .sud-keypad button { font-size: 20px; }
 
 /* Desktop tweaks */
 @media (min-width: 768px) {
   .sudoku-container { width: min(92vw, 640px); }
+}
+
+@media (orientation: landscape) {
+  #sud-grid { width: min(calc(100vh - 200px), var(--grid-max)); }
 }
