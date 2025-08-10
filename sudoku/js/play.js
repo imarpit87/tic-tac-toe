@@ -233,3 +233,43 @@ gridWrap?.addEventListener('touchend', (e)=>{
   pad.addEventListener('pointerdown',e=>{ const b=e.target.closest('button'); if(!b) return; b.classList.add('is-pressed'); },{passive:true});
   window.addEventListener('pointerup',()=>document.querySelectorAll('.keypad button.is-pressed').forEach(b=>b.classList.remove('is-pressed')),{passive:true});
 })();
+
+// Wire mobile/tablet topbar and desktop side undo/redo to existing handlers
+;(['u-undo','d-undo']).forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('click', ()=>{ undoBtn?.click(); });
+});
+;(['u-redo','d-redo']).forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('click', ()=>{ redoBtn?.click(); });
+});
+
+// Bind both keypads to existing click handler flow
+function bindPad(padId){
+  const pad=document.getElementById(padId);
+  if(!pad) return;
+  pad.addEventListener('click',(e)=>{
+    const b=e.target.closest('button'); if(!b) return;
+    if(b.hasAttribute('data-clear')){ const sel=game.selected; if(sel){ placeNumberWithFeedback(sel.r, sel.c, 0); } return; }
+    const n=b.getAttribute('data-num');
+    if(n){ const sel=game.selected; if(sel){ placeNumberWithFeedback(sel.r, sel.c, Number(n)); } }
+  });
+}
+bindPad('sudoku-keypad');
+bindPad('desk-keypad');
+
+// Desktop fit: keep grid within 100vh alongside side panel
+(function fitGrid(){
+  function resize(){
+    if(!window.matchMedia('(min-width:900px)').matches) return;
+    const grid=document.getElementById('sudoku-grid');
+    const stage=document.querySelector('.stage');
+    if(!grid||!stage) return;
+    const size=Math.min(stage.clientHeight, stage.clientWidth, 640);
+    grid.style.width=size+'px'; grid.style.height=size+'px';
+  }
+  ['load','resize','orientationchange'].forEach(ev=>window.addEventListener(ev,resize));
+  resize();
+})();

@@ -186,39 +186,39 @@ html,body{overflow-x:hidden;touch-action:manipulation;-webkit-tap-highlight-colo
 }
 @media (min-width: 601px){ .sud-fab{ display:none; } }
 
-/* Play layout responsive */
-:root{ --side-pad:16px; --gap:12px; --keypad-h:232px; }
-html,body{height:100%;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-.play-layout{min-height:100vh;display:grid;}
-.grid-pane{display:flex;align-items:center;justify-content:center;padding:12px var(--side-pad);}
-.sud-grid-wrap{position:relative;}
-#sudoku-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;aspect-ratio:1/1;max-width:640px;width:min(88vw,88vh);} 
+/* Clean reset layout for PLAY page */
+:root{ --pad:16px; --gap:12px; --keypad-h:232px; --grid-cap:640px; }
+html,body{margin:0;height:100%;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+/* Remove any old sticky/overlay that covers grid */
+*[class*="menu"],*[class*="card"],header.sticky{position:static !important; z-index:auto !important;}
 
-/* Keypad look + pressed feedback */
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-.keypad button,.control-row button{border-radius:14px;padding:14px 0;font-weight:700;font-size:18px;transition:transform .08s ease, box-shadow .12s ease, filter .12s ease;}
-.keypad button.is-pressed{transform:scale(.94);box-shadow:0 0 0 3px rgba(0,0,0,.08) inset;filter:brightness(.95);} 
-
-/* Mobile layout */
-@media (max-width:899px){
-  body{overflow-y:auto;}
-  .control-pane{display:none;}
-  .grid-pane{padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom));}
-  .keypad{
-    position:fixed;left:0;right:0;bottom:0;height:var(--keypad-h);
-    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
-    background:var(--bg-card,#fff);box-shadow:0 -8px 24px rgba(0,0,0,.12);z-index:10;
-  }
-  .sud-fab{position:absolute;right:-6px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;pointer-events:none;}
-  .sud-fab button{pointer-events:auto;width:44px;height:44px;border-radius:50%;font-size:20px;line-height:1;display:inline-flex;align-items:center;justify-content:center;border:0;color:#fff;background:linear-gradient(180deg,var(--btn-grad-start,#6a5ae0),var(--btn-grad-end,#7d4be0));box-shadow:0 6px 18px rgba(0,0,0,.18);}
+.play{min-height:100vh; display:grid; grid-template-columns:1fr;}
+.topbar{display:flex; gap:var(--gap); align-items:center; justify-content:space-between; padding:8px var(--pad); background:var(--bg-card,#fff);} 
+.stage{padding:12px var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom));}
+.grid-wrap{display:flex; justify-content:center;}
+#sudoku-grid{
+  display:grid; grid-template-columns:repeat(9,1fr); gap:6px;
+  width:min(92vw, var(--grid-cap)); aspect-ratio:1/1; max-width:var(--grid-cap);
+  background:var(--bg-grid,rgba(0,0,0,.05)); padding:8px; border-radius:16px; box-sizing:border-box;
 }
+#sudoku-grid .cell{aspect-ratio:1/1; border-radius:10px; padding:0; margin:0; display:flex; align-items:center; justify-content:center;}
 
-/* Tablet/Laptop layout */
+/* Keypad fixed at bottom for <900px */
+.keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; border-radius:0; background:var(--bg-card,#fff);} 
+.keypad:not(.keypad--desk){ position:fixed; left:0; right:0; bottom:0; height:var(--keypad-h); padding:12px var(--pad) calc(12px + env(safe-area-inset-bottom)); box-shadow:0 -8px 24px rgba(0,0,0,.12); z-index:10; }
+.keypad button{border-radius:14px; padding:14px 0; font-weight:700; font-size:18px; transition:transform .08s, box-shadow .12s, filter .12s;}
+.keypad button:active{transform:scale(.95); filter:brightness(.95);} 
+
+/* Desktop ≥900px: two columns; no page scroll; keypad on right */
 @media (min-width:900px){
-  .play-layout{grid-template-columns:1fr 340px;gap:var(--gap);padding:16px;box-sizing:border-box;}
-  .control-pane{display:grid;grid-template-rows:auto 1fr;gap:var(--gap);align-content:start;height:calc(100vh - 32px);} 
-  .control-row{display:flex;gap:var(--gap);} 
-  .sud-fab{display:none;} 
-  .grid-pane{height:calc(100vh - 32px);} 
-  .grid-pane #sudoku-grid{width:min(640px, calc(100vh - 32px));height:auto;} 
+  html,body{overflow:hidden;}
+  .play{grid-template-columns:minmax(0,1fr) 340px; gap:var(--gap); padding:16px; box-sizing:border-box;}
+  .topbar{display:none;}
+  .stage,.side{height:calc(100vh - 32px);} 
+  .stage{padding:0; display:flex; align-items:center; justify-content:center;}
+  #sudoku-grid{width:min(var(--grid-cap), calc(100vh - 32px));}
+  .side{display:grid; grid-template-rows:auto 1fr; gap:var(--gap); align-content:start;}
+  .row{display:flex; gap:var(--gap);} 
+  .keypad--desk{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap); align-content:start;}
+  #sudoku-keypad{display:none;}
 }

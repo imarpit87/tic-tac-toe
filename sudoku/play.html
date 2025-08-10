@@ -11,48 +11,35 @@
 </head>
 <body>
   <div class="container sudoku-container">
-    <header class="sud-toolbar" role="toolbar" aria-label="Sudoku toolbar">
-      <a class="btn icon-btn" href="/index.html" title="Home">🏠 Home</a>
-      <a class="btn icon-btn" href="/sudoku/index.html" title="New">🆕 New</a>
-      <button id="hintBtn" class="btn icon-btn" title="Hint">💡 Hint</button>
-      <button id="notesToggleBtn" class="btn icon-btn" aria-pressed="false" title="Notes">📝 Notes</button>
-      <button id="undoBtn" class="btn icon-btn" disabled title="Undo">↩ Undo</button>
-      <button id="redoBtn" class="btn icon-btn" disabled title="Redo">↪ Redo</button>
-      <span class="sud-timer" aria-label="Timer">⏱ <span id="timer">00:00</span></span>
-    </header>
+    <main class="play">
+      <header class="topbar" role="toolbar" aria-label="Sudoku controls">
+        <button id="u-undo" aria-label="Undo">↩ Undo</button>
+        <button id="u-redo" aria-label="Redo">↪ Redo</button>
+        <span id="u-timer" class="timer">00:00</span>
+      </header>
 
-    <div class="sud-meta">
-      Difficulty: <span id="sud-difficulty">-</span>
-      <span id="sud-player" style="margin-left:8px;"></span>
-    </div>
-
-    <main class="play-layout">
-      <section class="grid-pane">
-        <div class="sud-grid-wrap">
+      <section class="stage">
+        <div class="grid-wrap">
           <div id="sudoku-grid" role="grid" aria-label="Sudoku grid"></div>
-          <!-- mobile floating undo/redo -->
-          <div class="sud-fab">
-            <button id="fab-undo" aria-label="Undo (Z)" title="Undo">↩</button>
-            <button id="fab-redo" aria-label="Redo (Shift+Z)" title="Redo">↪</button>
-          </div>
         </div>
       </section>
 
-      <aside class="control-pane">
-        <div class="control-row">
-          <button id="btn-undo" aria-label="Undo">↩ Undo</button>
-          <button id="btn-redo" aria-label="Redo">↪ Redo</button>
+      <nav id="sudoku-keypad" class="keypad" aria-label="Number pad">
+        <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button>
+        <button data-num="4">4</button><button data-num="5">5</button><button data-num="6">6</button>
+        <button data-num="7">7</button><button data-num="8">8</button><button data-num="9">9</button>
+        <button data-clear>Clear</button>
+      </nav>
+
+      <aside class="side">
+        <div class="row">
+          <button id="d-undo" aria-label="Undo">↩ Undo</button>
+          <button id="d-redo" aria-label="Redo">↪ Redo</button>
         </div>
-        <div id="sudoku-keypad" class="keypad" aria-label="Number pad">
-          <button data-num="1">1</button>
-          <button data-num="2">2</button>
-          <button data-num="3">3</button>
-          <button data-num="4">4</button>
-          <button data-num="5">5</button>
-          <button data-num="6">6</button>
-          <button data-num="7">7</button>
-          <button data-num="8">8</button>
-          <button data-num="9">9</button>
+        <div id="desk-keypad" class="keypad keypad--desk" aria-label="Number pad">
+          <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button>
+          <button data-num="4">4</button><button data-num="5">5</button><button data-num="6">6</button>
+          <button data-num="7">7</button><button data-num="8">8</button><button data-num="9">9</button>
           <button data-clear>Clear</button>
         </div>
       </aside>
