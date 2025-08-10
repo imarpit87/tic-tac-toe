@@ -41,7 +41,20 @@ html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparen
 
 /* Stage */
 .sud-stage { padding: 12px var(--grid-side-pad); padding-bottom: calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); }
-#sud-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: var(--cell-gap); width: min(calc(100vw - (var(--grid-side-pad) * 2) - env(safe-area-inset-left) - env(safe-area-inset-right)), var(--grid-max)); margin: 0 auto; padding: 8px; border-radius: 16px; box-sizing: border-box; background: var(--bg-grid); }
+
+/* Centering wrapper for grid */
+.sud-grid-wrap { display: flex; justify-content: center; width: 100%; padding: 0 16px; box-sizing: border-box; }
+#sudoku-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: var(--cell-gap, 6px); width: min(calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)), var(--grid-max, 420px)); margin: 12px auto; box-sizing: border-box; background: var(--bg-grid); padding: 8px; border-radius: 16px; }
+
+/* normalize layout */
+html, body, .sud-stage { overflow-x: hidden; }
+.sud-stage { display: block; text-align: initial; }
+/* fallback centering */
+#sudoku-grid { position: relative; left: 50%; transform: translateX(-50%); }
+
+/* square cells remain from previous rules */
+#sudoku-grid .cell { aspect-ratio: 1/1; width: 100%; min-width: 0; }
+
 .cell { aspect-ratio: 1 / 1; width: 100%; min-width: 0; display: flex; align-items: center; justify-content: center; font-size: clamp(18px, 4.2vw, 24px); border-radius: 12px; user-select: none; box-sizing: border-box; background: rgba(255,255,255,0.98); color: #111; position: relative; outline: none; transition: transform 120ms ease, opacity 120ms ease, box-shadow 160ms ease; }
 .cell.given { background: var(--cell-given); font-weight: 800; }
 .cell.selected { box-shadow: 0 0 0 3px var(--cell-selected) inset; }
@@ -59,7 +72,7 @@ html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparen
 .sud-keypad button[data-clear] { background: #e9ecef; color: #111; }
 
 /* Prevent overlays from stealing taps */
-#sud-grid { pointer-events: auto; }
+#sudoku-grid { pointer-events: auto; }
 .sud-stage, .sud-meta { pointer-events: none; }
 .sud-stage * { pointer-events: auto; }
 
@@ -91,5 +104,5 @@ html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparen
 }
 
 @media (orientation: landscape) {
-  #sud-grid { width: min(calc(100vh - 200px), var(--grid-max)); }
+  #sudoku-grid { width: min(calc(100vh - 200px), var(--grid-max, 420px)); }
 }

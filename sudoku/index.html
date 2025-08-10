@@ -40,7 +40,6 @@
               <button class="avatar-option" data-avatar="🐱">🐱</button>
               <button class="avatar-option" data-avatar="🐼">🐼</button>
             </div>
-            <button id="avatarSkipBtn" class="btn tertiary" type="button">Skip</button>
           </div>
 
           <div class="start-field">
@@ -86,7 +85,9 @@
       </header>
       <div class="sud-meta">Difficulty: <span id="sud-difficulty">Easy</span></div>
       <main class="sud-stage">
-        <div id="sud-grid" role="grid" aria-label="Sudoku grid"></div>
+        <div class="sud-grid-wrap">
+          <div id="sudoku-grid" role="grid" aria-label="Sudoku grid"></div>
+        </div>
       </main>
       <nav id="sud-keypad" class="sud-keypad" aria-label="Number pad">
         <button data-num="1">1</button>

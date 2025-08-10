@@ -20,16 +20,15 @@ const winStats = document.getElementById('winStats');
 const playAgainBtn = document.getElementById('playAgainBtn');
 const closeWinBtn = document.getElementById('closeWinBtn');
 const currentDifficultyEl = document.getElementById('sud-difficulty');
-const gridEl = document.getElementById('sud-grid');
+const gridEl = document.getElementById('sudoku-grid');
 
 // Start inputs
 const playerNameInput = document.getElementById('playerName');
 const avatarPicker = document.getElementById('avatarPicker');
-const avatarSkipBtn = document.getElementById('avatarSkipBtn');
 const difficultyGroup = document.getElementById('difficultyGroup');
 const themeGroup = document.getElementById('themeGroup');
 
-let selectedAvatar = '';
+let selectedAvatar = null; // allow null when none chosen
 let selectedDifficulty = 'easy';
 let selectedTheme = 'light';
 
@@ -42,7 +41,6 @@ function setTheme(theme) {
   console.log('Grid ready');
   const saved = loadState();
   if (saved?.theme) setTheme(saved.theme);
-  // Keypad height custom prop
   document.documentElement.style.setProperty('--keypad-h', '220px');
 })();
 
@@ -54,7 +52,7 @@ continueLink?.addEventListener('click', (e) => { e.preventDefault(); if (game.co
 
 startGameBtn.addEventListener('click', () => {
   const name = playerNameInput.value.trim();
-  const avatar = selectedAvatar || '🧑';
+  const avatar = selectedAvatar; // may be null
   setTheme(selectedTheme);
   game.newGame({ name, avatar, difficulty: selectedDifficulty, theme: selectedTheme });
   enterGameUI(name, avatar, selectedDifficulty);
@@ -68,7 +66,6 @@ avatarPicker.addEventListener('click', (e) => {
   btn.classList.add('selected');
   selectedAvatar = btn.getAttribute('data-avatar');
 });
-avatarSkipBtn.addEventListener('click', () => { selectedAvatar = ''; [...avatarPicker.querySelectorAll('.avatar-option')].forEach(b => b.classList.remove('selected')); });
 
 difficultyGroup.addEventListener('click', (e) => {
   const pill = e.target.closest('.pill'); if (!pill) return;
@@ -84,14 +81,14 @@ themeGroup.addEventListener('click', (e) => {
   setTheme(pill.getAttribute('data-theme') || 'light');
 });
 
-// Delegated grid input: pointerdown and keyboard
+// Delegated grid input
 gridEl.addEventListener('pointerdown', (e) => {
   const target = e.target.closest('.cell');
   if (!target || !gridEl.contains(target)) return;
   const r = Number(target.getAttribute('data-row'));
   const c = Number(target.getAttribute('data-col'));
   if (Number.isNaN(r) || Number.isNaN(c)) return;
-  if (target.classList.contains('given')) return; // ignore givens selection for editing
+  if (target.classList.contains('given')) return;
   selectCell(r, c);
 }, { passive: true });
 
@@ -131,7 +128,7 @@ function buildGrid() {
       cell.setAttribute('data-row', String(r));
       cell.setAttribute('data-col', String(c));
       cell.setAttribute('aria-label', `Row ${r+1}, Column ${c+1}`);
-      cell.setAttribute('data-r', String(r)); // for 3x3 border rules
+      cell.setAttribute('data-r', String(r));
       cell.setAttribute('data-c', String(c));
       frag.appendChild(cell);
     }
@@ -179,7 +176,6 @@ function render() {
       if (game.fixed[r][c]) el.classList.add('given');
       if (sel && sel.r === r && sel.c === c) el.classList.add('selected');
       el.textContent = val === 0 ? '' : String(val);
-      // conflicts highlight (strict off by default: allow entry, show conflict)
       if (val !== 0 && !game.fixed[r][c]) {
         const temp = val; game.board[r][c] = 0; const invalid = !isValidPlacement(game.board, r, c, temp); game.board[r][c] = temp; if (invalid) el.classList.add('conflict');
       }
@@ -194,12 +190,7 @@ function formatTime(ms) { const s = Math.floor(ms / 1000); const m = Math.floor(
 playAgainBtn.addEventListener('click', () => { winModal.classList.add('hidden'); newGameBtn.click(); });
 closeWinBtn.addEventListener('click', () => winModal.classList.add('hidden'));
 
-// Console guards for placement and clear
 (function wrapPlace() {
   const orig = game.placeNumber.bind(game);
-  game.placeNumber = (r, c, val) => {
-    const res = orig(r, c, val);
-    if (val === 0) console.log('Cleared', r, c); else console.log('Placed', val, 'at', r, c);
-    return res;
-  };
+  game.placeNumber = (r, c, val) => { const res = orig(r, c, val); if (val === 0) console.log('Cleared', r, c); else console.log('Placed', val, 'at', r, c); return res; };
 })();
