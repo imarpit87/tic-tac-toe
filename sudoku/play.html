@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sudoku — Play</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="play">
+    <header class="play-topbar" role="toolbar" aria-label="Sudoku controls">
+      <nav class="actionbar" aria-label="Actions">
+        <a id="homeBtn" href="/sudoku/index.html" class="btn tertiary">Home</a>
+        <button id="newBtn" class="btn">New Game</button>
+        <button id="difficultyBtn" class="btn" aria-haspopup="true" aria-expanded="false">Difficulty ▾</button>
+        <button id="notesToggleBtn" class="btn" aria-pressed="false">Notes</button>
+        <button id="hintBtn" class="btn">Hint</button>
+        <button id="m-undo" class="btn">Undo</button>
+        <button id="m-redo" class="btn">Redo</button>
+        <span id="m-timer" class="timer" aria-live="polite">00:00</span>
+      </nav>
+    </header>
+
+    <section class="play-stage">
+      <div class="grid-wrap">
+        <div id="sudoku-grid" role="grid" aria-label="Sudoku grid"></div>
+      </div>
+    </section>
+
+    <nav id="sudoku-keypad" class="keypad" aria-label="Number pad (mobile)">
+      <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button>
+      <button data-num="4">4</button><button data-num="5">5</button><button data-num="6">6</button>
+      <button data-num="7">7</button><button data-num="8">8</button><button data-num="9">9</button>
+      <button data-clear>Clear</button>
+    </nav>
+
+    <aside class="desk" aria-label="Desktop controls">
+      <div class="row">
+        <button id="d-undo" class="btn">Undo</button>
+        <button id="d-redo" class="btn">Redo</button>
+      </div>
+      <div class="keypad keypad--desk" aria-label="Number pad (desktop)">
+        <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button>
+        <button data-num="4">4</button><button data-num="5">5</button><button data-num="6">6</button>
+        <button data-num="7">7</button><button data-num="8">8</button><button data-num="9">9</button>
+        <button data-clear>Clear</button>
+      </div>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast" aria-live="polite" role="status"></div>
+
+  <div class="modal hidden" id="winModal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="winTitle">🎉 Puzzle solved!</h3>
+      </div>
+      <p class="muted" id="winStats">Well done!</p>
+      <div class="controls">
+        <button id="playAgainBtn" class="btn">Play again</button>
+        <a href="/sudoku/index.html" class="btn tertiary">Back</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="difficultyMenu" class="menu hidden" role="menu" aria-labelledby="difficultyBtn">
+    <button role="menuitem" data-diff="easy">Easy</button>
+    <button role="menuitem" data-diff="medium">Medium</button>
+    <button role="menuitem" data-diff="hard">Hard</button>
+    <button role="menuitem" data-diff="god">God</button>
+  </div>
+
+  <script type="module" src="./js/play.js"></script>
+</body>
+</html>
