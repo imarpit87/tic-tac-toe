@@ -3,7 +3,7 @@ import { isValidPlacement } from './board.js';
 
 /* Toast helper early */
 const toast = document.getElementById('toast');
-function showToast(msg){ try{ if(!toast) return; toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1500);}catch{} }
+function showToast(msg){ try{ if(!toast) return; toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000);}catch{} }
 
 window.addEventListener('error',(e)=>{ console.error('[Sudoku] Error:', e.error || e.message); showToast('Sudoku error: ' + (e.message||'see console')); });
 window.addEventListener('unhandledrejection',(e)=>{ console.error('[Sudoku] Unhandled promise:', e.reason); showToast('Sudoku error: promise'); });
@@ -17,7 +17,7 @@ console.log('[Sudoku] init play.js');
 /* Setup guard */
 const setupRaw=localStorage.getItem('sudoka:setup');
 const cont=localStorage.getItem('sudoka:continue')==='1';
-if(!setupRaw && !cont){ location.replace('index.html'); }
+if(!setupRaw && !cont){ console.warn('[Sudoku] Missing setup and continue flag. Redirecting to start.'); location.replace('index.html'); }
 const setup=setupRaw? JSON.parse(setupRaw): null;
 
 /* Elements */
@@ -44,12 +44,24 @@ let game;
 
 function init(){
   try{
-    if(!gridEl){ console.error('[Sudoku] #sudoku-grid not found'); return; }
+    console.log('[Sudoku] init start');
+    if(!gridEl){ throw new Error('#sudoku-grid not found'); }
+    console.log('[Sudoku] grid element ok');
     game=new SudokuGame(onUpdate);
-    if(cont && game.continueLast()){ localStorage.removeItem('sudoka:continue'); buildGrid(); render(); }
-    else { const name=setup?.name||''; const avatar=setup?.avatar||null; const difficulty=setup?.difficulty||'easy'; const theme=setup?.theme||'light'; document.documentElement.setAttribute('data-theme', theme); game.newGame({name, avatar, difficulty, theme}); timer.reset(); buildGrid(); render(); }
+    console.log('[Sudoku] new SudokuGame ok');
+    if(cont && game.continueLast()){
+      console.log('[Sudoku] continueLast ok');
+      localStorage.removeItem('sudoka:continue'); buildGrid(); render();
+    } else {
+      const name=setup?.name||''; const avatar=setup?.avatar||null; const difficulty=setup?.difficulty||'easy'; const theme=setup?.theme||'light';
+      console.log('[Sudoku] starting new game', {name, avatar, difficulty, theme});
+      document.documentElement.setAttribute('data-theme', theme);
+      game.newGame({name, avatar, difficulty, theme});
+      timer.reset(); buildGrid(); render();
+    }
     wireEvents();
-  }catch(err){ console.error('[Sudoku] init failed', err); showToast('Sudoku init failed'); }
+    console.log('[Sudoku] init complete');
+  }catch(err){ console.error('[Sudoku] init failed', err); showToast('Sudoku init failed: ' + (err?.message||'see console')); }
 }
 
 /* Keypad height sync */
