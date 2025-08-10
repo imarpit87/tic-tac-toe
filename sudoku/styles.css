@@ -185,3 +185,40 @@ html,body{overflow-x:hidden;touch-action:manipulation;-webkit-tap-highlight-colo
   }
 }
 @media (min-width: 601px){ .sud-fab{ display:none; } }
+
+/* Play layout responsive */
+:root{ --side-pad:16px; --gap:12px; --keypad-h:232px; }
+html,body{height:100%;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.play-layout{min-height:100vh;display:grid;}
+.grid-pane{display:flex;align-items:center;justify-content:center;padding:12px var(--side-pad);}
+.sud-grid-wrap{position:relative;}
+#sudoku-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;aspect-ratio:1/1;max-width:640px;width:min(88vw,88vh);} 
+
+/* Keypad look + pressed feedback */
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.keypad button,.control-row button{border-radius:14px;padding:14px 0;font-weight:700;font-size:18px;transition:transform .08s ease, box-shadow .12s ease, filter .12s ease;}
+.keypad button.is-pressed{transform:scale(.94);box-shadow:0 0 0 3px rgba(0,0,0,.08) inset;filter:brightness(.95);} 
+
+/* Mobile layout */
+@media (max-width:899px){
+  body{overflow-y:auto;}
+  .control-pane{display:none;}
+  .grid-pane{padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom));}
+  .keypad{
+    position:fixed;left:0;right:0;bottom:0;height:var(--keypad-h);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:var(--bg-card,#fff);box-shadow:0 -8px 24px rgba(0,0,0,.12);z-index:10;
+  }
+  .sud-fab{position:absolute;right:-6px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;pointer-events:none;}
+  .sud-fab button{pointer-events:auto;width:44px;height:44px;border-radius:50%;font-size:20px;line-height:1;display:inline-flex;align-items:center;justify-content:center;border:0;color:#fff;background:linear-gradient(180deg,var(--btn-grad-start,#6a5ae0),var(--btn-grad-end,#7d4be0));box-shadow:0 6px 18px rgba(0,0,0,.18);}
+}
+
+/* Tablet/Laptop layout */
+@media (min-width:900px){
+  .play-layout{grid-template-columns:1fr 340px;gap:var(--gap);padding:16px;box-sizing:border-box;}
+  .control-pane{display:grid;grid-template-rows:auto 1fr;gap:var(--gap);align-content:start;height:calc(100vh - 32px);} 
+  .control-row{display:flex;gap:var(--gap);} 
+  .sud-fab{display:none;} 
+  .grid-pane{height:calc(100vh - 32px);} 
+  .grid-pane #sudoku-grid{width:min(640px, calc(100vh - 32px));height:auto;} 
+}

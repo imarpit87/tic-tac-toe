@@ -46,6 +46,9 @@ const newBtn = document.getElementById('btn-new');
 const fabUndo = document.getElementById('fab-undo');
 const fabRedo = document.getElementById('fab-redo');
 const gridWrap = document.querySelector('.sud-grid-wrap');
+const keypadDom = document.getElementById('sudoku-keypad') || document.getElementById('sud-keypad');
+const ctrlUndo = document.getElementById('btn-undo');
+const ctrlRedo = document.getElementById('btn-redo');
 
 // Setup
 const setupRaw = localStorage.getItem('sudoka:setup');
@@ -211,6 +214,9 @@ function persistTimer(){ try{ localStorage.setItem(TIMER_KEY, String(timer.value
 // Floating buttons -> use existing handlers
 fabUndo?.addEventListener('click', () => { undoBtn?.click(); });
 fabRedo?.addEventListener('click', () => { redoBtn?.click(); });
+// Desktop control-row buttons
+ctrlUndo?.addEventListener('click', () => { undoBtn?.click(); });
+ctrlRedo?.addEventListener('click', () => { redoBtn?.click(); });
 
 // Optional swipe gestures (mobile)
 let touchStartX=null, touchStartY=null;
@@ -219,3 +225,11 @@ gridWrap?.addEventListener('touchend', (e)=>{
   const t=e.changedTouches[0]; const dx=t.clientX - touchStartX; const dy=t.clientY - touchStartY;
   if (Math.abs(dx)>40 && Math.abs(dy)<25){ if (dx<0) undoBtn?.click(); if (dx>0) redoBtn?.click(); }
 }, {passive:true});
+
+// Keypad pressed feedback
+(function(){
+  const pad = keypadDom;
+  if(!pad) return;
+  pad.addEventListener('pointerdown',e=>{ const b=e.target.closest('button'); if(!b) return; b.classList.add('is-pressed'); },{passive:true});
+  window.addEventListener('pointerup',()=>document.querySelectorAll('.keypad button.is-pressed').forEach(b=>b.classList.remove('is-pressed')),{passive:true});
+})();
