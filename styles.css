@@ -192,6 +192,8 @@ h1 { font-size: 2.2rem; margin-bottom: 16px; font-weight: 700; }
 .sudoku-cell.fixed { background: rgba(240,240,240,0.95); color: #333; }
 .sudoku-cell.selected { outline: 2px solid var(--primary); outline-offset: -2px; }
 .sudoku-cell.conflict { background: #ffe3e3; }
+.sudoku-numpad { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px auto; max-width: 420px; }
+.sudoku-numpad .num-btn { min-width: 44px; padding: 10px 0; }
 @media (max-width: 480px) { .sudoku-grid { gap: 3px; max-width: 360px; } .sudoku-cell { font-size: 16px; } }
 
 @media (max-width: 480px) {

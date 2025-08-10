@@ -11,11 +11,13 @@ const sudokuBackBtn = document.getElementById('sudokuBackBtn');
 const sudokuBackBtn2 = document.getElementById('sudokuBackBtn2');
 const sudokuHintBtn = document.getElementById('sudokuHintBtn');
 const sudokuUndoBtn = document.getElementById('sudokuUndoBtn');
+const sudokuNumpad = document.getElementById('sudokuNumpad');
 
 let sudokuBoard = []; // 9x9 array
 let sudokuFixed = []; // boolean 9x9
 let sudokuSelected = null; // {r,c}
 let sudokuUndoStack = [];
+let sudokuSolution = [];
 
 function openSudoku() {
   document.getElementById('gameSetup').classList.add('hidden');
@@ -56,6 +58,7 @@ sudokuUndoBtn?.addEventListener('click', () => {
 function startSudoku(diff) {
   const { givens } = difficultyToParams(diff);
   const solved = generateSolvedGrid();
+  sudokuSolution = JSON.parse(JSON.stringify(solved));
   sudokuBoard = JSON.parse(JSON.stringify(solved));
   sudokuFixed = Array.from({ length: 9 }, () => Array(9).fill(false));
   // Remove cells to match difficulty (givens means keep that many random cells)
@@ -101,6 +104,9 @@ function renderSudoku() {
       if (sudokuSelected && sudokuSelected.r === r && sudokuSelected.c === c) cell.classList.add('selected');
       const val = sudokuBoard[r][c];
       cell.textContent = val === 0 ? '' : String(val);
+      if (val !== 0 && sudokuSolution?.[r]?.[c] && val !== sudokuSolution[r][c]) {
+        cell.classList.add('conflict');
+      }
       cell.setAttribute('data-r', r);
       cell.setAttribute('data-c', c);
       cell.addEventListener('click', () => onSudokuCellClick(r, c));
@@ -128,6 +134,28 @@ function applySudokuMove(r, c, val) {
   sudokuBoard[r][c] = val;
   sudokuUndoStack.push({ r, c, prev });
   renderSudoku();
+}
+
+// Numpad input
+sudokuNumpad?.addEventListener('click', (e) => {
+  const target = e.target;
+  if (!(target instanceof Element)) return;
+  const numAttr = target.getAttribute('data-num');
+  if (!numAttr) return;
+  if (!sudokuSelected) return;
+  const val = Number(numAttr);
+  applySudokuMove(sudokuSelected.r, sudokuSelected.c, val);
+});
+
+function findHint() {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (sudokuBoard[r][c] === 0) {
+        return { r, c, val: sudokuSolution?.[r]?.[c] || 0 };
+      }
+    }
+  }
+  return null;
 }
 
 // Simple generator: start from a known solved grid and shuffle rows/cols/blocks
