@@ -43,6 +43,9 @@ const playerEl = document.getElementById('sud-player') || document.getElementByI
 const gridEl = document.getElementById('sudoku-grid');
 const homeBtn = document.getElementById('btn-home');
 const newBtn = document.getElementById('btn-new');
+const fabUndo = document.getElementById('fab-undo');
+const fabRedo = document.getElementById('fab-redo');
+const gridWrap = document.querySelector('.sud-grid-wrap');
 
 // Setup
 const setupRaw = localStorage.getItem('sudoka:setup');
@@ -204,3 +207,15 @@ function render() {
 
 function formatTime(ms){ const s = Math.floor(ms/1000); const h = Math.floor(s/3600); const m = Math.floor((s%3600)/60); const sec = s%60; return h>0 ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
 function persistTimer(){ try{ localStorage.setItem(TIMER_KEY, String(timer.valueMs)); }catch{} }
+
+// Floating buttons -> use existing handlers
+fabUndo?.addEventListener('click', () => { undoBtn?.click(); });
+fabRedo?.addEventListener('click', () => { redoBtn?.click(); });
+
+// Optional swipe gestures (mobile)
+let touchStartX=null, touchStartY=null;
+gridWrap?.addEventListener('touchstart', (e)=>{ const t=e.changedTouches[0]; touchStartX=t.clientX; touchStartY=t.clientY; }, {passive:true});
+gridWrap?.addEventListener('touchend', (e)=>{
+  const t=e.changedTouches[0]; const dx=t.clientX - touchStartX; const dy=t.clientY - touchStartY;
+  if (Math.abs(dx)>40 && Math.abs(dy)<25){ if (dx<0) undoBtn?.click(); if (dx>0) redoBtn?.click(); }
+}, {passive:true});

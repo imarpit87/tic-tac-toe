@@ -163,3 +163,25 @@ html,body{overflow-x:hidden;touch-action:manipulation;-webkit-tap-highlight-colo
 
 /* Ensure minimum size on small phones */
 @media (max-width:480px){ #sudoku-grid .cell { min-height: 48px; } }
+
+/* Floating undo/redo for mobile */
+@media (max-width: 600px){
+  .sud-grid-wrap{ position: relative; }
+  .sud-fab{
+    position: absolute;
+    right: -4px; /* nudge inward if tight */
+    top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px;
+    pointer-events: none;
+  }
+  .sud-fab button{
+    pointer-events: auto;
+    width: 44px; height: 44px;
+    border-radius: 50%; font-size: 20px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,.18);
+    background: linear-gradient(180deg, var(--btn-grad-start,#6a5ae0), var(--btn-grad-end,#7d4be0));
+    color: #fff; border: 0;
+  }
+}
+@media (min-width: 601px){ .sud-fab{ display:none; } }
