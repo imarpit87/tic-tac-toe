@@ -17,7 +17,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 .actions{ display:flex; gap:10px; justify-content:center; }
 .hint{ color:#64748B; font-size:12px; }
 
-/* Play */
+/* Play: single-column layout across all sizes */
 .play{ min-height:100vh; display:grid; grid-template-columns:1fr; gap:16px; max-width:1100px; margin:0 auto; padding:16px; }
 .play-topbar{ position:sticky; top:0; z-index:5; padding:8px var(--pad); background:var(--bg-card); }
 .actionbar{ display:flex; flex-wrap:nowrap; justify-content:center; gap:12px; align-items:center; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
@@ -25,11 +25,10 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 .actionbar .btn{ white-space:nowrap; }
 .play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); overflow:auto; }
 .grid-wrap{ display:flex; justify-content:center; }
-/* Grid width avoids dynamic 100vh jumps; clamps to a positive min and 72vh/svh */
-#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; width:clamp(280px, min(92vw, var(--grid-cap)), 72vh); aspect-ratio:1/1; margin:0 auto; padding:8px; border-radius:16px; background:var(--bg-grid); box-sizing:border-box; }
-@supports (height: 1svh){
-  #sudoku-grid{ width:clamp(280px, min(92vw, var(--grid-cap)), 72svh); }
-}
+/* Grid width: clamp ensures positive size; prefer dvh/svh on modern browsers */
+#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; width:clamp(300px, min(92vw, var(--grid-cap)), 72vh); aspect-ratio:1/1; margin:0 auto; padding:8px; border-radius:16px; background:var(--bg-grid); box-sizing:border-box; }
+@supports (height: 1dvh){ #sudoku-grid{ width:clamp(300px, min(92vw, var(--grid-cap)), 72dvh); } }
+@supports (height: 1svh){ #sudoku-grid{ width:clamp(300px, min(92vw, var(--grid-cap)), 72svh); } }
 #sudoku-grid .cell{ aspect-ratio:1/1; min-height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:clamp(18px,4.2vw,28px); background:#fff; }
 #sudoku-grid .cell.given{ background:#FFF3BF; font-weight:800; }
 #sudoku-grid .cell.selected{ box-shadow:0 0 0 3px #CFE4FF inset; }
@@ -46,18 +45,15 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 
 /* Mobile: fixed keypad */
 @media (max-width:1023px){
-  .desk{ display:none; }
+  .desk{ display:none !important; }
   #sudoku-keypad{ position:fixed; left:0; right:0; bottom:0; height:var(--keypad-h); padding:12px 16px calc(12px + env(safe-area-inset-bottom)); background:#fff; box-shadow:0 -8px 24px rgba(0,0,0,.12); z-index:10; }
 }
 
-/* Desktop two-column */
+/* Desktop: keep header at top, grid below, keypad below grid (not fixed) */
 @media (min-width:1024px){
   html,body{ overflow-x:hidden; }
-  .play{ grid-template-columns:minmax(0,1fr) 360px; align-items:center; }
-  .desk{ height:100vh; display:grid; align-content:center; gap:16px; }
-  #sudoku-grid{ width:min(72vh, 720px); }
-  #sudoku-keypad{ display:none; }
-  .row{ display:flex; gap:12px; }
+  .desk{ display:none !important; }
+  #sudoku-keypad{ position:static; height:auto; box-shadow:none; padding:0; margin-top:12px; }
 }
 
 /* Toast / modal */
