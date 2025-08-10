@@ -12,13 +12,19 @@
 <body>
   <div class="container sudoku-container">
     <main class="play">
-      <header class="topbar" role="toolbar" aria-label="Sudoku controls">
-        <button id="u-undo" aria-label="Undo">↩ Undo</button>
-        <button id="u-redo" aria-label="Redo">↪ Redo</button>
-        <span id="u-timer" class="timer">00:00</span>
+      <header class="play-topbar" role="toolbar" aria-label="Sudoku controls">
+        <nav class="actionbar" aria-label="Actions">
+          <a id="homeLink" href="/sudoku/index.html" class="btn tertiary">Home</a>
+          <button id="newBtn" class="btn">New</button>
+          <button id="hintBtn" class="btn">Hint</button>
+          <button id="notesToggleBtn" class="btn" aria-pressed="false">Notes</button>
+          <button id="m-undo" class="btn">Undo</button>
+          <button id="m-redo" class="btn">Redo</button>
+          <span id="m-timer" class="timer">00:00</span>
+        </nav>
       </header>
 
-      <section class="stage">
+      <section class="play-stage">
         <div class="grid-wrap">
           <div id="sudoku-grid" role="grid" aria-label="Sudoku grid"></div>
         </div>
@@ -31,8 +37,8 @@
         <button data-clear>Clear</button>
       </nav>
 
-      <aside class="side">
-        <div class="row">
+      <aside class="play-side">
+        <div class="side-row">
           <button id="d-undo" aria-label="Undo">↩ Undo</button>
           <button id="d-redo" aria-label="Redo">↪ Redo</button>
         </div>

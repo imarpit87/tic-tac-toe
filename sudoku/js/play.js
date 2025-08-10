@@ -28,6 +28,10 @@ const winModal = document.getElementById('winModal');
 const winStats = document.getElementById('winStats');
 const closeWinBtn = document.getElementById('closeWinBtn');
 const gridEl = document.getElementById('sudoku-grid');
+const newBtn = document.getElementById('newBtn');
+const homeLink = document.getElementById('homeLink');
+const notesBtn = document.getElementById('notesToggleBtn');
+const hintBtn = document.getElementById('hintBtn');
 
 // Declare after element lookups
 let actionsSincePlacement = 0;
@@ -55,6 +59,40 @@ if (continueFlag && game.continueLast()) {
 /* Timer focus/blur */
 window.addEventListener('blur', () => timer.pause());
 window.addEventListener('focus', () => { if (!game.solved()) timer.resume(); });
+
+/* Action buttons */
+function startNewFromSetup(){
+  const sraw = localStorage.getItem('sudoka:setup');
+  const s = sraw ? JSON.parse(sraw) : {};
+  const name = s?.name || '';
+  const avatar = s?.avatar || null;
+  const difficulty = s?.difficulty || 'easy';
+  const theme = s?.theme || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  game.newGame({ name, avatar, difficulty, theme });
+  timer.reset();
+  buildGrid();
+  render();
+}
+newBtn?.addEventListener('click', () => {
+  if (confirm('Start a new puzzle? Your current progress will be lost.')) {
+    startNewFromSetup();
+    showToast('New puzzle');
+  }
+});
+if (notesBtn) notesBtn.setAttribute('aria-pressed', String(game.notesMode));
+notesBtn?.addEventListener('click', () => {
+  if (typeof game.toggleNotesMode === 'function') {
+    game.toggleNotesMode();
+    notesBtn.setAttribute('aria-pressed', String(game.notesMode));
+  }
+});
+hintBtn?.addEventListener('click', () => {
+  if (typeof game.hint === 'function') {
+    const h = game.hint();
+    if (h) { showToast('Hint used'); render(); }
+  }
+});
 
 /* Grid input */
 gridEl.addEventListener('pointerdown', (e) => {
@@ -99,7 +137,7 @@ function placeNumberWithFeedback(r, c, val){
   if (!timer.isRunning) timer.start();
   const el = gridEl.children[r*9+c];
   if (!ok) {
-    showToast('Conflicts in row');
+    showToast('That conflicts with this row/column/box');
     el.classList.add('error');
     setTimeout(()=>el.classList.remove('error'), 400);
   } else {
@@ -185,4 +223,19 @@ function persistTimer(){ try{ localStorage.setItem(TIMER_KEY, String(timer.value
   window.addEventListener('resize',resize);
   window.addEventListener('orientationchange',resize);
   resize();
+})();
+
+/* Mobile keypad height sync to keep grid above it */
+(function(){
+  const mobilePad = document.getElementById('sudoku-keypad');
+  if(!mobilePad) return;
+  function syncKeypadPadding(){
+    const h = mobilePad.getBoundingClientRect().height || 240;
+    document.documentElement.style.setProperty('--keypad-h', `${Math.round(h)}px`);
+  }
+  window.addEventListener('load', syncKeypadPadding);
+  window.addEventListener('resize', syncKeypadPadding);
+  window.addEventListener('orientationchange', syncKeypadPadding);
+  try { new ResizeObserver(syncKeypadPadding).observe(mobilePad); } catch {}
+  syncKeypadPadding();
 })();
