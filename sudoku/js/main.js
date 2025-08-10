@@ -12,11 +12,11 @@ let selectedAvatar=null; avatarPicker?.addEventListener('click', (e)=>{ const b=
 let selectedDifficulty='easy'; diffPicker?.addEventListener('click',(e)=>{ const b=e.target.closest('.pill'); if(!b) return; diffPicker.querySelectorAll('.pill').forEach(x=>x.classList.remove('active')); b.classList.add('active'); selectedDifficulty=b.dataset.diff; });
 
 try{ const saved=localStorage.getItem('sudoka:save'); if(saved) continueLink.hidden=false; }catch{}
-continueLink?.addEventListener('click',(e)=>{ e.preventDefault(); localStorage.setItem('sudoka:continue','1'); location.href='/sudoku/play.html'; });
+continueLink?.addEventListener('click',(e)=>{ e.preventDefault(); localStorage.setItem('sudoka:continue','1'); location.href='play.html'; });
 
 form.addEventListener('submit',(e)=>{
   e.preventDefault(); if(!validate()){ nameEl.focus(); return; }
   const setup={ name:nameEl.value.trim(), avatar:selectedAvatar, difficulty:selectedDifficulty, theme:'light' };
   try{ localStorage.setItem('sudoka:setup', JSON.stringify(setup)); }catch{}
-  location.href='/sudoku/play.html';
+  location.href='play.html';
 });

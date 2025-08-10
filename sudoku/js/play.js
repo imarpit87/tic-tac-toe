@@ -10,7 +10,7 @@ console.log('[Sudoku] init play.js');
 /* Setup guard */
 const setupRaw=localStorage.getItem('sudoka:setup');
 const cont=localStorage.getItem('sudoka:continue')==='1';
-if(!setupRaw && !cont){ location.replace('/sudoku/index.html'); }
+if(!setupRaw && !cont){ location.replace('index.html'); }
 const setup=setupRaw? JSON.parse(setupRaw): null;
 
 /* Elements */
