@@ -7,7 +7,7 @@
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#667eea" />
   <link rel="stylesheet" href="/styles.css?v=2025-08-09-01" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="/sudoku/play.css" />
 </head>
 <body>
   <div class="container sudoku-container">
@@ -37,14 +37,8 @@
         <button data-clear>Clear</button>
       </nav>
 
-      <aside class="play-side">
-        <div class="side-actions">
-          <a id="homeLink" href="/sudoku/index.html" class="btn tertiary">Home</a>
-          <button id="newBtn" class="btn">New</button>
-          <button id="hintBtn" class="btn">Hint</button>
-          <button id="notesToggleBtn" class="btn" aria-pressed="false">Notes</button>
-        </div>
-        <div class="side-row">
+      <aside class="desk">
+        <div class="row">
           <button id="d-undo" class="btn" aria-label="Undo">Undo</button>
           <button id="d-redo" class="btn" aria-label="Redo">Redo</button>
         </div>

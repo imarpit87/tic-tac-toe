@@ -1,0 +1,49 @@
+/* Sudoku PLAY dedicated stylesheet */
+:root{ --pad:16px; --gap:12px; --grid-cap:720px; --keypad-h:260px; }
+html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+
+.play{ min-height:100vh; display:grid; grid-template-columns:1fr; gap:16px; max-width:1100px; margin:0 auto; padding:16px; }
+.play-topbar{ position:sticky; top:0; z-index:5; padding:8px var(--pad); background:var(--bg-card,#fff); }
+.actionbar{ display:flex; flex-wrap:nowrap; justify-content:center; gap:12px; align-items:center; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.actionbar::-webkit-scrollbar{ display:none; }
+.actionbar .btn{ white-space:nowrap; }
+
+.play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); }
+.grid-wrap{ display:flex; justify-content:center; }
+#sudoku-grid{
+  display:grid; grid-template-columns:repeat(9,1fr); gap:6px;
+  width: min( 92vw, var(--grid-cap), calc(100vh - var(--keypad-h) - 140px) );
+  aspect-ratio: 1 / 1; margin: 0 auto; padding:8px; border-radius:16px; background: var(--bg-grid,rgba(0,0,0,.05)); box-sizing:border-box;
+}
+#sudoku-grid .cell{ aspect-ratio:1/1; min-height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:clamp(18px, 4.2vw, 28px); background:#fff; }
+#sudoku-grid .cell.given{ background:#FFF3BF; font-weight:700; }
+#sudoku-grid .cell.selected{ box-shadow:0 0 0 3px #CFE4FF inset; }
+#sudoku-grid .cell.peer{ background:#EEF5FF; }
+#sudoku-grid .cell.error{ background:#FEE2E2; animation:shake 120ms linear; }
+@keyframes shake { 50%{ transform:translateX(2px) } }
+#sudoku-grid .cell.box-top, #sudoku-grid .cell.box-left, #sudoku-grid .cell.box-right, #sudoku-grid .cell.box-bottom{ outline:2px solid rgba(0,0,0,.15); outline-offset:-2px; }
+
+/* Keypad */
+.keypad{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:720px; margin:0 auto; }
+.keypad button{ height:56px; border-radius:14px; font-weight:700; font-size:18px; background: linear-gradient(180deg, #6A5AE0, #7D4BE0); color:#fff; box-shadow:0 8px 18px rgba(0,0,0,.12); transition: transform .08s, filter .12s, box-shadow .12s; }
+.keypad button.flash{ transform:scale(.96); filter:brightness(.95); }
+.keypad button[data-clear]{ background:#e9ecef; color:#111; box-shadow:0 6px 16px rgba(0,0,0,.1); }
+
+/* Fixed bottom keypad on phones/tablets */
+@media (max-width:1023px){
+  .desk{ display:none; }
+  #sudoku-keypad{
+    position:fixed; left:0; right:0; bottom:0; height:var(--keypad-h);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom)); background:#fff; box-shadow:0 -8px 24px rgba(0,0,0,.12); z-index:10;
+  }
+}
+
+/* Desktop/laptop split */
+@media (min-width:1024px){
+  html,body{ overflow:hidden; }
+  .play{ grid-template-columns: minmax(0,1fr) 360px; align-items:center; }
+  .desk{ height: 100vh; display:grid; align-content:center; gap:16px; }
+  #sudoku-grid{ width: min(72vh, 720px); }
+  #sudoku-keypad{ display:none; }
+  .row{ display:flex; gap:12px; }
+}
