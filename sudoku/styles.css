@@ -23,9 +23,9 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 .actionbar{ display:flex; flex-wrap:nowrap; justify-content:center; gap:12px; align-items:center; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
 .actionbar::-webkit-scrollbar{ display:none; }
 .actionbar .btn{ white-space:nowrap; }
-.play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); }
+.play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); overflow:auto; }
 .grid-wrap{ display:flex; justify-content:center; }
-#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; width:min(92vw, var(--grid-cap), calc(100vh - var(--keypad-h) - 160px)); aspect-ratio:1/1; margin:0 auto; padding:8px; border-radius:16px; background:var(--bg-grid); box-sizing:border-box; }
+#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; width:min(92vw, var(--grid-cap), max(300px, calc(100vh - var(--keypad-h) - 160px))); aspect-ratio:1/1; margin:0 auto; padding:8px; border-radius:16px; background:var(--bg-grid); box-sizing:border-box; }
 #sudoku-grid .cell{ aspect-ratio:1/1; min-height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:clamp(18px,4.2vw,28px); background:#fff; }
 #sudoku-grid .cell.given{ background:#FFF3BF; font-weight:800; }
 #sudoku-grid .cell.selected{ box-shadow:0 0 0 3px #CFE4FF inset; }
@@ -48,7 +48,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 
 /* Desktop two-column */
 @media (min-width:1024px){
-  html,body{ overflow:hidden; }
+  html,body{ overflow-x:hidden; }
   .play{ grid-template-columns:minmax(0,1fr) 360px; align-items:center; }
   .desk{ height:100vh; display:grid; align-content:center; gap:16px; }
   #sudoku-grid{ width:min(72vh, 720px); }
