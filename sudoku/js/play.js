@@ -5,6 +5,8 @@ import { isValidPlacement } from './board.js';
 const TIMER_KEY='sudoka:timerMs';
 const timer=(()=>{ let start=0, running=false, value=0; function load(){ try{ const v=Number(localStorage.getItem(TIMER_KEY)); if(!Number.isNaN(v)) value=v; }catch{} } function save(){ try{ localStorage.setItem(TIMER_KEY,String(value)); }catch{} } function startRun(){ if(running) return; running=true; start=performance.now(); } function pause(){ if(!running) return; running=false; value+=performance.now()-start; save(); } function resume(){ if(running) return; running=true; start=performance.now(); } function reset(){ running=false; start=0; value=0; save(); } function now(){ return running? value+(performance.now()-start): value; } load(); return { start:startRun, pause, resume, reset, get isRunning(){return running;}, get valueMs(){return now();} }; })();
 
+console.log('[Sudoku] init play.js');
+
 /* Setup guard */
 const setupRaw=localStorage.getItem('sudoka:setup');
 const cont=localStorage.getItem('sudoka:continue')==='1';
@@ -13,6 +15,7 @@ const setup=setupRaw? JSON.parse(setupRaw): null;
 
 /* Elements */
 const gridEl=document.getElementById('sudoku-grid');
+if(gridEl) gridEl.style.pointerEvents = 'auto';
 const toast=document.getElementById('toast');
 const mUndo=document.getElementById('m-undo');
 const mRedo=document.getElementById('m-redo');
@@ -37,12 +40,12 @@ else { const name=setup?.name||''; const avatar=setup?.avatar||null; const diffi
 (function(){ if(!keypadMobile) return; function sync(){ const h=Math.round(keypadMobile.getBoundingClientRect().height||260); document.documentElement.style.setProperty('--keypad-h', h+'px'); } window.addEventListener('load',sync); window.addEventListener('resize',sync); window.addEventListener('orientationchange',sync); try{ new ResizeObserver(sync).observe(keypadMobile);}catch{} sync(); })();
 
 /* Build grid */
-function buildGrid(){ const frag=document.createDocumentFragment(); for(let r=0;r<9;r++) for(let c=0;c<9;c++){ const cell=document.createElement('div'); cell.className='cell'; if(r%3===0) cell.classList.add('box-top'); if(c%3===0) cell.classList.add('box-left'); if(c%3===2) cell.classList.add('box-right'); if(r%3===2) cell.classList.add('box-bottom'); cell.setAttribute('role','gridcell'); cell.setAttribute('tabindex','0'); cell.setAttribute('aria-label',`Row ${r+1}, Column ${c+1}`); cell.dataset.row=String(r); cell.dataset.col=String(c); frag.appendChild(cell);} gridEl.innerHTML=''; gridEl.appendChild(frag);} 
+function buildGrid(){ const frag=document.createDocumentFragment(); for(let r=0;r<9;r++) for(let c=0;c<9;c++){ const cell=document.createElement('div'); cell.className='cell'; if(r%3===0) cell.classList.add('box-top'); if(c%3===0) cell.classList.add('box-left'); if(c%3===2) cell.classList.add('box-right'); if(r%3===2) cell.classList.add('box-bottom'); cell.setAttribute('role','gridcell'); cell.setAttribute('tabindex','0'); cell.setAttribute('aria-label',`Row ${r+1}, Column ${c+1}`); cell.dataset.row=String(r); cell.dataset.col=String(c); frag.appendChild(cell);} gridEl.innerHTML=''; gridEl.appendChild(frag); console.log('[Sudoku] grid built with 81 cells'); } 
 
 /* Selection + input */
 function selectCell(r,c){ game.selectCell(r,c); render(); }
 
-gridEl.addEventListener('pointerdown',(e)=>{ const t=e.target.closest('.cell'); if(!t) return; const r=Number(t.dataset.row), c=Number(t.dataset.col); if(Number.isNaN(r)||Number.isNaN(c)) return; selectCell(r,c); if(!timer.isRunning) timer.start(); }, {passive:true});
+gridEl.addEventListener('pointerdown',(e)=>{ const t=e.target.closest('.cell'); if(!t) return; const r=Number(t.dataset.row), c=Number(t.dataset.col); if(Number.isNaN(r)||Number.isNaN(c)) return; console.log('[Sudoku] cell click', r, c); selectCell(r,c); if(!timer.isRunning) timer.start(); }, {passive:true});
 
 document.addEventListener('keydown',(e)=>{ const sel=game.selected; if(!sel) return; const {r,c}=sel; if(/^[1-9]$/.test(e.key)){ place(r,c,Number(e.key)); e.preventDefault(); } else if(['Backspace','Delete','0'].includes(e.key)){ place(r,c,0); e.preventDefault(); } else if(e.key==='ArrowUp'){ selectCell(Math.max(0,r-1),c); } else if(e.key==='ArrowDown'){ selectCell(Math.min(8,r+1),c); } else if(e.key==='ArrowLeft'){ selectCell(r,Math.max(0,c-1)); } else if(e.key==='ArrowRight'){ selectCell(r,Math.min(8,c+1)); } else if(e.key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey) && e.shiftKey){ redo(); } else if(e.key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey)){ undo(); } else if(e.key.toLowerCase()==='h'){ doHint(); } else if(e.key.toLowerCase()==='n'){ toggleNotes(); } });
 
