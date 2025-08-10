@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XO Duel — Sudoku</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#667eea" />
+  <link rel="stylesheet" href="/styles.css?v=2025-08-09-01" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="container sudoku-container">
+    <header class="app-header">
+      <h1 class="app-title" aria-label="Sudoku">🧩 Sudoku</h1>
+      <div class="header-controls">
+        <a class="btn tertiary" href="/index.html" aria-label="Back to home">Home</a>
+        <select id="sudokuThemeSelect" class="theme-select" aria-label="Theme select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="neon">Neon</option>
+          <option value="kids">Kids</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Start Screen -->
+    <section id="startScreen" class="start-screen" aria-labelledby="startTitle">
+      <h2 id="startTitle">Start a New Puzzle</h2>
+      <p class="muted" id="startHelper">Tap a cell, then choose a number.</p>
+      <div class="start-grid">
+        <div class="start-field">
+          <label for="playerName" class="muted">Player name (optional)</label>
+          <input id="playerName" class="text-input" placeholder="Your name" />
+        </div>
+        <div class="start-field">
+          <div class="muted">Choose avatar (optional)</div>
+          <div id="avatarPicker" class="avatar-picker">
+            <button class="avatar-option" data-avatar="🧑">🧑</button>
+            <button class="avatar-option" data-avatar="🧑‍🎓">🧑‍🎓</button>
+            <button class="avatar-option" data-avatar="🦸‍♂️">🦸‍♂️</button>
+            <button class="avatar-option" data-avatar="🦸‍♀️">🦸‍♀️</button>
+            <button class="avatar-option" data-avatar="🧑‍🚀">🧑‍🚀</button>
+            <button class="avatar-option" data-avatar="🧑‍🍳">🧑‍🍳</button>
+            <button class="avatar-option" data-avatar="🐱">🐱</button>
+            <button class="avatar-option" data-avatar="🐼">🐼</button>
+          </div>
+          <button id="avatarSkipBtn" class="btn tertiary" type="button">Skip</button>
+        </div>
+        <div class="start-field">
+          <label for="difficultySelect" class="muted">Difficulty</label>
+          <select id="difficultySelect" class="rounds-select" aria-label="Select difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+            <option value="god">God Mode</option>
+          </select>
+        </div>
+        <div class="start-field">
+          <label for="themeSelectInline" class="muted">Theme</label>
+          <select id="themeSelectInline" class="rounds-select" aria-label="Theme select (inline)">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="neon">Neon</option>
+            <option value="kids">Kids</option>
+          </select>
+        </div>
+        <div class="start-actions">
+          <button id="startGameBtn" class="btn">Start Game</button>
+          <button id="continueBtn" class="btn secondary" style="display:none;">Continue last game</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Game Screen -->
+    <section id="gameScreen" class="game-screen hidden" aria-live="polite">
+      <div class="topbar">
+        <a class="btn tertiary" href="/index.html">Home</a>
+        <button id="newGameBtn" class="btn">New Game</button>
+        <div class="muted">Difficulty: <strong id="currentDifficulty">Easy</strong></div>
+        <button id="hintBtn" class="btn">Hint</button>
+        <button id="notesToggleBtn" class="btn tertiary" aria-pressed="false">Notes Off</button>
+        <button id="undoBtn" class="btn tertiary" disabled>Undo</button>
+        <button id="redoBtn" class="btn tertiary" disabled>Redo</button>
+        <div class="muted">⏱ <span id="timer">00:00</span></div>
+        <select id="sudokuThemeSelectTop" class="theme-select" aria-label="Theme select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="neon">Neon</option>
+          <option value="kids">Kids</option>
+        </select>
+      </div>
+
+      <div class="player-bar">
+        <div id="playerBadge" class="player-badge"><span id="playerAvatar" class="avatar">🧑</span><span id="playerLabel">Player</span></div>
+        <div id="statusText" class="muted" role="status"></div>
+      </div>
+
+      <div class="sudoku-wrap">
+        <div id="sudokuGrid" class="sudoku-grid" role="grid" aria-label="Sudoku board" tabindex="0"></div>
+        <div class="keypad" id="keypad" aria-label="Number pad">
+          <button class="btn key" data-num="1">1</button>
+          <button class="btn key" data-num="2">2</button>
+          <button class="btn key" data-num="3">3</button>
+          <button class="btn key" data-num="4">4</button>
+          <button class="btn key" data-num="5">5</button>
+          <button class="btn key" data-num="6">6</button>
+          <button class="btn key" data-num="7">7</button>
+          <button class="btn key" data-num="8">8</button>
+          <button class="btn key" data-num="9">9</button>
+          <button class="btn key secondary" data-num="0">Clear</button>
+        </div>
+      </div>
+
+      <div id="toast" class="toast" aria-live="polite" role="status"></div>
+    </section>
+
+    <div class="modal hidden" id="winModal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="winTitle">Puzzle solved!</h3>
+        </div>
+        <p class="muted" id="winStats">Well done—puzzle solved.</p>
+        <div class="controls">
+          <button id="playAgainBtn" class="btn">Play again</button>
+          <button id="closeWinBtn" class="btn tertiary">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
