@@ -71,51 +71,7 @@
         </div>
       </div>
     </section>
-
-    <!-- Game Screen -->
-    <section id="gameScreen" class="game-screen hidden" aria-live="polite">
-      <header class="sud-toolbar" role="toolbar" aria-label="Sudoku toolbar">
-        <a class="btn icon-btn" href="/index.html" title="Home">🏠 Home</a>
-        <button id="newGameBtn" class="btn icon-btn" title="New Game">🆕 New</button>
-        <button id="hintBtn" class="btn icon-btn" title="Hint">💡 Hint</button>
-        <button id="notesToggleBtn" class="btn icon-btn" aria-pressed="false" title="Notes">📝 Notes</button>
-        <button id="undoBtn" class="btn icon-btn" disabled title="Undo">↩ Undo</button>
-        <button id="redoBtn" class="btn icon-btn" disabled title="Redo">↪ Redo</button>
-        <span class="sud-timer" aria-label="Timer">⏱ <span id="timer">00:00</span></span>
-      </header>
-      <div class="sud-meta">Difficulty: <span id="sud-difficulty">Easy</span></div>
-      <main class="sud-stage">
-        <div class="sud-grid-wrap">
-          <div id="sudoku-grid" role="grid" aria-label="Sudoku grid"></div>
-        </div>
-      </main>
-      <nav id="sud-keypad" class="sud-keypad" aria-label="Number pad">
-        <button data-num="1">1</button>
-        <button data-num="2">2</button>
-        <button data-num="3">3</button>
-        <button data-num="4">4</button>
-        <button data-num="5">5</button>
-        <button data-num="6">6</button>
-        <button data-num="7">7</button>
-        <button data-num="8">8</button>
-        <button data-num="9">9</button>
-        <button data-clear>Clear</button>
-      </nav>
-      <div id="toast" class="toast" aria-live="polite" role="status"></div>
-    </section>
-
-    <div class="modal hidden" id="winModal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="winTitle">Puzzle solved!</h3>
-        </div>
-        <p class="muted" id="winStats">Well done—puzzle solved.</p>
-        <div class="controls">
-          <button id="playAgainBtn" class="btn">Play again</button>
-          <button id="closeWinBtn" class="btn tertiary">Close</button>
-        </div>
-      </div>
-    </div>
+    
   </div>
 
   <script type="module" src="./js/main.js"></script>
