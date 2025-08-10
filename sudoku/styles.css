@@ -61,3 +61,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 .toast.show{ opacity:1; }
 .modal.hidden{ display:none; }
 .menu.hidden{ display:none; }
+
+/* Error bar */
+.errorbar{ position:sticky; top:0; z-index:10; background:#fee2e2; color:#7f1d1d; padding:8px 12px; font-weight:700; text-align:center; border-bottom:1px solid #fecaca; }
+.errorbar[hidden]{ display:none; }
