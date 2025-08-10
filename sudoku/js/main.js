@@ -5,84 +5,83 @@ const gridEl = document.getElementById('sudokuGrid');
 const startScreen = document.getElementById('startScreen');
 const gameScreen = document.getElementById('gameScreen');
 const startGameBtn = document.getElementById('startGameBtn');
-const continueBtn = document.getElementById('continueBtn');
-const difficultySelect = document.getElementById('difficultySelect');
-const playerNameInput = document.getElementById('playerName');
-const avatarPicker = document.getElementById('avatarPicker');
-const avatarSkipBtn = document.getElementById('avatarSkipBtn');
-const playerAvatar = document.getElementById('playerAvatar');
-const playerLabel = document.getElementById('playerLabel');
-const currentDifficulty = document.getElementById('currentDifficulty');
+const continueLink = document.getElementById('continueLink');
+const newGameBtn = document.getElementById('newGameBtn');
 const hintBtn = document.getElementById('hintBtn');
 const notesToggleBtn = document.getElementById('notesToggleBtn');
 const undoBtn = document.getElementById('undoBtn');
 const redoBtn = document.getElementById('redoBtn');
-const newGameBtn = document.getElementById('newGameBtn');
 const keypad = document.getElementById('keypad');
 const toast = document.getElementById('toast');
-const statusText = document.getElementById('statusText');
 const timerEl = document.getElementById('timer');
 const winModal = document.getElementById('winModal');
 const winStats = document.getElementById('winStats');
 const playAgainBtn = document.getElementById('playAgainBtn');
 const closeWinBtn = document.getElementById('closeWinBtn');
-const themeSelectTop = document.getElementById('sudokuThemeSelectTop');
-const themeSelectHeader = document.getElementById('sudokuThemeSelect');
-const themeSelectInline = document.getElementById('themeSelectInline');
+const playerAvatar = document.getElementById('playerAvatar');
+const playerLabel = document.getElementById('playerLabel');
+const currentDifficulty = document.getElementById('currentDifficulty');
+
+const playerNameInput = document.getElementById('playerName');
+const avatarPicker = document.getElementById('avatarPicker');
+const avatarSkipBtn = document.getElementById('avatarSkipBtn');
+const difficultyGroup = document.getElementById('difficultyGroup');
+const themeGroup = document.getElementById('themeGroup');
 
 let selectedAvatar = '';
+let selectedDifficulty = 'easy';
+let selectedTheme = 'light';
 
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  themeSelectTop.value = theme;
-  themeSelectHeader.value = theme;
-  themeSelectInline.value = theme;
+  selectedTheme = theme;
 }
 
-;(() => { // initialize theme from saved or default
-  const savedState = loadState();
-  const saved = (savedState && savedState.theme) || 'light';
-  setTheme(saved);
+;(() => {
+  const saved = loadState();
+  if (saved?.theme) setTheme(saved.theme);
 })();
-
-themeSelectTop.addEventListener('change', () => setTheme(themeSelectTop.value));
-themeSelectHeader.addEventListener('change', () => setTheme(themeSelectHeader.value));
-themeSelectInline.addEventListener('change', () => setTheme(themeSelectInline.value));
 
 const game = new SudokuGame(onUpdate);
 
-if (loadState()) continueBtn.style.display = '';
+const hasSave = !!loadState();
+if (!hasSave) continueLink.style.display = 'none';
+continueLink?.addEventListener('click', (e) => { e.preventDefault(); if (game.continueLast()) { setTheme(game.theme); enterGameUI(game.player.name, game.player.avatar, game.difficulty); } });
 
 startGameBtn.addEventListener('click', () => {
   const name = playerNameInput.value.trim();
   const avatar = selectedAvatar || '🧑';
-  const difficulty = difficultySelect.value;
-  const theme = themeSelectInline.value;
-  setTheme(theme);
-  game.newGame({ name, avatar, difficulty, theme });
-  enterGameUI(name, avatar, difficulty);
+  setTheme(selectedTheme);
+  game.newGame({ name, avatar, difficulty: selectedDifficulty, theme: selectedTheme });
+  enterGameUI(name, avatar, selectedDifficulty);
 });
 
-continueBtn.addEventListener('click', () => {
-  if (game.continueLast()) { setTheme(game.theme); enterGameUI(game.player.name, game.player.avatar, game.difficulty); }
-});
-
-newGameBtn.addEventListener('click', () => {
-  startScreen.classList.remove('hidden');
-  gameScreen.classList.add('hidden');
-});
+newGameBtn.addEventListener('click', () => { startScreen.classList.remove('hidden'); gameScreen.classList.add('hidden'); });
 
 avatarPicker.addEventListener('click', (e) => {
-  const btn = e.target.closest('.avatar-option');
-  if (!btn) return;
+  const btn = e.target.closest('.avatar-option'); if (!btn) return;
   [...avatarPicker.querySelectorAll('.avatar-option')].forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   selectedAvatar = btn.getAttribute('data-avatar');
 });
 avatarSkipBtn.addEventListener('click', () => { selectedAvatar = ''; [...avatarPicker.querySelectorAll('.avatar-option')].forEach(b => b.classList.remove('selected')); });
 
-hintBtn.addEventListener('click', () => { const h = game.hint(); if (!h) showToast('No logical hint available right now—try another area'); else { selectCell(h.r, h.c); showToast('Hint applied'); } });
-notesToggleBtn.addEventListener('click', () => { game.toggleNotesMode(); notesToggleBtn.textContent = game.notesMode ? 'Notes On' : 'Notes Off'; notesToggleBtn.setAttribute('aria-pressed', String(game.notesMode)); showToast('Notes ' + (game.notesMode ? 'enabled' : 'disabled')); });
+difficultyGroup.addEventListener('click', (e) => {
+  const pill = e.target.closest('.pill'); if (!pill) return;
+  [...difficultyGroup.querySelectorAll('.pill')].forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  selectedDifficulty = pill.getAttribute('data-diff') || 'easy';
+});
+
+themeGroup.addEventListener('click', (e) => {
+  const pill = e.target.closest('.pill'); if (!pill) return;
+  [...themeGroup.querySelectorAll('.pill')].forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  setTheme(pill.getAttribute('data-theme') || 'light');
+});
+
+hintBtn.addEventListener('click', () => { const h = game.hint(); if (!h) showToast('No logical hint available right now—try another area'); else { selectCell(h.r, h.c); showToast('Hint used'); } });
+notesToggleBtn.addEventListener('click', () => { game.toggleNotesMode(); notesToggleBtn.setAttribute('aria-pressed', String(game.notesMode)); showToast(game.notesMode ? 'Notes enabled' : 'Notes disabled'); });
 undoBtn.addEventListener('click', () => { if (game.undo()) showToast('Undone'); updateUndoRedo(); render(); });
 redoBtn.addEventListener('click', () => { if (game.redo()) showToast('Redone'); updateUndoRedo(); render(); });
 
@@ -92,7 +91,7 @@ keypad.addEventListener('click', (e) => {
   const val = Number(key.getAttribute('data-num'));
   const { r, c } = game.selected;
   const ok = game.placeNumber(r, c, val);
-  if (!ok) showToast('That conflicts with this row/column/box');
+  if (!ok) showToast('That conflicts with this row/column/box'); else showToast('Nice move!');
   render();
 });
 
@@ -117,7 +116,7 @@ function selectCell(r, c) { game.selectCell(r, c); render(); }
 
 function onCellKeyDown(e, r, c) {
   const key = e.key;
-  if (/^[1-9]$/.test(key)) { const ok = game.placeNumber(r, c, Number(key)); if (!ok) showToast('That conflicts with this row/column/box'); render(); e.preventDefault(); }
+  if (/^[1-9]$/.test(key)) { const ok = game.placeNumber(r, c, Number(key)); showToast(ok ? 'Nice move!' : 'That conflicts with this row/column/box'); render(); e.preventDefault(); }
   else if (key === 'Backspace' || key === 'Delete' || key === '0') { const ok = game.placeNumber(r, c, 0); if (!ok) showToast('That conflicts with this row/column/box'); render(); e.preventDefault(); }
   else if (key === 'ArrowUp') { r = (r + 8) % 9; selectCell(r, c); e.preventDefault(); }
   else if (key === 'ArrowDown') { r = (r + 1) % 9; selectCell(r, c); e.preventDefault(); }
@@ -127,17 +126,10 @@ function onCellKeyDown(e, r, c) {
 
 function onUpdate(message) {
   if (!message) return;
-  statusText.textContent = message;
-  if (message.includes('Invalid')) showToast('That conflicts with this row/column/box');
-  if (message === 'Hint applied') showToast('Hint applied');
-  if (message === 'Game saved') showToast('Game saved');
   updateUndoRedo();
 }
 
-function updateUndoRedo() {
-  undoBtn.disabled = game.undoStack.length <= 1;
-  redoBtn.disabled = game.redoStack.length === 0;
-}
+function updateUndoRedo() { undoBtn.disabled = game.undoStack.length <= 1; redoBtn.disabled = game.redoStack.length === 0; }
 
 function enterGameUI(name, avatar, difficulty) {
   startScreen.classList.add('hidden');
@@ -148,12 +140,16 @@ function enterGameUI(name, avatar, difficulty) {
   render();
 }
 
-function showToast(msg) { toast.textContent = msg; }
+let toastTimeout;
+function showToast(msg) {
+  clearTimeout(toastTimeout);
+  toast.textContent = msg;
+  toast.classList.add('show');
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 2200);
+}
 
 function render() {
-  game.tick(Date.now());
   timerEl.textContent = formatTime(game.elapsedMs);
-
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       const btn = gridEl.children[r * 9 + c];
@@ -186,14 +182,12 @@ function render() {
   }
 
   if (game.solved()) {
-    winStats.textContent = `Well done—puzzle solved in ${formatTime(game.elapsedMs)}!`;
+    winStats.textContent = `Puzzle solved! Great job 🎉\nTime: ${formatTime(game.elapsedMs)}`;
     winModal.classList.remove('hidden');
   }
 }
 
-function formatTime(ms) {
-  const s = Math.floor(ms / 1000); const m = Math.floor(s / 60); const sec = s % 60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-}
+function formatTime(ms) { const s = Math.floor(ms / 1000); const m = Math.floor(s / 60); const sec = s % 60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
 
 buildGrid();
 render();
