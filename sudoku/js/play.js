@@ -122,7 +122,8 @@ keypad.addEventListener('click', (e) => {
 function placeNumberWithFeedback(r, c, val){
   const ok = game.placeNumber(r, c, val);
   if (!timer.isRunning) timer.start();
-  if (!ok) { conflictCount++; showToast('Conflicts in row'); playSound('error'); } else { actionsSincePlacement = 0; lastPlacementAt = Date.now(); playSound('place'); }
+  if (!ok) { conflictCount++; showToast('Conflicts in row'); playSound('error'); const el = gridEl.children[r*9+c]; el.classList.add('error'); setTimeout(()=>el.classList.add('error'), 400); }
+  else { actionsSincePlacement = 0; lastPlacementAt = Date.now(); playSound('place'); const el = gridEl.children[r*9+c]; el.classList.remove('error'); el.classList.add('user'); }
   actionsSincePlacement++;
   render();
   return ok;
@@ -140,6 +141,10 @@ function buildGrid() {
     for (let c = 0; c < 9; c++) {
       const cell = document.createElement('div');
       cell.className = 'cell';
+      if (r % 3 === 0) cell.classList.add('box-top');
+      if (c % 3 === 0) cell.classList.add('box-left');
+      if (c % 3 === 2) cell.classList.add('box-right');
+      if (r % 3 === 2) cell.classList.add('box-bottom');
       cell.setAttribute('role', 'gridcell');
       cell.setAttribute('tabindex', '0');
       cell.setAttribute('data-row', String(r));
@@ -166,26 +171,26 @@ function highlightPeers(selected) {
   for (let rr = 0; rr < 9; rr++) {
     for (let cc = 0; cc < 9; cc++) {
       const el = gridEl.children[rr * 9 + cc];
-      el.classList.remove('peer');
+      el.classList.remove('peer','selected');
+      if (selected && rr === r && cc === c) el.classList.add('selected');
       if (selected && (rr === r || cc === c || (Math.floor(rr/3) === Math.floor(r/3) && Math.floor(cc/3) === Math.floor(c/3)))) el.classList.add('peer');
     }
   }
 }
 
 function render() {
-  // timer display
   timerEl.textContent = formatTime(timer.valueMs);
   const sel = game.selected;
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       const el = gridEl.children[r * 9 + c];
       const val = game.board[r][c];
-      el.className = 'cell';
+      el.classList.remove('given');
       if (game.fixed[r][c]) el.classList.add('given');
-      if (sel && sel.r === r && sel.c === c) el.classList.add('selected');
-      el.textContent = val === 0 ? '' : String(val);
+      el.textContent = '';
+      if (val !== 0) el.textContent = String(val);
       if (val !== 0 && !game.fixed[r][c]) {
-        const temp = val; game.board[r][c] = 0; const invalid = !isValidPlacement(game.board, r, c, temp); game.board[r][c] = temp; if (invalid) el.classList.add('conflict');
+        const temp = val; game.board[r][c] = 0; const invalid = !isValidPlacement(game.board, r, c, temp); game.board[r][c] = temp; if (invalid) el.classList.add('error'); else el.classList.remove('error');
       }
     }
   }

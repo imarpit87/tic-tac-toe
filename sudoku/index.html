@@ -24,8 +24,9 @@
         <h2 id="startTitle">Start a New Puzzle</h2>
         <div class="start-grid">
           <div class="start-field">
-            <label for="playerName" class="muted">Name (optional)</label>
-            <input id="playerName" class="text-input" placeholder="Your name" />
+            <label for="playerName" class="muted">Your name (required)</label>
+            <input id="playerName" name="playerName" class="text-input" placeholder="Your name" required minlength="1" aria-describedby="nameHelp" />
+            <small id="nameHelp" class="field-hint muted" hidden>Please enter your name to start.</small>
           </div>
 
           <div class="start-field">

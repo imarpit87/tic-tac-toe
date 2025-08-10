@@ -21,33 +21,22 @@ const hasSave = !!loadState();
 if (!hasSave && continueLink) continueLink.style.display = 'none';
 continueLink?.addEventListener('click', (e) => { e.preventDefault(); localStorage.setItem('sudoka:continue', '1'); location.href = '/sudoku/play.html'; });
 
-startGameBtn.addEventListener('click', () => {
+const nameHelp = document.getElementById('nameHelp');
+function validateName(){
+  const ok = !!playerNameInput.value.trim();
+  if (startGameBtn) startGameBtn.disabled = !ok;
+  if (nameHelp) nameHelp.hidden = ok;
+  return ok;
+}
+playerNameInput.addEventListener('input', validateName);
+validateName();
+
+startGameBtn.addEventListener('click', (e) => {
+  if (!validateName()) { e.preventDefault(); playerNameInput.focus(); return; }
   const name = playerNameInput.value.trim();
-  const errorId = 'nameError';
-  let errEl = document.getElementById(errorId);
-  if (!name) {
-    if (!errEl) {
-      errEl = document.createElement('div');
-      errEl.id = errorId;
-      errEl.className = 'muted';
-      errEl.style.color = '#e11d48';
-      errEl.style.marginTop = '4px';
-      playerNameInput.insertAdjacentElement('afterend', errEl);
-    }
-    errEl.textContent = 'Please enter your name to start';
-    playerNameInput.focus();
-    return;
-  } else if (errEl) {
-    errEl.textContent = '';
-  }
   const setup = { name: name || '', avatar: selectedAvatar || null, difficulty: selectedDifficulty, theme: selectedTheme };
   localStorage.setItem('sudoka:setup', JSON.stringify(setup));
   location.href = '/sudoku/play.html';
-});
-
-playerNameInput.addEventListener('input', () => {
-  const errEl = document.getElementById('nameError');
-  if (errEl && playerNameInput.value.trim()) errEl.textContent = '';
 });
 
 avatarPicker.addEventListener('click', (e) => {
