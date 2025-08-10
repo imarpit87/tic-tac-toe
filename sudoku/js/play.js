@@ -1,33 +1,58 @@
 import { SudokuGame } from './game.js';
 import { isValidPlacement } from './board.js';
 
-const setupRaw = localStorage.getItem('sudoka:setup');
-const continueFlag = localStorage.getItem('sudoka:continue') === '1';
-if (!setupRaw && !continueFlag) { location.href = '/sudoku/index.html'; }
-const setup = setupRaw ? JSON.parse(setupRaw) : null;
+// Timer utility
+const TIMER_KEY = 'sudoka:timerMs';
+const timer = (() => {
+  let startTs = 0, pausedAt = 0, running = false, valueMs = 0;
+  function load() { try { const v = Number(localStorage.getItem(TIMER_KEY)); if (!Number.isNaN(v)) valueMs = v; } catch {} }
+  function save() { try { localStorage.setItem(TIMER_KEY, String(valueMs)); } catch {} }
+  function start() { if (running) return; running = true; startTs = performance.now(); }
+  function pause() { if (!running) return; running = false; valueMs += performance.now() - startTs; save(); }
+  function resume() { if (running) return; running = true; startTs = performance.now(); }
+  function reset() { running = false; startTs = 0; valueMs = 0; save(); }
+  function nowMs() { return running ? valueMs + (performance.now() - startTs) : valueMs; }
+  load();
+  return { start, pause, resume, reset, nowMs, get isRunning(){return running;}, get valueMs(){return nowMs();} };
+})();
 
-// Apply theme from setup
-if (setup?.theme) document.documentElement.setAttribute('data-theme', setup.theme);
-document.documentElement.style.setProperty('--keypad-h', '220px');
+// Sounds (lightweight placeholders)
+const SND_KEY = 'sudoka:mute';
+let muted = localStorage.getItem(SND_KEY) === '1' ? true : false;
+function setMuted(v){ muted = !!v; try{ localStorage.setItem(SND_KEY, muted ? '1' : '0'); }catch{} }
+function playSound(type){ if (muted) return; /* hook audio here */ }
+
+// Coaching counters
+let actionsSincePlacement = 0;
+let lastPlacementAt = Date.now();
+let conflictCount = 0;
 
 // Elements
-const hintBtn = document.getElementById('hintBtn');
-const notesToggleBtn = document.getElementById('notesToggleBtn');
-const undoBtn = document.getElementById('undoBtn');
-const redoBtn = document.getElementById('redoBtn');
-const keypad = document.getElementById('sud-keypad');
+const hintBtn = document.getElementById('hintBtn') || document.getElementById('btn-hint');
+const notesToggleBtn = document.getElementById('notesToggleBtn') || document.getElementById('btn-notes');
+const undoBtn = document.getElementById('undoBtn') || document.getElementById('btn-undo');
+const redoBtn = document.getElementById('redoBtn') || document.getElementById('btn-redo');
+const keypad = document.getElementById('sud-keypad') || document.getElementById('sudoku-keypad');
 const toast = document.getElementById('toast');
 const timerEl = document.getElementById('timer');
 const winModal = document.getElementById('winModal');
 const winStats = document.getElementById('winStats');
 const closeWinBtn = document.getElementById('closeWinBtn');
-const currentDifficultyEl = document.getElementById('sud-difficulty');
-const playerEl = document.getElementById('sud-player');
+const currentDifficultyEl = document.getElementById('sud-difficulty') || document.getElementById('difficulty-label');
+const playerEl = document.getElementById('sud-player') || document.getElementById('player-info');
 const gridEl = document.getElementById('sudoku-grid');
+const homeBtn = document.getElementById('btn-home');
+const newBtn = document.getElementById('btn-new');
+
+// Setup
+const setupRaw = localStorage.getItem('sudoka:setup');
+const continueFlag = localStorage.getItem('sudoka:continue') === '1';
+if (!setupRaw && !continueFlag) { location.href = '/sudoku/index.html'; }
+const setup = setupRaw ? JSON.parse(setupRaw) : null;
+if (setup?.theme) document.documentElement.setAttribute('data-theme', setup.theme);
 
 const game = new SudokuGame(onUpdate);
 
-// Initialize game according to setup or continue
 if (continueFlag && game.continueLast()) {
   localStorage.removeItem('sudoka:continue');
   currentDifficultyEl.textContent = game.difficulty.charAt(0).toUpperCase() + game.difficulty.slice(1);
@@ -42,6 +67,7 @@ if (continueFlag && game.continueLast()) {
   currentDifficultyEl.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
   renderHeader(name, avatar);
   game.newGame({ name, avatar, difficulty, theme });
+  timer.reset();
   buildGrid();
   render();
 }
@@ -49,6 +75,14 @@ if (continueFlag && game.continueLast()) {
 function renderHeader(name = setup?.name || '', avatar = setup?.avatar || null) {
   playerEl.textContent = name ? `${avatar ? avatar + ' ' : ''}${name}` : '';
 }
+
+// Focus/blur handling for timer
+window.addEventListener('blur', () => timer.pause());
+window.addEventListener('focus', () => { if (!game.solved()) timer.resume(); });
+
+// Toolbar buttons (if present)
+homeBtn?.addEventListener('click', () => { location.href = '/'; });
+newBtn?.addEventListener('click', () => { timer.pause(); location.href = '/sudoku/index.html'; });
 
 // Delegated grid input
 gridEl.addEventListener('pointerdown', (e) => {
@@ -59,13 +93,19 @@ gridEl.addEventListener('pointerdown', (e) => {
   if (Number.isNaN(r) || Number.isNaN(c)) return;
   if (target.classList.contains('given')) return;
   selectCell(r, c);
+  if (!timer.isRunning) timer.start();
 }, { passive: true });
 
 document.addEventListener('keydown', (e) => {
   if (!game.selected) return;
   const { r, c } = game.selected;
-  if (/^[1-9]$/.test(e.key)) { const ok = game.placeNumber(r, c, Number(e.key)); showToast(ok ? 'Nice move!' : 'Conflicts in row'); render(); e.preventDefault(); }
-  else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') { const ok = game.placeNumber(r, c, 0); if (!ok) showToast('Conflicts in row'); render(); e.preventDefault(); }
+  if (/^[1-9]$/.test(e.key)) { const ok = placeNumberWithFeedback(r, c, Number(e.key)); e.preventDefault(); }
+  else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') { const ok = placeNumberWithFeedback(r, c, 0); e.preventDefault(); }
+  else if (e.key.toLowerCase() === 'z' && e.shiftKey) { redoBtn?.click(); }
+  else if (e.key.toLowerCase() === 'z') { undoBtn?.click(); }
+  else if (e.key.toLowerCase() === 'h') { hintBtn?.click(); }
+  else if (e.key.toLowerCase() === 'n') { notesToggleBtn?.click(); }
+  else if (e.key.toLowerCase() === 'r') { newBtn?.click(); }
 });
 
 // Keypad
@@ -73,18 +113,25 @@ keypad.addEventListener('click', (e) => {
   const btn = e.target.closest('button'); if (!btn) return;
   if (!game.selected) { showToast('Tap a cell, then choose a number'); return; }
   const { r, c } = game.selected;
-  if (btn.hasAttribute('data-clear')) { const ok = game.placeNumber(r, c, 0); if (!ok) showToast('Conflicts in row'); render(); return; }
+  if (btn.hasAttribute('data-clear')) { placeNumberWithFeedback(r, c, 0); return; }
   const n = Number(btn.getAttribute('data-num'));
   if (!n) return;
-  const ok = game.placeNumber(r, c, n);
-  showToast(ok ? 'Nice move!' : 'Conflicts in row');
-  render();
+  placeNumberWithFeedback(r, c, n);
 });
 
-hintBtn.addEventListener('click', () => { const h = game.hint(); if (!h) showToast('No logical hint available'); else { selectCell(h.r, h.c); showToast('Hint used'); } });
+function placeNumberWithFeedback(r, c, val){
+  const ok = game.placeNumber(r, c, val);
+  if (!timer.isRunning) timer.start();
+  if (!ok) { conflictCount++; showToast('Conflicts in row'); playSound('error'); } else { actionsSincePlacement = 0; lastPlacementAt = Date.now(); playSound('place'); }
+  actionsSincePlacement++;
+  render();
+  return ok;
+}
+
+hintBtn.addEventListener('click', () => { const h = game.hint(); if (!h) showToast('No logical hint available'); else { selectCell(h.r, h.c); showToast('Hint used'); playSound('chime'); } });
 notesToggleBtn.addEventListener('click', () => { game.toggleNotesMode(); notesToggleBtn.setAttribute('aria-pressed', String(game.notesMode)); showToast(game.notesMode ? 'Notes enabled' : 'Notes disabled'); });
-undoBtn.addEventListener('click', () => { if (game.undo()) showToast('Undone'); updateUndoRedo(); render(); });
-redoBtn.addEventListener('click', () => { if (game.redo()) showToast('Redone'); updateUndoRedo(); render(); });
+undoBtn.addEventListener('click', () => { if (game.undo()) { showToast('Undone'); playSound('whoosh'); } updateUndoRedo(); render(); });
+redoBtn.addEventListener('click', () => { if (game.redo()) { showToast('Redone'); playSound('whoosh'); } updateUndoRedo(); render(); });
 closeWinBtn.addEventListener('click', () => winModal.classList.add('hidden'));
 
 function buildGrid() {
@@ -108,11 +155,11 @@ function buildGrid() {
 }
 
 function selectCell(r, c) { game.selectCell(r, c); console.log('Selected', r, c); render(); }
-function onUpdate() { updateUndoRedo(); }
+function onUpdate() { updateUndoRedo(); persistTimer(); }
 function updateUndoRedo() { undoBtn.disabled = game.undoStack.length <= 1; redoBtn.disabled = game.redoStack.length === 0; }
 
 let toastTimeout;
-function showToast(msg) { clearTimeout(toastTimeout); toast.textContent = msg; toast.classList.add('show'); toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000); }
+function showToast(msg) { clearTimeout(toastTimeout); toast.textContent = msg; toast.classList.add('show'); toastTimeout = setTimeout(() => toast.classList.remove('show'), 1500); }
 
 function highlightPeers(selected) {
   const { r, c } = selected;
@@ -126,7 +173,8 @@ function highlightPeers(selected) {
 }
 
 function render() {
-  timerEl.textContent = formatTime(game.elapsedMs);
+  // timer display
+  timerEl.textContent = formatTime(timer.valueMs);
   const sel = game.selected;
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
@@ -142,7 +190,12 @@ function render() {
     }
   }
   if (sel) highlightPeers(sel);
-  if (game.solved()) { winStats.textContent = `Puzzle solved! Great job 🎉\nTime: ${formatTime(game.elapsedMs)}`; winModal.classList.remove('hidden'); }
+  if (game.solved()) {
+    timer.pause();
+    winStats.textContent = `Puzzle solved in ${formatTime(timer.valueMs)}`;
+    winModal.classList.remove('hidden');
+  }
 }
 
-function formatTime(ms) { const s = Math.floor(ms / 1000); const m = Math.floor(s / 60); const sec = s % 60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
+function formatTime(ms){ const s = Math.floor(ms/1000); const h = Math.floor(s/3600); const m = Math.floor((s%3600)/60); const sec = s%60; return h>0 ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
+function persistTimer(){ try{ localStorage.setItem(TIMER_KEY, String(timer.valueMs)); }catch{} }

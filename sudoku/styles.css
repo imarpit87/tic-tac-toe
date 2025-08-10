@@ -133,3 +133,28 @@ html,body{overflow-x:hidden;touch-action:manipulation;-webkit-tap-highlight-colo
   background:var(--bg-card,#fff);box-shadow:0 -8px 24px rgba(0,0,0,.12);z-index:10;}
 .sud-stage{padding:12px var(--side-pad);padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom));}
 #sudoku-grid, .sud-stage, .sud-toolbar{max-width:780px;margin-left:auto;margin-right:auto;}
+
+/* Visual language colors (tweak here) */
+:root{
+  --col-given: #1f2937;      /* pre-filled numbers */
+  --bg-given: #FFF3BF;       /* pale yellow */
+  --col-user:  #111827;      /* player-entered numbers */
+  --bg-selected: #CFE4FF;    /* selected cell */
+  --bg-peers:   #EEF5FF;     /* same row/col/box */
+  --bg-error:   #FEE2E2;     /* conflict cell */
+  --col-note:   #64748B;     /* pencil marks */
+}
+
+/* Apply visual states */
+#sudoku-grid .cell { color: var(--col-user); }
+#sudoku-grid .cell.given { background: var(--bg-given); color: var(--col-given); font-weight: 800; }
+#sudoku-grid .cell.selected { box-shadow: 0 0 0 3px var(--bg-selected) inset; }
+#sudoku-grid .cell.peer { background: var(--bg-peers); }
+#sudoku-grid .cell.conflict { background: var(--bg-error); animation: shake-quick 120ms linear; }
+#sudoku-grid .cell .notes { color: var(--col-note); }
+
+@keyframes shake-quick { 0%{transform:translateX(0)} 25%{transform:translateX(-2px)} 50%{transform:translateX(2px)} 75%{transform:translateX(-2px)} 100%{transform:translateX(0)} }
+
+/* Ensure cell minimums */
+#sudoku-grid .cell { min-height: 48px; }
+@media (max-width:480px){ #sudoku-grid .cell { min-height: 54px; } }

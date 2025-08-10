@@ -23,9 +23,31 @@ continueLink?.addEventListener('click', (e) => { e.preventDefault(); localStorag
 
 startGameBtn.addEventListener('click', () => {
   const name = playerNameInput.value.trim();
+  const errorId = 'nameError';
+  let errEl = document.getElementById(errorId);
+  if (!name) {
+    if (!errEl) {
+      errEl = document.createElement('div');
+      errEl.id = errorId;
+      errEl.className = 'muted';
+      errEl.style.color = '#e11d48';
+      errEl.style.marginTop = '4px';
+      playerNameInput.insertAdjacentElement('afterend', errEl);
+    }
+    errEl.textContent = 'Please enter your name to start';
+    playerNameInput.focus();
+    return;
+  } else if (errEl) {
+    errEl.textContent = '';
+  }
   const setup = { name: name || '', avatar: selectedAvatar || null, difficulty: selectedDifficulty, theme: selectedTheme };
   localStorage.setItem('sudoka:setup', JSON.stringify(setup));
   location.href = '/sudoku/play.html';
+});
+
+playerNameInput.addEventListener('input', () => {
+  const errEl = document.getElementById('nameError');
+  if (errEl && playerNameInput.value.trim()) errEl.textContent = '';
 });
 
 avatarPicker.addEventListener('click', (e) => {
