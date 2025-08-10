@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sudoku — Start</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="start">
+    <section class="start-card" aria-labelledby="title">
+      <h1 id="title">🧩 Sudoku</h1>
+      <form id="startForm" class="start-form">
+        <div class="field">
+          <label for="playerName">Your name (required)</label>
+          <input id="playerName" name="playerName" required minlength="1" aria-describedby="nameHelp" placeholder="Your name" />
+          <small id="nameHelp" class="hint" hidden>Please enter your name to start.</small>
+        </div>
+        <div class="field">
+          <label>Choose an avatar (optional)</label>
+          <div id="avatarPicker" class="avatar-picker" role="group" aria-label="Choose an avatar">
+            <button type="button" class="avatar" data-avatar="🧩">🧩</button>
+            <button type="button" class="avatar" data-avatar="🦊">🦊</button>
+            <button type="button" class="avatar" data-avatar="🐼">🐼</button>
+            <button type="button" class="avatar" data-avatar="🐯">🐯</button>
+            <button type="button" class="avatar" data-avatar="🦄">🦄</button>
+            <button type="button" class="avatar" data-avatar="🐸">🐸</button>
+            <button type="button" class="avatar" data-avatar="🐨">🐨</button>
+            <button type="button" class="avatar" data-avatar="🐻">🐻</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Difficulty</label>
+          <div class="pill-group" id="difficultyPicker">
+            <button type="button" class="pill active" data-diff="easy">Easy</button>
+            <button type="button" class="pill" data-diff="medium">Medium</button>
+            <button type="button" class="pill" data-diff="hard">Hard</button>
+            <button type="button" class="pill" data-diff="god">God Mode</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="startBtn" class="btn" type="submit">Start Game</button>
+          <a id="continueLink" class="btn tertiary" href="#" hidden>Continue last game</a>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
