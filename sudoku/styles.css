@@ -121,3 +121,43 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
     height: clamp(120px, 38vh, 220px);
   }
 }
+
+/* --- Mobile viewport stability (override) --- */
+@media (max-width:1023px){
+  .play{
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  html, body{
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    overflow-anchor: none;
+  }
+  /* Grid by width to avoid vh math */
+  #sudoku-grid{
+    width: min(92vw, 720px);
+    max-width: 92vw;
+    aspect-ratio: 1 / 1;
+  }
+  /* Reserve space for keypad using same clamp as keypad height */
+  .play-stage{
+    padding-bottom: calc(clamp(140px, 32vh, 240px) + 16px + env(safe-area-inset-bottom));
+  }
+  /* Fixed keypad, no scroll anchoring */
+  #sudoku-keypad{
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: clamp(140px, 32vh, 240px);
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 10;
+    overflow-anchor: none;
+    transform: none;
+  }
+}
+
+/* Landscape keypad clamp (ensure visibility) */
+@media (max-width:1023px) and (orientation:landscape){
+  #sudoku-keypad{
+    height: clamp(120px, 38vh, 240px);
+  }
+}
