@@ -291,3 +291,12 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 @media (max-width:1023px){
   .play-stage{ min-height: auto !important; }
 }
+
+/* Mobile: in-flow spacer to permanently reserve keypad space */
+@media (max-width:1023px){
+  .play-stage::after{
+    content: "";
+    display: block;
+    height: calc(var(--keypad-h, 220px) + env(safe-area-inset-bottom));
+  }
+}
