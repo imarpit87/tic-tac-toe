@@ -26,7 +26,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 .play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); overflow:auto; }
 .grid-wrap{ display:flex; justify-content:center; }
 /* Grid width: clamp ensures positive size; prefer dvh/svh on modern browsers */
-#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; width:clamp(300px, min(92vw, var(--grid-cap)), 72vh); aspect-ratio:1/1; margin:0 auto; padding:8px; border-radius:16px; background:var(--bg-grid); box-sizing:border-box; }
+#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; width:clamp(300px, min(92vw, var(--grid-cap)), 72vh); aspect-ratio:1/1; margin:0 auto 12px; padding:8px; border-radius:16px; background:var(--bg-grid); box-sizing:border-box; }
 @supports (height: 1dvh){ #sudoku-grid{ width:clamp(300px, min(92vw, var(--grid-cap)), 72dvh); } }
 @supports (height: 1svh){ #sudoku-grid{ width:clamp(300px, min(92vw, var(--grid-cap)), 72svh); } }
 #sudoku-grid .cell{ aspect-ratio:1/1; min-height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:clamp(18px,4.2vw,28px); background:#fff; }
@@ -43,13 +43,14 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 .keypad button.flash{ transform:scale(.96); filter:brightness(.95); }
 .keypad button[data-clear]{ background:#e9ecef; color:#111; box-shadow:0 6px 16px rgba(0,0,0,.1); }
 
-/* Mobile: sticky keypad and width-only grid sizing to avoid vh jank */
+/* Mobile: fixed keypad with safe padding to avoid overlap; width-only grid sizing to avoid vh jank */
 @media (max-width:1023px){
   .desk{ display:none !important; }
   /* Override grid sizing to width-only so vertical viewport changes don't collapse it */
   #sudoku-grid{ width:min(92vw, var(--grid-cap)); }
-  .play-stage{ padding-bottom:calc(16px + env(safe-area-inset-bottom)); }
-  #sudoku-keypad{ position:sticky; bottom:0; height:auto; padding:12px 16px calc(12px + env(safe-area-inset-bottom)); background:#fff; box-shadow:0 -8px 24px rgba(0,0,0,.12); z-index:10; }
+  /* Keep stage padding for keypad height so grid never overlaps */
+  .play-stage{ padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); }
+  #sudoku-keypad{ position:fixed; left:0; right:0; bottom:0; height:auto; padding:12px 16px calc(12px + env(safe-area-inset-bottom)); background:#fff; box-shadow:0 -8px 24px rgba(0,0,0,.12); z-index:10; }
 }
 
 /* Desktop: keep header at top, grid below, keypad below grid (not fixed) */
