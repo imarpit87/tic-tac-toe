@@ -107,3 +107,41 @@ function render(){ if(!game){ return; } if(timerEl) timerEl.textContent = format
 function onUpdate(){ updateUndoRedo(); try{ localStorage.setItem(TIMER_KEY, String(timer.valueMs)); }catch{} }
 function updateUndoRedo(){ const canUndo=(game?.undoStack?.length||0)>1; const canRedo=(game?.redoStack?.length||0)>0; if(mUndo) mUndo.disabled=!canUndo; if(mRedo) mRedo.disabled=!canRedo; if(dUndo) dUndo.disabled=!canUndo; if(dRedo) dRedo.disabled=!canRedo; }
 function formatTime(ms){ const s=Math.floor(ms/1000); const h=Math.floor(s/3600); const m=Math.floor((s%3600)/60); const sec=s%60; return h>0?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
+
+// Show current difficulty label on the button after starting/changes
+function updateDifficultyLabel(){
+  const btn = document.getElementById('difficultyBtn');
+  if(!btn || !game) return;
+  const label = (game.difficulty||'easy');
+  btn.textContent = `Difficulty: ${label.charAt(0).toUpperCase()+label.slice(1)} ▾`;
+}
+
+// Call after init render
+try{ updateDifficultyLabel(); }catch{}
+
+// Ensure difficulty menu toggles and applies correctly
+if (diffBtn){
+  diffBtn.addEventListener('click', ()=>{
+    const open = diffMenu.classList.toggle('hidden');
+    diffBtn.setAttribute('aria-expanded', String(!open));
+  });
+}
+
+// Delegate menu clicks
+if (diffMenu){
+  diffMenu.addEventListener('click', (e)=>{
+    const item = e.target.closest('[data-diff]'); if(!item) return;
+    const d = item.getAttribute('data-diff'); if(!d) return;
+    if (confirm('Start a new game at this difficulty?')){
+      const s = setup || {};
+      s.difficulty = d; try{ localStorage.setItem('sudoka:setup', JSON.stringify(s)); }catch{}
+      try{
+        game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:d, theme:s.theme||'light' });
+        updateDifficultyLabel();
+        timer.reset(); buildGrid(); render();
+      }catch(err){ showError('Difficulty error: ' + err.message); }
+    }
+    diffMenu.classList.add('hidden');
+    diffBtn?.setAttribute('aria-expanded','false');
+  });
+}
