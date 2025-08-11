@@ -161,3 +161,16 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
     height: clamp(120px, 38vh, 240px);
   }
 }
+
+/* Center grid within available viewport on mobile */
+@media (max-width:1023px){
+  .play-stage{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* vertical centering */
+    /* Fill the viewport minus topbar + keypad so grid is fully visible */
+    min-height: calc(100dvh - var(--topbar-h, 56px) - var(--keypad-h, 220px));
+  }
+  .grid-wrap{ width: 100%; display: flex; justify-content: center; }
+}
