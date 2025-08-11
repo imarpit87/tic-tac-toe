@@ -300,3 +300,17 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
     height: calc(var(--keypad-h, 220px) + env(safe-area-inset-bottom));
   }
 }
+
+/* Mobile: make keypad in-flow to eliminate viewport reflow */
+@media (max-width:1023px){
+  .play-stage{ padding: 16px; overflow-y: auto; }
+  .play-stage::after{ content: none !important; }
+  #sudoku-keypad{
+    position: static !important;
+    height: auto !important;
+    padding: 12px 16px;
+    box-shadow: none;
+    z-index: auto;
+    margin: 0 auto; max-width: 720px;
+  }
+}

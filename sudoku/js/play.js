@@ -42,26 +42,6 @@ try{
   wire();
 }catch(err){ console.error('Sudoku init error', err); showError('Init error: ' + (err?.message||'see console')); }
 
-function applyMobileLayoutVars(){
-  const isMobile = matchMedia('(max-width:1023px)').matches;
-  if (!isMobile) return;
-
-  const root = document.documentElement;
-  const keypad = document.getElementById('sudoku-keypad');
-  const keypadH = keypad ? Math.ceil(keypad.offsetHeight) : 0;
-
-  // Only set keypad height; let CSS fall back to width-based grid sizing
-  root.style.setProperty('--keypad-h', `${keypadH || 220}px`);
-}
-
-const _recalc = () => { clearTimeout(_recalc.t); _recalc.t = setTimeout(applyMobileLayoutVars, 50); };
-['DOMContentLoaded','load','resize','orientationchange'].forEach(e => window.addEventListener(e, _recalc));
-if (window.visualViewport){
-  window.visualViewport.addEventListener('resize', _recalc);
-  window.visualViewport.addEventListener('scroll', _recalc);
-}
-_recalc();
-
 // Simplified mobile padding: only sync keypad height; remove viewport height coupling
 (function(){
   const m = document.getElementById('sudoku-keypad'); if(!m) return;
