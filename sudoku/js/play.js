@@ -145,3 +145,21 @@ if (diffMenu){
     diffBtn?.setAttribute('aria-expanded','false');
   });
 }
+
+// Toggle difficulty menu visibility safely on mobile
+if (diffBtn && diffMenu){
+  diffBtn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const isHidden = diffMenu.classList.contains('hidden');
+    diffMenu.classList.toggle('hidden', !isHidden);
+    diffBtn.setAttribute('aria-expanded', String(isHidden));
+  });
+  // Close when tapping outside
+  document.addEventListener('click', (e)=>{
+    if (diffMenu.classList.contains('hidden')) return;
+    if (!e.target.closest('#difficultyMenu') && !e.target.closest('#difficultyBtn')){
+      diffMenu.classList.add('hidden');
+      diffBtn?.setAttribute('aria-expanded','false');
+    }
+  }, { passive: true });
+}

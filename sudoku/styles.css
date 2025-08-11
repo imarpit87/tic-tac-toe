@@ -186,3 +186,20 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   /* Hide Clear button on mobile keypad */
   #sudoku-keypad [data-clear]{ display: none !important; }
 }
+
+/* Mobile: ensure topbar is above all and difficulty menu is visible */
+@media (max-width:1023px){
+  .play-topbar{ z-index: 100; pointer-events: auto; }
+  .actionbar{ pointer-events: auto; }
+  #difficultyMenu{
+    position: fixed;
+    top: calc(var(--topbar-h, 56px) + 4px);
+    left: 50%; transform: translateX(-50%);
+    z-index: 1000;
+    background: var(--bg-card,#fff);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.18);
+    padding: 8px;
+  }
+  #difficultyMenu button{ display:block; width:100%; text-align:left; padding:8px 10px; border-radius:8px; }
+}
