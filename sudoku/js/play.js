@@ -62,17 +62,13 @@ if (window.visualViewport){
 }
 _recalc();
 
-// Provide a stable visual viewport height CSS var for mobile
+// Simplified mobile padding: only sync keypad height; remove viewport height coupling
 (function(){
-  function setVVH(){
-    const isMobile = matchMedia('(max-width:1023px)').matches; if(!isMobile) return;
-    const vvh = Math.max(320, Math.floor(window.visualViewport?.height || window.innerHeight));
-    document.documentElement.style.setProperty('--vvh', `${vvh}px`);
-  }
-  let t; const onV = ()=>{ clearTimeout(t); t=setTimeout(setVVH, 50); };
-  ['DOMContentLoaded','load','resize','orientationchange'].forEach(e=>window.addEventListener(e,onV));
-  if (window.visualViewport){ window.visualViewport.addEventListener('resize', onV); window.visualViewport.addEventListener('scroll', onV); }
-  onV();
+  const m = document.getElementById('sudoku-keypad'); if(!m) return;
+  function sync(){ const h = Math.round(m.getBoundingClientRect().height || 220); document.documentElement.style.setProperty('--keypad-h', h+'px'); }
+  ['DOMContentLoaded','load','resize','orientationchange'].forEach(e=>window.addEventListener(e,sync));
+  try{ new ResizeObserver(sync).observe(m);}catch{}
+  sync();
 })();
 
 export function focusCellNoJump(el){
