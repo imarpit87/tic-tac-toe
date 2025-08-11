@@ -42,6 +42,32 @@ try{
   wire();
 }catch(err){ console.error('Sudoku init error', err); showError('Init error: ' + (err?.message||'see console')); }
 
+// Mobile layout sizing vars to keep padding correct
+function setMobileLayoutVars() {
+  const isMobile = window.matchMedia('(max-width: 1023px)').matches;
+  if (!isMobile) return;
+
+  const root = document.documentElement;
+  const keypad = document.getElementById('sudoku-keypad');
+  const topbar = document.querySelector('.play-topbar');
+
+  const keypadH = keypad ? Math.ceil(keypad.offsetHeight) : 0;
+  const topbarH = topbar ? Math.ceil(topbar.offsetHeight) : 0;
+
+  root.style.setProperty('--keypad-h', keypadH ? `${keypadH}px` : '220px');
+  root.style.setProperty('--topbar-h', `${topbarH}px`);
+}
+
+const _applyLayoutVars = () => setMobileLayoutVars();
+window.addEventListener('DOMContentLoaded', _applyLayoutVars);
+window.addEventListener('load', _applyLayoutVars);
+window.addEventListener('resize', _applyLayoutVars);
+window.addEventListener('orientationchange', _applyLayoutVars);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', _applyLayoutVars);
+  window.visualViewport.addEventListener('scroll', _applyLayoutVars);
+}
+
 (function(){ const m=keypadMobile; if(!m) return; function sync(){ const h=Math.round(m.getBoundingClientRect().height||260); document.documentElement.style.setProperty('--keypad-h', h+'px'); } window.addEventListener('load',sync); window.addEventListener('resize',sync); window.addEventListener('orientationchange',sync); try{ new ResizeObserver(sync).observe(m);}catch{} sync(); })();
 
 function buildGrid(){ const frag=document.createDocumentFragment(); for(let r=0;r<9;r++) for(let c=0;c<9;c++){ const cell=document.createElement('div'); cell.className='cell'; if(r%3===0) cell.classList.add('box-top'); if(c%3===0) cell.classList.add('box-left'); if(c%3===2) cell.classList.add('box-right'); if(r%3===2) cell.classList.add('box-bottom'); cell.setAttribute('role','gridcell'); cell.setAttribute('tabindex','0'); cell.setAttribute('aria-label',`Row ${r+1}, Column ${c+1}`); cell.dataset.row=String(r); cell.dataset.col=String(c); frag.appendChild(cell);} gridEl.innerHTML=''; gridEl.appendChild(frag); }

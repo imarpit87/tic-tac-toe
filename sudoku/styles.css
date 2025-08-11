@@ -69,3 +69,55 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 /* Error bar */
 .errorbar{ position:sticky; top:0; z-index:10; background:#fee2e2; color:#7f1d1d; padding:8px 12px; font-weight:700; text-align:center; border-bottom:1px solid #fecaca; }
 .errorbar[hidden]{ display:none; }
+
+/* Mobile base */
+@media (max-width:1023px){
+  /* Make topbar sticky and compact; allow horizontal scroll for buttons */
+  .play-topbar{
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg-card);
+    padding: 8px var(--pad);
+  }
+  .actionbar{
+    gap: 8px;
+    padding: 0 4px;
+    overflow-x: auto;  /* already present but keep */
+    scrollbar-width: none;
+  }
+  .actionbar .btn{
+    padding: 8px 12px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  /* Keep grid centered and sized by width on phones; avoid 100vh math */
+  #sudoku-grid{
+    /* Square via aspect-ratio; size by viewport width to avoid Safari UI jumps */
+    width: min(92vw, 720px);
+    max-width: 92vw;
+  }
+
+  /* Let stage reserve space for keypad dynamically (JS will set --keypad-h) */
+  .play-stage{
+    padding-bottom: calc(var(--keypad-h, 220px) + 16px + env(safe-area-inset-bottom));
+  }
+
+  /* Fixed keypad at the bottom with safe-area support */
+  #sudoku-keypad{
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: var(--keypad-h, 220px);
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 10;
+  }
+}
+
+/* Landscape-specific tweaks: shrink keypad so grid is visible, allow scrolling */
+@media (max-width:1023px) and (orientation:landscape){
+  #sudoku-keypad{
+    /* Never exceed ~40vh on landscape */
+    height: clamp(120px, 38vh, 220px);
+  }
+}
