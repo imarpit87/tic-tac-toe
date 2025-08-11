@@ -278,3 +278,11 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   /* allow page scroll on phones */
   html, body{ overflow-y: auto; overscroll-behavior: contain; }
 }
+
+/* Mobile stable viewport container */
+@media (max-width:1023px){
+  html, body{ height: 100%; min-height: 100%; min-height: -webkit-fill-available; }
+  .play{ min-height: 100%; min-height: -webkit-fill-available; }
+  /* Use a JS-provided --vvh (visual viewport height) to size the stage safely */
+  .play-stage{ min-height: calc(var(--vvh, 100svh) - var(--topbar-h, 56px) - var(--keypad-h, 220px)); }
+}

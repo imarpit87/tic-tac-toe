@@ -62,6 +62,19 @@ if (window.visualViewport){
 }
 _recalc();
 
+// Provide a stable visual viewport height CSS var for mobile
+(function(){
+  function setVVH(){
+    const isMobile = matchMedia('(max-width:1023px)').matches; if(!isMobile) return;
+    const vvh = Math.max(320, Math.floor(window.visualViewport?.height || window.innerHeight));
+    document.documentElement.style.setProperty('--vvh', `${vvh}px`);
+  }
+  let t; const onV = ()=>{ clearTimeout(t); t=setTimeout(setVVH, 50); };
+  ['DOMContentLoaded','load','resize','orientationchange'].forEach(e=>window.addEventListener(e,onV));
+  if (window.visualViewport){ window.visualViewport.addEventListener('resize', onV); window.visualViewport.addEventListener('scroll', onV); }
+  onV();
+})();
+
 export function focusCellNoJump(el){
   if (!el) return;
   try { el.focus({ preventScroll: true }); } catch { el.focus(); }
