@@ -42,41 +42,41 @@ try{
   wire();
 }catch(err){ console.error('Sudoku init error', err); showError('Init error: ' + (err?.message||'see console')); }
 
-// Mobile viewport-driven layout sizing (no game logic changes)
-(function(){
-  function updateMobileLayoutVars(){
-    const isMobile = matchMedia('(max-width:1023px)').matches;
-    if (!isMobile) return;
-    const root = document.documentElement;
-    const vv = window.visualViewport;
-    const vvh = Math.max(300, Math.floor(vv?.height ?? window.innerHeight));
-    const keypad = document.getElementById('sudoku-keypad');
-    const topbar = document.querySelector('.play-topbar');
-    const keypadH = keypad ? Math.ceil(keypad.offsetHeight) : 0;
-    const topbarH = topbar ? Math.ceil(topbar.offsetHeight) : 0;
-    // Clamp grid size by height budget and width; expose for CSS fallback
-    const heightBudget = vvh - topbarH - keypadH - 32;
-    const minGrid = 300;
-    const byHeight = Math.max(minGrid, heightBudget);
-    const byWidth  = Math.floor(Math.min(window.innerWidth * 0.92, 720));
-    const gridSize = Math.min(byHeight, byWidth);
-    root.style.setProperty('--keypad-h', `${keypadH || 220}px`);
-    root.style.setProperty('--topbar-h', `${topbarH}px`);
-    root.style.setProperty('--grid-size', `${gridSize}px`);
-  }
-  let t; const recalc = () => { clearTimeout(t); t = setTimeout(updateMobileLayoutVars, 50); };
-  ['DOMContentLoaded','load','resize','orientationchange'].forEach(e=>window.addEventListener(e,recalc));
-  if (window.visualViewport){ window.visualViewport.addEventListener('resize', recalc); window.visualViewport.addEventListener('scroll', recalc); }
-  document.getElementById('sudoku-keypad')?.addEventListener('click', recalc, { passive:true });
-  // Inject CSS fallback to use --grid-size for width on mobile
-  const style = document.createElement('style');
-  style.textContent = `@media (max-width:1023px){ #sudoku-grid{ width: var(--grid-size, min(92vw, 720px)); } }`;
-  document.head.appendChild(style);
-  recalc();
-})();
+function applyMobileLayoutVars(){
+  const isMobile = matchMedia('(max-width:1023px)').matches;
+  if (!isMobile) return;
 
-// Prevent focus-induced auto scroll jumps
-function focusCell(el){ if(!el) return; try{ el.focus({ preventScroll:true }); } catch{ el.focus(); } }
+  const root = document.documentElement;
+  const keypad = document.getElementById('sudoku-keypad');
+  const topbar = document.querySelector('.play-topbar');
+
+  const vvh = (window.visualViewport?.height ?? window.innerHeight);
+  const keypadH = keypad ? Math.ceil(keypad.offsetHeight) : 0;
+  const topbarH = topbar ? Math.ceil(topbar.offsetHeight) : 0;
+
+  root.style.setProperty('--keypad-h', `${keypadH || 220}px`);
+
+  const heightBudget = vvh - topbarH - keypadH - 32; // paddings
+  const minGrid = 300;                                // floor
+  const byHeight = Math.max(minGrid, Math.floor(heightBudget));
+  const byWidth  = Math.floor(Math.min(window.innerWidth * 0.92, 720));
+  const gridSize = Math.min(byHeight, byWidth);
+
+  root.style.setProperty('--grid-size', `${gridSize}px`);
+}
+
+const _recalc = () => { clearTimeout(_recalc.t); _recalc.t = setTimeout(applyMobileLayoutVars, 50); };
+['DOMContentLoaded','load','resize','orientationchange'].forEach(e => window.addEventListener(e, _recalc));
+if (window.visualViewport){
+  window.visualViewport.addEventListener('resize', _recalc);
+  window.visualViewport.addEventListener('scroll', _recalc);
+}
+_recalc();
+
+export function focusCellNoJump(el){
+  if (!el) return;
+  try { el.focus({ preventScroll: true }); } catch { el.focus(); }
+}
 
 (function(){ const m=keypadMobile; if(!m) return; function sync(){ const h=Math.round(m.getBoundingClientRect().height||260); document.documentElement.style.setProperty('--keypad-h', h+'px'); } window.addEventListener('load',sync); window.addEventListener('resize',sync); window.addEventListener('orientationchange',sync); try{ new ResizeObserver(sync).observe(m);}catch{} sync(); })();
 

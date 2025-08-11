@@ -203,3 +203,77 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   }
   #difficultyMenu button{ display:block; width:100%; text-align:left; padding:8px 10px; border-radius:8px; }
 }
+
+/* START (mobile portrait) */
+@media (max-width:1023px){
+  .start{
+    min-height: 100vh;
+    min-height: 100dvh;               /* dynamic vh -> no iOS jump */
+    display: grid;
+    place-items: center;
+    padding: 16px;
+  }
+
+  .start-card{
+    width: min(94vw, 520px);
+    gap: 14px;
+    padding: 20px;
+  }
+
+  .start-form .field{ gap: 6px; }
+  .avatar-picker{ grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+  .pill-group{
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .pill{ padding: 10px 14px; font-size: 14px; } /* compact on phones */
+}
+
+/* PLAY (mobile portrait) */
+@media (max-width:1023px){
+  .play{
+    min-height: 100vh;
+    min-height: 100dvh;                /* dynamic vh for iOS Safari */
+    padding: 12px 16px;
+  }
+
+  .play-topbar{
+    position: sticky; top: 0; z-index: 5;
+    background: var(--bg-card);
+    padding: 8px 8px;
+  }
+
+  .actionbar{
+    display: flex;
+    gap: 8px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .actionbar::-webkit-scrollbar{ display: none; }
+  .actionbar .btn{ padding: 8px 12px; font-size: 14px; white-space: nowrap; }
+
+  .play-stage{
+    /* reserve real space for keypad; JS sets --keypad-h */
+    padding: 0 0 calc(var(--keypad-h, 220px) + 16px + env(safe-area-inset-bottom));
+  }
+
+  /* center the board; size by width to avoid 100vh math on iOS */
+  .grid-wrap{ display: flex; justify-content: center; }
+  #sudoku-grid{
+    width: var(--grid-size, min(92vw, 720px));
+    max-width: 92vw;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+  }
+
+  /* fixed keypad at bottom; never anchor scroll to it */
+  #sudoku-keypad{
+    position: fixed; left: 0; right: 0; bottom: 0;
+    height: var(--keypad-h, 220px);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    z-index: 10;
+    overflow-anchor: none;
+  }
+
+  /* allow page scroll on phones */
+  html, body{ overflow-y: auto; overscroll-behavior: contain; }
+}
