@@ -254,12 +254,13 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   .play-stage{
     /* reserve real space for keypad; JS sets --keypad-h */
     padding: 0 0 calc(var(--keypad-h, 220px) + 16px + env(safe-area-inset-bottom));
+    overflow-y: auto;
   }
 
   /* center the board; size by width to avoid 100vh math on iOS */
-  .grid-wrap{ display: flex; justify-content: center; }
+  .grid-wrap{ display: flex; justify-content: center; width: 100%; }
   #sudoku-grid{
-    width: var(--grid-size, min(92vw, 720px));
+    width: min(92vw, 720px);
     max-width: 92vw;
     aspect-ratio: 1 / 1;
     margin: 0 auto;

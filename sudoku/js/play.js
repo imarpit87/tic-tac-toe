@@ -48,21 +48,10 @@ function applyMobileLayoutVars(){
 
   const root = document.documentElement;
   const keypad = document.getElementById('sudoku-keypad');
-  const topbar = document.querySelector('.play-topbar');
-
-  const vvh = (window.visualViewport?.height ?? window.innerHeight);
   const keypadH = keypad ? Math.ceil(keypad.offsetHeight) : 0;
-  const topbarH = topbar ? Math.ceil(topbar.offsetHeight) : 0;
 
+  // Only set keypad height; let CSS fall back to width-based grid sizing
   root.style.setProperty('--keypad-h', `${keypadH || 220}px`);
-
-  const heightBudget = vvh - topbarH - keypadH - 32; // paddings
-  const minGrid = 300;                                // floor
-  const byHeight = Math.max(minGrid, Math.floor(heightBudget));
-  const byWidth  = Math.floor(Math.min(window.innerWidth * 0.92, 720));
-  const gridSize = Math.min(byHeight, byWidth);
-
-  root.style.setProperty('--grid-size', `${gridSize}px`);
 }
 
 const _recalc = () => { clearTimeout(_recalc.t); _recalc.t = setTimeout(applyMobileLayoutVars, 50); };
