@@ -21,6 +21,9 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 .play{ min-height:100vh; display:grid; grid-template-columns:1fr; gap:16px; max-width:1100px; margin:0 auto; padding:16px; }
 .play-topbar{ position:sticky; top:0; z-index:5; padding:8px var(--pad); background:var(--bg-card); }
 .actionbar{ display:flex; flex-wrap:nowrap; justify-content:center; gap:12px; align-items:center; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+
+/* Difficulty button container for dropdown positioning */
+#difficultyBtn{ position: relative; }
 .actionbar::-webkit-scrollbar{ display:none; }
 .actionbar .btn{ white-space:nowrap; }
 .play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); overflow:auto; }
@@ -54,13 +57,66 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   html,body{ overflow-x:hidden; }
   .desk{ display:none !important; }
   #sudoku-keypad{ position:static; height:auto; box-shadow:none; padding:0; margin-top:12px; }
+  
+  /* Ensure difficulty menu is properly positioned on desktop */
+  #difficultyMenu{
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+  }
 }
 
 /* Toast / modal */
 .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--keypad-h) + 10px + env(safe-area-inset-bottom)); background:rgba(0,0,0,.8); color:#fff; padding:10px 14px; border-radius:12px; opacity:0; transition:opacity .25s; pointer-events:none; }
 .toast.show{ opacity:1; }
 .modal.hidden{ display:none; }
+/* Difficulty menu - desktop and tablet styling */
+#difficultyMenu{
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 160px;
+  background: #ffffff;
+  border: 1px solid #bbdefb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  padding: 8px;
+  z-index: 1000;
+}
+
+#difficultyMenu button{
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #1976d2;
+  transition: background-color 0.2s ease;
+}
+
+#difficultyMenu button:hover{
+  background: #e3f2fd;
+}
+
+#difficultyMenu button:focus{
+  outline: 2px solid #2196f3;
+  outline-offset: -2px;
+}
+
 .menu.hidden{ display:none; }
+
+/* Tablet specific rules for difficulty menu */
+@media (min-width: 768px) and (max-width: 1023px) {
+  #difficultyMenu{
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 160px;
+  }
+}
 
 /* Error bar */
 .errorbar{ position:sticky; top:0; z-index:10; background:#fee2e2; color:#7f1d1d; padding:8px 12px; font-weight:700; text-align:center; border-bottom:1px solid #fecaca; }
@@ -192,12 +248,29 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
     top: calc(var(--topbar-h, 56px) + 4px);
     left: 50%; transform: translateX(-50%);
     z-index: 1000;
-    background: var(--bg-card,#fff);
+    background: #ffffff;
+    border: 1px solid #bbdefb;
     border-radius: 12px;
     box-shadow: 0 12px 32px rgba(0,0,0,.18);
     padding: 8px;
+    min-width: 160px;
   }
-  #difficultyMenu button{ display:block; width:100%; text-align:left; padding:8px 10px; border-radius:8px; }
+  #difficultyMenu button{ 
+    display:block; 
+    width:100%; 
+    text-align:left; 
+    padding:10px 12px; 
+    border-radius:8px;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    color: #1976d2;
+    transition: background-color 0.2s ease;
+  }
+  #difficultyMenu button:hover,
+  #difficultyMenu button:focus{
+    background: #e3f2fd;
+  }
 }
 
 /* START (mobile portrait) */
