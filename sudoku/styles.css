@@ -609,9 +609,9 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   --card: #ffffff;
   --stroke: #e5e7eb;
   --stroke-strong: #c7cdd8;
-  --peer: #e1f5fe;
-  --selected: #ff6b6b;
-  --given: #ffeaa7;
+  --peer: #e3f2fd;
+  --selected: #2196f3;
+  --given: #ffffff;
   --error: #ffcdd2;
   --ink: #111827;
   --ink-muted: #6b7280;
@@ -671,10 +671,10 @@ body{ color: var(--ink); background: var(--surface-muted); }
   font-size: clamp(18px, 4.2vw, 28px);
 }
 /* Removed - these are now handled in the updated 3x3 box separators section */
-#sudoku-grid .cell.given    { background: var(--given); font-weight: 800; }
-#sudoku-grid .cell.user     { background: #e8f5e8; font-weight: 600; color: #2e7d32; }
+#sudoku-grid .cell.given    { background: var(--given); font-weight: 800; color: #000000; }
+#sudoku-grid .cell.user     { background: var(--surface); font-weight: 600; color: #1976d2; }
 #sudoku-grid .cell.peer     { background: var(--peer); }
-#sudoku-grid .cell.selected { background: var(--selected) !important; }
+#sudoku-grid .cell.selected { background: var(--selected) !important; color: #ffffff !important; }
 #sudoku-grid .cell.error    { background: var(--error); animation: shake 120ms linear; }
 #sudoku-grid .cell:active{ filter:brightness(.98); }
 
