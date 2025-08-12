@@ -604,3 +604,99 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
     box-sizing: border-box;
   }
 }
+
+/* iOS-style theme tokens */
+:root{
+  --surface: #ffffff;
+  --surface-muted: #f7f8fa;
+  --card: #ffffff;
+  --stroke: #e5e7eb;
+  --stroke-strong: #c7cdd8;
+  --peer: #edf2ff;
+  --selected: #dbeafe;
+  --given: #fff6cc;
+  --error: #fee2e2;
+  --ink: #111827;
+  --ink-muted: #6b7280;
+  --primary: #2563eb;
+  --shadow-1: 0 2px 8px rgba(0,0,0,.06);
+  --shadow-2: 0 6px 18px rgba(0,0,0,.10);
+}
+
+body{ color: var(--ink); background: var(--surface-muted); }
+
+/* Grid card wrapper */
+.grid-card{
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: var(--shadow-1);
+  padding: 10px;
+  margin: 0 auto;
+  width: min(92vw, var(--grid-cap, 640px));
+  box-sizing: border-box;
+}
+
+/* Tools row */
+.tools-row{
+  display:flex; gap:10px; justify-content:space-between; align-items:center;
+  padding:10px var(--pad, 16px);
+  max-width: min(92vw, var(--grid-cap, 640px));
+  margin: 8px auto 12px;
+}
+.tool-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--stroke);
+  border-radius: 12px; padding:10px 12px;
+  box-shadow: var(--shadow-1);
+  font-weight: 700;
+}
+.tool-btn svg{ width:18px; height:18px; }
+
+/* Grid visual polish (keep sizing rules elsewhere) */
+#sudoku-grid{
+  background: var(--surface);
+  border: 1px solid var(--stroke-strong);
+}
+#sudoku-grid .cell{
+  position:relative;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700;
+  color: var(--ink);
+  background: var(--surface);
+  border-right: 1px solid var(--stroke);
+  border-bottom: 1px solid var(--stroke);
+  border-radius: 0;
+  user-select: none;
+}
+#sudoku-grid .cell:nth-child(9n){ border-right: none; }
+#sudoku-grid .cell:nth-last-child(-n+9){ border-bottom: none; }
+#sudoku-grid .cell.box-right { box-shadow: inset -2px 0 0 var(--stroke-strong); }
+#sudoku-grid .cell.box-bottom{ box-shadow: inset 0 -2px 0 var(--stroke-strong); }
+#sudoku-grid .cell.box-left  { box-shadow: inset 2px 0 0 var(--stroke-strong); }
+#sudoku-grid .cell.box-top   { box-shadow: inset 0 2px 0 var(--stroke-strong); }
+#sudoku-grid .cell.given    { background: var(--given); }
+#sudoku-grid .cell.peer     { background: var(--peer); }
+#sudoku-grid .cell.selected { background: var(--selected); outline: 2px solid var(--primary); outline-offset: -2px; }
+#sudoku-grid .cell.error    { background: var(--error); }
+#sudoku-grid .cell:active{ filter:brightness(.98); }
+
+/* Keypad visual polish (keep existing positioning rules) */
+.keypad{
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow: var(--shadow-2);
+}
+.keypad button{
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  color: var(--primary);
+  font-weight: 800;
+  border-radius: 12px;
+  box-shadow: var(--shadow-1);
+}
+.keypad button[data-clear]{ color: var(--ink); }
+
+@media (max-width: 420px){
+  .grid-card{ padding: 8px; }
+}
