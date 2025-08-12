@@ -220,3 +220,25 @@ setTimeout(__recalc, 50);
   if (window.visualViewport){ window.visualViewport.addEventListener('resize', run, { passive: true }); window.visualViewport.addEventListener('scroll', run, { passive: true }); }
   setTimeout(run, 0);
 })();
+
+// Mobile portrait: compute --cellPx to ensure last column never clips
+(function fitMobileGrid(){
+  const grid = document.getElementById('sudoku-grid');
+  if(!grid) return;
+  function compute(){
+    const isPortraitPhone = window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches;
+    if(!isPortraitPhone){ grid.style.removeProperty('--cellPx'); return; }
+    const cs = getComputedStyle(grid);
+    const padL = parseFloat(cs.paddingLeft) || 8;
+    const padR = parseFloat(cs.paddingRight) || 8;
+    const gap = parseFloat(cs.gap) || 6;
+    const safeW = window.innerWidth;
+    const avail = Math.max(0, safeW - padL - padR);
+    let cellPx = Math.floor((avail - (8*gap)) / 9);
+    cellPx = Math.max(30, cellPx - 2); // tiny safety 2px
+    grid.style.setProperty('--cellPx', cellPx + 'px');
+  }
+  ['load','resize','orientationchange'].forEach(e=>window.addEventListener(e, compute, { passive:true }));
+  if(window.visualViewport){ window.visualViewport.addEventListener('resize', compute, { passive:true }); window.visualViewport.addEventListener('scroll', compute, { passive:true }); }
+  compute();
+})();
