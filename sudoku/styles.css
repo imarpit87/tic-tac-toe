@@ -19,12 +19,16 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 
 /* Play: single-column layout across all sizes */
 .play{ min-height:100vh; display:grid; grid-template-columns:1fr; gap:16px; max-width:1100px; margin:0 auto; padding:16px; }
-.play-topbar{ position:sticky; top:0; z-index:5; padding:8px var(--pad); background:var(--bg-card); }
-.actionbar{ display:flex; flex-wrap:nowrap; justify-content:center; gap:12px; align-items:center; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.play-topbar{ position:sticky; top:0; z-index:1000; padding:8px var(--pad); background:var(--bg-card); }
+.actionbar{ display:flex; flex-wrap:nowrap; justify-content:center; gap:12px; align-items:center; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; z-index:1001; position:relative; }
 
 /* Difficulty button container for dropdown positioning */
-#difficultyBtn{ position: relative; }
-#difficultyBtn:not([disabled]) { pointer-events: auto; cursor: pointer; }
+#difficultyBtn{ 
+  position: relative; 
+  z-index: 1001;
+  pointer-events: auto !important; 
+  cursor: pointer !important; 
+}
 .actionbar::-webkit-scrollbar{ display:none; }
 .actionbar .btn{ white-space:nowrap; }
 .play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); overflow:auto; }
@@ -60,15 +64,9 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   #sudoku-keypad{ position:static; height:auto; box-shadow:none; padding:0; margin-top:12px; }
   
   /* Remove mobile keypad padding on desktop */
+  /* Desktop-specific overrides */
   .play-stage{ padding-bottom: 16px; }
-  
-  /* Bring tools closer to grid on desktop */
   .tools-row{ margin: 4px auto 8px; }
-  
-  /* Ensure topbar and difficulty functionality works on desktop */
-  .play-topbar{ z-index: 100; pointer-events: auto; position: relative; }
-  .actionbar{ pointer-events: auto; position: relative; z-index: 10; }
-  #difficultyBtn{ pointer-events: auto !important; cursor: pointer; z-index: 11; position: relative; }
   
   /* Ensure difficulty menu is properly positioned on desktop */
   #difficultyMenu{
@@ -93,7 +91,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,.15);
   padding: 8px;
-  z-index: 1000;
+  z-index: 1002;
 }
 
 #difficultyMenu button{
@@ -122,10 +120,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 
 /* Tablet specific rules for difficulty menu */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* Ensure topbar and difficulty functionality works on tablet */
-  .play-topbar{ z-index: 100; pointer-events: auto; }
-  .actionbar{ pointer-events: auto; }
-  #difficultyBtn{ pointer-events: auto; cursor: pointer; }
+  /* Tablet-specific overrides - none needed with enhanced base styles */
   
   #difficultyMenu{
     position: absolute;
@@ -137,7 +132,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0,0,0,.15);
     padding: 8px;
-    z-index: 1000;
+    z-index: 1002;
   }
   
   #difficultyMenu button{
@@ -280,15 +275,13 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   #sudoku-keypad [data-clear]{ display: none !important; }
 }
 
-/* Mobile phones only: ensure topbar is above all and difficulty menu is visible */
+/* Mobile phones only: position difficulty menu centrally */
 @media (max-width:767px){
-  .play-topbar{ z-index: 100; pointer-events: auto; }
-  .actionbar{ pointer-events: auto; }
   #difficultyMenu{
     position: fixed;
     top: calc(var(--topbar-h, 56px) + 4px);
     left: 50%; transform: translateX(-50%);
-    z-index: 1000;
+    z-index: 1002;
     background: #ffffff;
     border: 1px solid #bbdefb;
     border-radius: 12px;

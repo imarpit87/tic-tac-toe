@@ -118,22 +118,73 @@ if (diffMenu){
   });
 }
 
-// Toggle difficulty menu visibility safely on mobile
-if (diffBtn && diffMenu){
-  diffBtn.addEventListener('click', (e)=>{
+// Enhanced difficulty button functionality with comprehensive debugging
+function setupDifficultyButton() {
+  console.log('Setting up difficulty button...');
+  
+  const diffBtn = document.getElementById('difficultyBtn');
+  const diffMenu = document.getElementById('difficultyMenu');
+  
+  console.log('Difficulty button found:', !!diffBtn);
+  console.log('Difficulty menu found:', !!diffMenu);
+  
+  if (!diffBtn || !diffMenu) {
+    console.error('Difficulty elements not found');
+    return;
+  }
+
+  // Remove any existing listeners by cloning the button
+  const newDiffBtn = diffBtn.cloneNode(true);
+  diffBtn.parentNode.replaceChild(newDiffBtn, diffBtn);
+  
+  // Update reference to the new button
+  const freshDiffBtn = document.getElementById('difficultyBtn');
+  
+  // Add click handler with comprehensive debugging
+  freshDiffBtn.addEventListener('click', function(e) {
+    console.log('Difficulty button clicked!', e);
+    e.preventDefault();
     e.stopPropagation();
+    
     const isHidden = diffMenu.classList.contains('hidden');
-    diffMenu.classList.toggle('hidden', !isHidden);
-    diffBtn.setAttribute('aria-expanded', String(isHidden));
-  });
-  // Close when tapping outside
-  document.addEventListener('click', (e)=>{
-    if (diffMenu.classList.contains('hidden')) return;
-    if (!e.target.closest('#difficultyMenu') && !e.target.closest('#difficultyBtn')){
+    console.log('Menu currently hidden:', isHidden);
+    
+    if (isHidden) {
+      diffMenu.classList.remove('hidden');
+      freshDiffBtn.setAttribute('aria-expanded', 'true');
+      console.log('Menu opened');
+    } else {
       diffMenu.classList.add('hidden');
-      diffBtn?.setAttribute('aria-expanded','false');
+      freshDiffBtn.setAttribute('aria-expanded', 'false');
+      console.log('Menu closed');
+    }
+  }, { passive: false });
+
+  // Add additional event types for better compatibility
+  ['mousedown', 'touchstart'].forEach(eventType => {
+    freshDiffBtn.addEventListener(eventType, function(e) {
+      console.log(`${eventType} on difficulty button`);
+    }, { passive: true });
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (diffMenu.classList.contains('hidden')) return;
+    if (!e.target.closest('#difficultyMenu') && !e.target.closest('#difficultyBtn')) {
+      diffMenu.classList.add('hidden');
+      freshDiffBtn.setAttribute('aria-expanded', 'false');
+      console.log('Menu closed by outside click');
     }
   }, { passive: true });
+
+  console.log('Difficulty button setup complete');
+}
+
+// Call setup after DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupDifficultyButton);
+} else {
+  setupDifficultyButton();
 }
 
 // Mobile portrait: reserve bottom space equal to keypad height
