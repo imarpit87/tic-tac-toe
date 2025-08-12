@@ -141,3 +141,18 @@ if (diffBtn && diffMenu){
     }
   }, { passive: true });
 }
+
+// Mobile portrait: reserve bottom space equal to keypad height
+(function syncKeypadPadding(){
+  const root = document.documentElement;
+  const pad = document.getElementById('sudoku-keypad');
+  if (!pad) return;
+  function apply() {
+    const h = pad.offsetHeight || 260;
+    root.style.setProperty('--kb', h + 'px');
+  }
+  window.addEventListener('load', apply, { once: true });
+  window.addEventListener('resize', apply);
+  window.addEventListener('orientationchange', apply);
+  try { new ResizeObserver(apply).observe(pad); } catch {}
+})();

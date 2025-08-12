@@ -314,3 +314,63 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
     margin: 0 auto; max-width: 720px;
   }
 }
+
+/* Mobile portrait only layout fix */
+@media (max-width: 480px) and (orientation: portrait) {
+  /* Center the main container */
+  .sudoku-container,
+  .play,
+  .play-stage,
+  .grid-wrap { max-width: 100%; margin: 0 auto; }
+
+  /* Center the top row of controls */
+  .play-topbar, .actionbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  /* Grid centered and sized by width */
+  #sudoku-grid {
+    width: min(92vw, 520px);
+    aspect-ratio: 1 / 1;
+    margin: 12px auto;
+  }
+
+  /* Bottom keypad as full-width bar */
+  #sudoku-keypad:not(.keypad--desk) {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--bg-card, #fff);
+    box-shadow: 0 -10px 30px rgba(0,0,0,.12);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    overflow-anchor: none;
+  }
+
+  #sudoku-keypad button {
+    min-height: 56px;            /* bigger touch target */
+    font-size: clamp(18px, 5vw, 22px);
+    font-weight: 700;
+    border-radius: 14px;
+    transition: transform .08s, filter .12s;
+  }
+  #sudoku-keypad button:active { transform: scale(.97); filter: brightness(.96); }
+
+  /* If Clear exists, make it full width */
+  #sudoku-keypad button[data-clear] { grid-column: 1 / -1; min-height: 52px; }
+
+  /* Ensure the content leaves space for the fixed keypad */
+  .play-stage, .grid-wrap {
+    padding-bottom: calc(var(--kb, 260px) + 16px + env(safe-area-inset-bottom));
+  }
+
+  /* Don’t clip content on mobile */
+  html, body { overflow-x: hidden; overflow-y: auto; }
+}
