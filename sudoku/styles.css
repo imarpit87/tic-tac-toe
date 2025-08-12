@@ -671,13 +671,10 @@ body{ color: var(--ink); background: var(--surface-muted); }
 }
 #sudoku-grid .cell:nth-child(9n){ border-right: none; }
 #sudoku-grid .cell:nth-last-child(-n+9){ border-bottom: none; }
-#sudoku-grid .cell.box-right { box-shadow: inset -2px 0 0 var(--stroke-strong); }
-#sudoku-grid .cell.box-bottom{ box-shadow: inset 0 -2px 0 var(--stroke-strong); }
-#sudoku-grid .cell.box-left  { box-shadow: inset 2px 0 0 var(--stroke-strong); }
-#sudoku-grid .cell.box-top   { box-shadow: inset 0 2px 0 var(--stroke-strong); }
+/* Removed - these are now handled in the updated 3x3 box separators section */
 #sudoku-grid .cell.given    { background: var(--given); }
 #sudoku-grid .cell.peer     { background: var(--peer); }
-#sudoku-grid .cell.selected { background: var(--selected); outline: 2px solid var(--primary); outline-offset: -2px; }
+#sudoku-grid .cell.selected { background: var(--selected); --cell-shadow: 0 0 0 2px var(--primary) inset; }
 #sudoku-grid .cell.error    { background: var(--error); }
 #sudoku-grid .cell:active{ filter:brightness(.98); }
 
@@ -703,15 +700,16 @@ body{ color: var(--ink); background: var(--surface-muted); }
 
 /* ===== 3×3 box separators (no layout shift) ===== */
 :root{
-  --stroke-strong: #c7cdd8; /* ensure stronger stroke is defined */
+  --stroke-strong: #8b5cf6; /* purple-500 for stronger 3x3 box separation */
+  --stroke-thick: #374151;  /* gray-700 for clear but subtle 3x3 separation */
 }
 /* Keep any existing cell shadow via CSS variable */
 #sudoku-grid .cell{ --cell-shadow: none; }
 /* Draw thicker 3×3 lines using inset shadows so size does not change */
-#sudoku-grid .cell.box-right  { box-shadow: inset -2px 0 0 var(--stroke-strong), var(--cell-shadow, none); }
-#sudoku-grid .cell.box-left   { box-shadow: inset  2px 0 0 var(--stroke-strong), var(--cell-shadow, none); }
-#sudoku-grid .cell.box-bottom { box-shadow: inset  0 -2px 0 var(--stroke-strong), var(--cell-shadow, none); }
-#sudoku-grid .cell.box-top    { box-shadow: inset  0  2px 0 var(--stroke-strong), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-right  { box-shadow: inset -3px 0 0 var(--stroke-thick), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-left   { box-shadow: inset  3px 0 0 var(--stroke-thick), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-bottom { box-shadow: inset  0 -3px 0 var(--stroke-thick), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-top    { box-shadow: inset  0  3px 0 var(--stroke-thick), var(--cell-shadow, none); }
 
 /* ===== Mobile width fine-tune (portrait only) ===== */
 @media (max-width: 420px){
