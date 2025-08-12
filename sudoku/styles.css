@@ -700,3 +700,21 @@ body{ color: var(--ink); background: var(--surface-muted); }
 @media (max-width: 420px){
   .grid-card{ padding: 8px; }
 }
+
+/* ===== 3×3 box separators (no layout shift) ===== */
+:root{
+  --stroke-strong: #c7cdd8; /* ensure stronger stroke is defined */
+}
+/* Keep any existing cell shadow via CSS variable */
+#sudoku-grid .cell{ --cell-shadow: none; }
+/* Draw thicker 3×3 lines using inset shadows so size does not change */
+#sudoku-grid .cell.box-right  { box-shadow: inset -2px 0 0 var(--stroke-strong), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-left   { box-shadow: inset  2px 0 0 var(--stroke-strong), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-bottom { box-shadow: inset  0 -2px 0 var(--stroke-strong), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-top    { box-shadow: inset  0  2px 0 var(--stroke-strong), var(--cell-shadow, none); }
+
+/* ===== Mobile width fine-tune (portrait only) ===== */
+@media (max-width: 420px){
+  #sudoku-grid{ width: min(90vw, var(--grid-cap, 640px)); }
+  .grid-card, .grid-wrap{ padding-left: 10px; padding-right: 10px; }
+}
