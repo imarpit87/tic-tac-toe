@@ -26,7 +26,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 .play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); overflow:auto; }
 .grid-wrap{ display:flex; justify-content:center; }
 /* Grid width: clamp ensures positive size; prefer dvh/svh on modern browsers */
-#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:0px; width:clamp(300px, min(92vw, var(--grid-cap)), 72vh); aspect-ratio:1/1; margin:0 auto 12px; padding:0px; border-radius:0px; background:var(--surface); box-sizing:border-box; border: 2px solid #000000; }
+#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:0px; width:clamp(300px, min(92vw, var(--grid-cap)), 72vh); aspect-ratio:1/1; margin:0 auto 12px; padding:0px; border-radius:0px; background:var(--surface); box-sizing:border-box; border: 2px solid #374151; }
 @supports (height: 1dvh){ #sudoku-grid{ width:clamp(300px, min(92vw, var(--grid-cap)), 72dvh); } }
 @supports (height: 1svh){ #sudoku-grid{ width:clamp(300px, min(92vw, var(--grid-cap)), 72svh); } }
 /* Old cell styling removed - using newer definitions below */
@@ -532,7 +532,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
     border-radius: 0px;
     box-sizing: border-box;
     aspect-ratio: auto !important; /* override any prior aspect rules */
-    border: 2px solid #000000;
+    border: 2px solid #374151;
   }
 
   /* Big, comfy keypad just below the grid (in-flow) */
@@ -609,9 +609,9 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   --card: #ffffff;
   --stroke: #e5e7eb;
   --stroke-strong: #c7cdd8;
-  --peer: #e0f2fe;
-  --selected: #81d4fa;
-  --given: #b3e5fc;
+  --peer: #e1f5fe;
+  --selected: #4fc3f7;
+  --given: #81d4fa;
   --error: #fee2e2;
   --ink: #111827;
   --ink-muted: #6b7280;
@@ -673,7 +673,7 @@ body{ color: var(--ink); background: var(--surface-muted); }
 /* Removed - these are now handled in the updated 3x3 box separators section */
 #sudoku-grid .cell.given    { background: var(--given); }
 #sudoku-grid .cell.peer     { background: var(--peer); }
-#sudoku-grid .cell.selected { background: var(--selected); }
+#sudoku-grid .cell.selected { background: var(--selected) !important; }
 #sudoku-grid .cell.error    { background: var(--error); animation: shake 120ms linear; }
 #sudoku-grid .cell:active{ filter:brightness(.98); }
 
@@ -697,12 +697,12 @@ body{ color: var(--ink); background: var(--surface-muted); }
   .grid-card{ padding: 0px; }
 }
 
-/* ===== 3×3 box separators - thick dark borders for each section ===== */
-/* Use border-width overrides to create thick 3x3 section separators */
-#sudoku-grid .cell.box-right  { border-right-width: 3px; border-right-color: #000000; }
-#sudoku-grid .cell.box-left   { border-left-width: 3px; border-left-color: #000000; }
-#sudoku-grid .cell.box-bottom { border-bottom-width: 3px; border-bottom-color: #000000; }
-#sudoku-grid .cell.box-top    { border-top-width: 3px; border-top-color: #000000; }
+/* ===== 3×3 box separators - pleasant borders for each section ===== */
+/* Use border-width overrides to create 3x3 section separators */
+#sudoku-grid .cell.box-right  { border-right-width: 2px; border-right-color: #374151; }
+#sudoku-grid .cell.box-left   { border-left-width: 2px; border-left-color: #374151; }
+#sudoku-grid .cell.box-bottom { border-bottom-width: 2px; border-bottom-color: #374151; }
+#sudoku-grid .cell.box-top    { border-top-width: 2px; border-top-color: #374151; }
 
 /* ===== Mobile width fine-tune (portrait only) ===== */
 @media (max-width: 420px){
