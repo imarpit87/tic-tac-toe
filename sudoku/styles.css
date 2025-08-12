@@ -374,3 +374,78 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   /* Don’t clip content on mobile */
   html, body { overflow-x: hidden; overflow-y: auto; }
 }
+
+:root{
+  --vh: 1vh;               /* updated by JS */
+  --kb-h: 260px;           /* keypad height (mobile portrait), updated by JS */
+  --hdr-h: 0px;            /* header height (mobile portrait), updated by JS */
+  --page-pad: 16px;
+}
+
+/* Mobile portrait only */
+@media (max-width: 600px) and (orientation: portrait) {
+  /* page scroll allowed; nothing should hide the grid */
+  html, body { overflow-x: hidden; overflow-y: auto; }
+
+  .play { display: flex; flex-direction: column; align-items: center; }
+
+  /* Top controls (Home, New Game, Difficulty, Notes/Hint/Undo/Redo/Timer) */
+  .play-topbar, .actionbar, .controls-row {
+    width: 100%;
+    max-width: 640px;
+    margin: 8px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;   /* center buttons */
+    align-items: center;
+  }
+
+  /* Stage holds the grid; bottom padding keeps it above the fixed keypad */
+  .play-stage {
+    width: 100%;
+    max-width: 640px;
+    padding: 8px var(--page-pad) calc(var(--kb-h) + 12px + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+  }
+
+  .grid-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Make the grid a perfect square that fits between header and keypad */
+  #sudoku-grid {
+    /* available height = viewport - header - keypad - margins */
+    --avail-h: calc(var(--vh) * 100 - var(--hdr-h) - var(--kb-h) - 24px);
+    width: min(92vw, 520px, var(--avail-h));
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+  }
+
+  /* Comfortable touch size for cells on small phones */
+  #sudoku-grid .cell { min-height: 40px; border-radius: 10px; }
+
+  /* Keypad fixed at the bottom, centered content */
+  .keypad:not(.keypad--desk){
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: var(--kb-h);
+    padding: 12px var(--page-pad) calc(12px + env(safe-area-inset-bottom));
+    background: var(--bg-card, #fff);
+    box-shadow: 0 -10px 24px rgba(0,0,0,.12);
+    z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .keypad:not(.keypad--desk) button{
+    min-height: 56px;            /* larger touch area */
+    font-size: 18px;
+    border-radius: 14px;
+    font-weight: 700;
+  }
+}

@@ -156,3 +156,21 @@ if (diffBtn && diffMenu){
   window.addEventListener('orientationchange', apply);
   try { new ResizeObserver(apply).observe(pad); } catch {}
 })();
+
+// Mobile portrait: safe viewport unit and header/keypad measurement
+function setVHVar(){
+  document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+}
+function setHeaderAndKeypadVars(){
+  const hdr = document.querySelector('.play-topbar, .controls-row');
+  const kb  = document.querySelector('.keypad:not(.keypad--desk)');
+  const hdrH = hdr ? hdr.getBoundingClientRect().height : 0;
+  const kbH  = kb  ? kb.getBoundingClientRect().height  : 260;
+  document.documentElement.style.setProperty('--hdr-h', `${Math.ceil(hdrH)}px`);
+  document.documentElement.style.setProperty('--kb-h',  `${Math.ceil(kbH)}px`);
+}
+const __recalc = () => { setVHVar(); setHeaderAndKeypadVars(); };
+window.addEventListener('load', __recalc, { once:true });
+window.addEventListener('resize', __recalc);
+window.addEventListener('orientationchange', __recalc);
+setTimeout(__recalc, 50);
