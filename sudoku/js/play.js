@@ -174,3 +174,14 @@ window.addEventListener('load', __recalc, { once:true });
 window.addEventListener('resize', __recalc);
 window.addEventListener('orientationchange', __recalc);
 setTimeout(__recalc, 50);
+
+// Mobile portrait sizing helpers (no game logic changed)
+(function(){
+  const pad = document.getElementById('sudoku-keypad'); if(!pad) return;
+  const root = document.documentElement;
+  function measure(){ const h = pad.offsetHeight || 210; root.style.setProperty('--keypad-h', h+'px'); }
+  window.addEventListener('load', measure, { once:true });
+  window.addEventListener('resize', measure);
+  window.addEventListener('orientationchange', measure);
+  try { new ResizeObserver(measure).observe(pad); } catch {}
+})();

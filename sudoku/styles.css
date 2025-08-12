@@ -449,3 +449,68 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
     font-weight: 700;
   }
 }
+
+/* Mobile portrait: focused layout fix */
+@media (max-width: 430px) and (orientation: portrait) {
+  :root{ --keypad-h: 210px; }
+
+  /* page scroll allowed */
+  html, body { overflow-x: hidden; overflow-y: auto; }
+
+  /* Stack naturally and center */
+  .play { display: block; }
+
+  .grid-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 12px;
+  }
+
+  /* Grid fully visible and centered; remove any legacy transforms */
+  #sudoku-grid{
+    margin: 8px auto 10px;
+    width: min(92vw, 440px);
+    max-width: 92vw;
+    aspect-ratio: 1 / 1;
+    transform: none; left: auto;
+  }
+  #sudoku-grid .cell{
+    border-radius: 10px;
+    font-size: clamp(18px, 4.6vw, 22px);
+  }
+
+  /* Reserve bottom space so fixed keypad never overlaps grid */
+  .stage, .play-stage{
+    padding: 8px 0 calc(var(--keypad-h, 210px) + 18px);
+  }
+
+  /* Bottom keypad as full-width bar; larger touch targets */
+  #sudoku-keypad:not(.keypad--desk), .keypad:not(.keypad--desk){
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: var(--keypad-h);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    background: var(--bg-card, #fff);
+    box-shadow: 0 -10px 28px rgba(0,0,0,.12);
+    z-index: 10;
+  }
+  #sudoku-keypad:not(.keypad--desk) button, .keypad:not(.keypad--desk) button{
+    min-height: 56px; /* bigger, easier taps */
+    font-size: 18px; font-weight: 700;
+    border-radius: 16px;
+    transition: transform .08s, filter .12s;
+  }
+  #sudoku-keypad:not(.keypad--desk) button:active, .keypad:not(.keypad--desk) button:active{
+    transform: scale(.96); filter: brightness(.95);
+  }
+  /* Make Clear full width if present */
+  #sudoku-keypad button[data-clear]{ grid-column: 1 / -1; }
+
+  /* Center top bars without pushing grid off center */
+  .controls, .topbar, .header-controls, .play-topbar, .actionbar{
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  }
+}
