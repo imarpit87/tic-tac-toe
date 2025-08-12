@@ -58,6 +58,11 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   .desk{ display:none !important; }
   #sudoku-keypad{ position:static; height:auto; box-shadow:none; padding:0; margin-top:12px; }
   
+  /* Ensure topbar and difficulty functionality works on desktop */
+  .play-topbar{ z-index: 100; pointer-events: auto; }
+  .actionbar{ pointer-events: auto; }
+  #difficultyBtn{ pointer-events: auto; cursor: pointer; }
+  
   /* Ensure difficulty menu is properly positioned on desktop */
   #difficultyMenu{
     position: absolute;
@@ -110,11 +115,40 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 
 /* Tablet specific rules for difficulty menu */
 @media (min-width: 768px) and (max-width: 1023px) {
+  /* Ensure topbar and difficulty functionality works on tablet */
+  .play-topbar{ z-index: 100; pointer-events: auto; }
+  .actionbar{ pointer-events: auto; }
+  #difficultyBtn{ pointer-events: auto; cursor: pointer; }
+  
   #difficultyMenu{
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
     min-width: 160px;
+    background: #ffffff;
+    border: 1px solid #bbdefb;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.15);
+    padding: 8px;
+    z-index: 1000;
+  }
+  
+  #difficultyMenu button{
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #1976d2;
+    transition: background-color 0.2s ease;
+  }
+  
+  #difficultyMenu button:hover,
+  #difficultyMenu button:focus{
+    background: #e3f2fd;
   }
 }
 
@@ -239,8 +273,8 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   #sudoku-keypad [data-clear]{ display: none !important; }
 }
 
-/* Mobile: ensure topbar is above all and difficulty menu is visible */
-@media (max-width:1023px){
+/* Mobile phones only: ensure topbar is above all and difficulty menu is visible */
+@media (max-width:767px){
   .play-topbar{ z-index: 100; pointer-events: auto; }
   .actionbar{ pointer-events: auto; }
   #difficultyMenu{
