@@ -910,3 +910,42 @@ body{ color: var(--ink); background: var(--surface-muted); }
   font-weight: 600;
   font-size: 15px;
 }
+
+/* === Landing page spacing & typography refinements === */
+.start{
+  padding: 24px;
+}
+
+.start-card{
+  width: min(92vw, 540px);
+  padding: 28px 32px;
+  gap: 20px;
+}
+
+.start-form{ display:grid; gap: 20px; }
+.start-form .field{ gap: 8px; margin-bottom: 4px; }
+
+.start h1{ font-size: 36px; margin: 0 0 8px; }
+
+/* Avatar grid responsive */
+.avatar-picker{ grid-template-columns: repeat(auto-fit, minmax(60px,1fr)); gap: 12px; }
+.avatar{ font-size: 30px; padding: 14px; }
+
+/* Inputs */
+.start-form input{ font-size: 17px; }
+.start-form input::placeholder{ color:#8f8f9d; }
+
+/* Actions row */
+.actions{ gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+@media (min-width:600px){ .actions{ gap: 20px; } }
+
+/* Buttons refinement */
+.start .btn{ padding: 12px 22px; font-size: 16px; border-radius: 14px; }
+.start .btn.tertiary{ font-weight: 600; }
+
+/* Pill tweaks */
+.pill{ display:inline-flex; align-items:center; justify-content:center; min-width: 84px; font-size: 15px; }
+.pill:focus-visible{ outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Hint text spacing */
+.hint{ margin-top: 2px; font-size: 13px; color: #6d6d78; }
