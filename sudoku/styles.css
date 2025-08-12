@@ -24,6 +24,7 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 
 /* Difficulty button container for dropdown positioning */
 #difficultyBtn{ position: relative; }
+#difficultyBtn:not([disabled]) { pointer-events: auto; cursor: pointer; }
 .actionbar::-webkit-scrollbar{ display:none; }
 .actionbar .btn{ white-space:nowrap; }
 .play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); overflow:auto; }
@@ -58,10 +59,16 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   .desk{ display:none !important; }
   #sudoku-keypad{ position:static; height:auto; box-shadow:none; padding:0; margin-top:12px; }
   
+  /* Remove mobile keypad padding on desktop */
+  .play-stage{ padding-bottom: 16px; }
+  
+  /* Bring tools closer to grid on desktop */
+  .tools-row{ margin: 4px auto 8px; }
+  
   /* Ensure topbar and difficulty functionality works on desktop */
-  .play-topbar{ z-index: 100; pointer-events: auto; }
-  .actionbar{ pointer-events: auto; }
-  #difficultyBtn{ pointer-events: auto; cursor: pointer; }
+  .play-topbar{ z-index: 100; pointer-events: auto; position: relative; }
+  .actionbar{ pointer-events: auto; position: relative; z-index: 10; }
+  #difficultyBtn{ pointer-events: auto !important; cursor: pointer; z-index: 11; position: relative; }
   
   /* Ensure difficulty menu is properly positioned on desktop */
   #difficultyMenu{

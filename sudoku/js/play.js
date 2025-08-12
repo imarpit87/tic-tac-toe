@@ -68,7 +68,7 @@ function wire(){
   hintBtn?.addEventListener('click', doHint);
   notesBtn?.addEventListener('click', toggleNotes);
   newBtn?.addEventListener('click', ()=>{ if(confirm('Start a new puzzle? Your current progress will be lost.')){ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); showToast('New game'); }catch(e){ showError('New game error: ' + e.message); } } });
-  diffBtn?.addEventListener('click', ()=>{ const open=diffMenu.classList.toggle('hidden'); diffBtn.setAttribute('aria-expanded', String(!open)); const onClick=(e)=>{ const item=e.target.closest('[data-diff]'); if(item){ if(confirm('Start a new game at this difficulty?')){ const d=item.dataset.diff; const s=setup||{}; try{ s.difficulty=d; localStorage.setItem('sudoka:setup', JSON.stringify(s)); game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:d, theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); }catch(err){ showError('Difficulty error: ' + err.message); } } diffMenu.classList.add('hidden'); diffBtn.setAttribute('aria-expanded','false'); document.removeEventListener('click',onClick); } }; setTimeout(()=>document.addEventListener('click', onClick),0); });
+  // Difficulty button click handler removed - handled by dedicated listener below
   playAgainBtn?.addEventListener('click', ()=>{ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); winModal?.classList.add('hidden'); }catch(e){ showError('Play again error: ' + e.message); } });
 }
 
@@ -97,13 +97,7 @@ function updateDifficultyLabel(){
 // Call after init render
 try{ updateDifficultyLabel(); }catch{}
 
-// Ensure difficulty menu toggles and applies correctly
-if (diffBtn){
-  diffBtn.addEventListener('click', ()=>{
-    const open = diffMenu.classList.toggle('hidden');
-    diffBtn.setAttribute('aria-expanded', String(!open));
-  });
-}
+// Duplicate difficulty listener removed - handled by main listener below
 
 // Delegate menu clicks
 if (diffMenu){
