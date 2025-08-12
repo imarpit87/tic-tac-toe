@@ -26,16 +26,12 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
 .play-stage{ padding:0 var(--pad); padding-bottom:calc(var(--keypad-h) + 16px + env(safe-area-inset-bottom)); overflow:auto; }
 .grid-wrap{ display:flex; justify-content:center; }
 /* Grid width: clamp ensures positive size; prefer dvh/svh on modern browsers */
-#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; width:clamp(300px, min(92vw, var(--grid-cap)), 72vh); aspect-ratio:1/1; margin:0 auto 12px; padding:8px; border-radius:16px; background:var(--bg-grid); box-sizing:border-box; }
+#sudoku-grid{ display:grid; grid-template-columns:repeat(9,1fr); gap:0px; width:clamp(300px, min(92vw, var(--grid-cap)), 72vh); aspect-ratio:1/1; margin:0 auto 12px; padding:0px; border-radius:0px; background:var(--surface); box-sizing:border-box; }
 @supports (height: 1dvh){ #sudoku-grid{ width:clamp(300px, min(92vw, var(--grid-cap)), 72dvh); } }
 @supports (height: 1svh){ #sudoku-grid{ width:clamp(300px, min(92vw, var(--grid-cap)), 72svh); } }
-#sudoku-grid .cell{ aspect-ratio:1/1; min-height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:clamp(18px,4.2vw,28px); background:#fff; }
-#sudoku-grid .cell.given{ background:#FFF3BF; font-weight:800; }
-#sudoku-grid .cell.selected{ box-shadow:0 0 0 3px #CFE4FF inset; }
-#sudoku-grid .cell.peer{ background:#EEF5FF; }
-#sudoku-grid .cell.error{ background:#FEE2E2; animation:shake 120ms linear; }
+/* Old cell styling removed - using newer definitions below */
 @keyframes shake{ 50%{ transform:translateX(2px) } }
-#sudoku-grid .cell.box-top, #sudoku-grid .cell.box-left, #sudoku-grid .cell.box-right, #sudoku-grid .cell.box-bottom{ outline:2px solid rgba(0,0,0,.15); outline-offset:-2px; }
+/* Old box outline styling removed - using new 3x3 separators */
 
 /* Keypad */
 .keypad{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:720px; margin:0 auto; }
@@ -612,9 +608,9 @@ html,body{ margin:0; height:100%; overflow-x:hidden; touch-action:manipulation; 
   --card: #ffffff;
   --stroke: #e5e7eb;
   --stroke-strong: #c7cdd8;
-  --peer: #edf2ff;
-  --selected: #dbeafe;
-  --given: #fff6cc;
+  --peer: #e0f2fe;
+  --selected: #81d4fa;
+  --given: #b3e5fc;
   --error: #fee2e2;
   --ink: #111827;
   --ink-muted: #6b7280;
@@ -628,9 +624,9 @@ body{ color: var(--ink); background: var(--surface-muted); }
 /* Grid card wrapper */
 .grid-card{
   background: var(--card);
-  border-radius: 14px;
-  box-shadow: var(--shadow-1);
-  padding: 10px;
+  border-radius: 0px;
+  box-shadow: none;
+  padding: 0px;
   margin: 0 auto;
   width: min(92vw, var(--grid-cap, 640px));
   box-sizing: border-box;
@@ -656,7 +652,8 @@ body{ color: var(--ink); background: var(--surface-muted); }
 /* Grid visual polish (keep sizing rules elsewhere) */
 #sudoku-grid{
   background: var(--surface);
-  border: 1px solid var(--stroke-strong);
+  border: 2px solid #000000;
+  border-radius: 0;
 }
 #sudoku-grid .cell{
   position:relative;
@@ -664,18 +661,22 @@ body{ color: var(--ink); background: var(--surface-muted); }
   font-weight:700;
   color: var(--ink);
   background: var(--surface);
-  border-right: 1px solid var(--stroke);
-  border-bottom: 1px solid var(--stroke);
+  border-right: 1px solid #d1d5db;
+  border-bottom: 1px solid #d1d5db;
   border-radius: 0;
   user-select: none;
+  box-sizing: border-box;
+  aspect-ratio: 1/1;
+  min-height: 48px;
+  font-size: clamp(18px, 4.2vw, 28px);
 }
 #sudoku-grid .cell:nth-child(9n){ border-right: none; }
 #sudoku-grid .cell:nth-last-child(-n+9){ border-bottom: none; }
 /* Removed - these are now handled in the updated 3x3 box separators section */
 #sudoku-grid .cell.given    { background: var(--given); }
 #sudoku-grid .cell.peer     { background: var(--peer); }
-#sudoku-grid .cell.selected { background: var(--selected); --cell-shadow: 0 0 0 2px var(--primary) inset; }
-#sudoku-grid .cell.error    { background: var(--error); }
+#sudoku-grid .cell.selected { background: var(--selected); }
+#sudoku-grid .cell.error    { background: var(--error); animation: shake 120ms linear; }
 #sudoku-grid .cell:active{ filter:brightness(.98); }
 
 /* Keypad visual polish (keep existing positioning rules) */
@@ -695,24 +696,24 @@ body{ color: var(--ink); background: var(--surface-muted); }
 .keypad button[data-clear]{ color: var(--ink); }
 
 @media (max-width: 420px){
-  .grid-card{ padding: 8px; }
+  .grid-card{ padding: 0px; }
 }
 
 /* ===== 3×3 box separators (no layout shift) ===== */
 :root{
   --stroke-strong: #8b5cf6; /* purple-500 for stronger 3x3 box separation */
-  --stroke-thick: #374151;  /* gray-700 for clear but subtle 3x3 separation */
+  --stroke-thick: #000000;  /* black for clear 3x3 separation like screenshot */
 }
 /* Keep any existing cell shadow via CSS variable */
 #sudoku-grid .cell{ --cell-shadow: none; }
 /* Draw thicker 3×3 lines using inset shadows so size does not change */
-#sudoku-grid .cell.box-right  { box-shadow: inset -3px 0 0 var(--stroke-thick), var(--cell-shadow, none); }
-#sudoku-grid .cell.box-left   { box-shadow: inset  3px 0 0 var(--stroke-thick), var(--cell-shadow, none); }
-#sudoku-grid .cell.box-bottom { box-shadow: inset  0 -3px 0 var(--stroke-thick), var(--cell-shadow, none); }
-#sudoku-grid .cell.box-top    { box-shadow: inset  0  3px 0 var(--stroke-thick), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-right  { box-shadow: inset -2px 0 0 var(--stroke-thick), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-left   { box-shadow: inset  2px 0 0 var(--stroke-thick), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-bottom { box-shadow: inset  0 -2px 0 var(--stroke-thick), var(--cell-shadow, none); }
+#sudoku-grid .cell.box-top    { box-shadow: inset  0  2px 0 var(--stroke-thick), var(--cell-shadow, none); }
 
 /* ===== Mobile width fine-tune (portrait only) ===== */
 @media (max-width: 420px){
   #sudoku-grid{ width: min(90vw, var(--grid-cap, 640px)); }
-  .grid-card, .grid-wrap{ padding-left: 10px; padding-right: 10px; }
+  .grid-card, .grid-wrap{ padding-left: 0px; padding-right: 0px; }
 }
