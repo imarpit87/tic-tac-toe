@@ -153,12 +153,40 @@ function setupDifficultyButton() {
       diffMenu.classList.remove('hidden');
       freshDiffBtn.setAttribute('aria-expanded', 'true');
       console.log('Menu opened');
+      layoutMenu();
     } else {
       diffMenu.classList.add('hidden');
       freshDiffBtn.setAttribute('aria-expanded', 'false');
       console.log('Menu closed');
     }
   }, { passive: false });
+
+  // Position menu below button on desktop/tablet
+  function layoutMenu(){
+    const vw = window.innerWidth;
+    const rect = freshDiffBtn.getBoundingClientRect();
+    if(vw >= 1024){ // desktop
+      diffMenu.style.position = 'fixed';
+      diffMenu.style.left = rect.left + 'px';
+      diffMenu.style.top  = (rect.bottom + 4) + 'px';
+      diffMenu.style.transform = 'none';
+    } else if(vw >= 768){ // tablet
+      diffMenu.style.position = 'fixed';
+      diffMenu.style.left = rect.left + 'px';
+      diffMenu.style.top  = (rect.bottom + 4) + 'px';
+      diffMenu.style.transform = 'none';
+    } else { // mobile retains centered fixed styling via CSS
+      diffMenu.style.position = 'fixed';
+      diffMenu.style.left = '50%';
+      diffMenu.style.top  = 'calc(var(--topbar-h, 56px) + 4px)';
+      diffMenu.style.transform = 'translateX(-50%)';
+    }
+  }
+
+  // Re-position on viewport changes when menu is open
+  ['resize','orientationchange'].forEach(evt => window.addEventListener(evt, ()=>{
+    if(!diffMenu.classList.contains('hidden')) layoutMenu();
+  }));
 
   // Add additional event types for better compatibility
   ['mousedown', 'touchstart'].forEach(eventType => {
