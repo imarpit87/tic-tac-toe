@@ -185,3 +185,38 @@ setTimeout(__recalc, 50);
   window.addEventListener('orientationchange', measure);
   try { new ResizeObserver(measure).observe(pad); } catch {}
 })();
+
+// === Mobile portrait fit so grid + keypad are visible together ===
+(function fitMobilePortrait(){
+  const grid = document.getElementById('sudoku-grid');
+  const keypad = document.getElementById('sudoku-keypad');
+  const header = document.querySelector('.play-topbar') || document.querySelector('.actionbar') || document.querySelector('header');
+  if (!grid || !keypad) return;
+
+  function isPortraitPhone(){ return window.innerWidth <= 600 && window.innerHeight > window.innerWidth; }
+
+  function fit(){
+    if (!isPortraitPhone()) return;
+    const headerH = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
+    const keypadH = Math.ceil(keypad.getBoundingClientRect().height || 180);
+    const verticalGaps = 8 + 8 + 16; // top margin + grid-bottom gap + bottom margin
+    const availH = Math.max(220, window.innerHeight - headerH - keypadH - verticalGaps);
+    const availW = Math.min(document.documentElement.clientWidth, window.innerWidth) - 20; // account for page padding
+
+    const gap = 6;
+    const innerPad = 16; // 8px left + 8px right
+    const maxCellFrom = (container) => Math.floor((container - innerPad - (gap * 8)) / 9);
+
+    const cellFromH = maxCellFrom(availH);
+    const cellFromW = maxCellFrom(availW);
+    const cell = Math.max(28, Math.min(cellFromH, cellFromW));
+    grid.style.setProperty('--cell', `${cell}px`);
+  }
+
+  const run = () => { try{ fit(); }catch{} };
+  window.addEventListener('load', run, { passive: true });
+  window.addEventListener('resize', run, { passive: true });
+  window.addEventListener('orientationchange', run, { passive: true });
+  if (window.visualViewport){ window.visualViewport.addEventListener('resize', run, { passive: true }); window.visualViewport.addEventListener('scroll', run, { passive: true }); }
+  setTimeout(run, 0);
+})();
