@@ -793,8 +793,10 @@ function listenRoom(code) {
     }
 
     // Disable input if not my turn; enable only when status is playing
+    // Only disable if we're actually joined to the room (online.mySide is set)
     const myTurn = (statusNow === 'playing') && online.mySide === currentPlayer;
-    boardEl.classList.toggle('ai-thinking', !myTurn);
+    const shouldDisable = online.mySide && !myTurn; // Only disable if we have a side assigned
+    boardEl.classList.toggle('ai-thinking', shouldDisable);
 
     // Game is active when status is playing
     gameActive = (statusNow === 'playing');
