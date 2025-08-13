@@ -88,6 +88,10 @@
   --transition-fast: 150ms ease;
   --transition-base: 200ms ease;
   --transition-slow: 300ms ease;
+  
+  /* RGB values for animations */
+  --color-primary-rgb: 0, 122, 255;
+  --color-secondary-rgb: 255, 107, 53;
 }
 
 /* Dark theme support */
@@ -356,6 +360,44 @@ h3 { font-size: var(--font-size-2xl); }
   color: var(--color-white);
   transition: all var(--transition-base);
   font-size: var(--font-size-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.switch span::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.switch input:checked + span {
+  background-color: var(--color-primary);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.4);
+}
+
+.switch input:not(:checked) + span {
+  background-color: var(--color-neutral-400);
+  transform: scale(0.95);
+  opacity: 0.7;
+}
+
+.switch input:checked + span::before {
+  opacity: 1;
+}
+
+.switch input:checked + span .sound-icon {
+  animation: soundPulse 0.3s ease-out;
+}
+
+.switch input:not(:checked) + span .sound-icon {
+  animation: soundMute 0.3s ease-out;
 }
 
 .switch:hover span {
@@ -1167,4 +1209,29 @@ h3 { font-size: var(--font-size-2xl); }
 .tab-btn:focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* Sound toggle animations */
+@keyframes soundPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes soundMute {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
