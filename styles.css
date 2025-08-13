@@ -94,47 +94,82 @@
   --color-secondary-rgb: 255, 107, 53;
 }
 
-/* Dark theme support */
+/* Dark theme support - Sophisticated Apple Dark */
 [data-theme="dark"] {
+  --color-primary: #0A84FF;
+  --color-primary-hover: #007AFF;
+  --color-secondary: #FF9F0A;
+  --color-success: #30D158;
+  --color-warning: #FFD60A;
+  --color-error: #FF453A;
   --color-background: #000000;
   --color-background-secondary: #1C1C1E;
   --color-surface: #1C1C1E;
   --color-surface-elevated: #2C2C2E;
   --color-text-primary: #FFFFFF;
-  --color-text-secondary: #98989D;
-  --color-text-tertiary: #636366;
+  --color-text-secondary: #EBEBF5;
+  --color-text-tertiary: #8E8E93;
   --color-border: #38383A;
   --color-border-light: #2C2C2E;
   --color-neutral-100: #2C2C2E;
-  --color-neutral-200: #38383A;
+  --color-neutral-200: #3A3A3C;
   --color-neutral-300: #48484A;
   --color-neutral-50: #1C1C1E;
+  --color-x: #0A84FF;
+  --color-o: #FF9F0A;
+  --color-winner: #30D158;
 }
 
-/* Neon theme support */
+/* Neon theme support - Cyberpunk Neon */
 [data-theme="neon"] {
-  --color-primary: #00D4FF;
-  --color-primary-hover: #00B8E6;
-  --color-secondary: #FF6B9D;
-  --color-success: #00E676;
-  --color-warning: #FFD54F;
-  --color-error: #FF5252;
-  --color-background: #0D1117;
-  --color-background-secondary: #161B22;
-  --color-surface: #21262D;
-  --color-surface-elevated: #30363D;
-  --color-text-primary: #F0F6FC;
-  --color-text-secondary: #C9D1D9;
-  --color-text-tertiary: #8B949E;
-  --color-border: #30363D;
-  --color-border-light: #21262D;
-  --color-neutral-100: #30363D;
-  --color-neutral-200: #484F58;
-  --color-neutral-300: #6E7681;
-  --color-neutral-50: #161B22;
-  --color-x: #00D4FF;
-  --color-o: #FF6B9D;
-  --color-winner: #00E676;
+  --color-primary: #00FFFF;
+  --color-primary-hover: #00E5E5;
+  --color-secondary: #FF00FF;
+  --color-success: #00FF41;
+  --color-warning: #FFFF00;
+  --color-error: #FF0040;
+  --color-background: #0A0A0F;
+  --color-background-secondary: #1A1A2E;
+  --color-surface: #16213E;
+  --color-surface-elevated: #0F3460;
+  --color-text-primary: #E8F4FD;
+  --color-text-secondary: #B8D4E3;
+  --color-text-tertiary: #7A9BA8;
+  --color-border: #00FFFF;
+  --color-border-light: #1A1A2E;
+  --color-neutral-100: #16213E;
+  --color-neutral-200: #0F3460;
+  --color-neutral-300: #533483;
+  --color-neutral-50: #0A0A0F;
+  --color-x: #00FFFF;
+  --color-o: #FF00FF;
+  --color-winner: #00FF41;
+}
+
+/* Neon theme special effects */
+[data-theme="neon"] .btn {
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="neon"] .btn:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  border-color: rgba(0, 255, 255, 0.4);
+}
+
+[data-theme="neon"] .container {
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+[data-theme="neon"] .game-option {
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="neon"] .game-option:hover {
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+  border-color: rgba(0, 255, 255, 0.4);
 }
 
 /* Kids theme support */
