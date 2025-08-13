@@ -245,9 +245,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
   flex-wrap: wrap;
-  gap: var(--spacing-4);
+  gap: var(--spacing-6);
+  padding: var(--spacing-4) 0;
 }
 
 .app-title {
@@ -261,8 +262,9 @@ body {
 .header-controls {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-4);
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* Typography */
@@ -329,10 +331,14 @@ h3 { font-size: var(--font-size-2xl); }
 .btn.tertiary {
   background-color: var(--color-neutral-100);
   color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
 }
 
 .btn.tertiary:hover:not(:disabled) {
   background-color: var(--color-neutral-200);
+  border-color: var(--color-border);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn.large {
@@ -355,6 +361,25 @@ h3 { font-size: var(--font-size-2xl); }
   border-radius: var(--radius-md);
   transition: all var(--transition-base);
   min-height: 44px;
+}
+
+/* Header-specific theme select */
+.header-controls .theme-select {
+  min-width: 120px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Version number styling */
+.version-number {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-neutral-100);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border-light);
 }
 
 .text-input:focus,
@@ -397,6 +422,7 @@ h3 { font-size: var(--font-size-2xl); }
   font-size: var(--font-size-lg);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .switch span::before {
@@ -1205,12 +1231,19 @@ h3 { font-size: var(--font-size-2xl); }
   
   .app-header {
     flex-direction: column;
-    gap: var(--spacing-3);
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
   }
   
   .header-controls {
     justify-content: center;
     width: 100%;
+    gap: var(--spacing-3);
+  }
+  
+  .version-number {
+    font-size: 10px;
+    padding: var(--spacing-1) var(--spacing-2);
   }
   
   .hero-title {
