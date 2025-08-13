@@ -9,4 +9,12 @@ function generateSolved(){ const board=Array.from({length:9},()=>Array(9).fill(0
 
 function removeSymmetric(solved, targetGivens){ const puzzle=deepClone(solved); const coords=[]; for(let r=0;r<9;r++) for(let c=0;c<9;c++) coords.push([r,c]); coords.sort(()=>Math.random()-0.5); const needed=81-targetGivens; let removed=0; for(const [r,c] of coords){ if(removed>=needed) break; const r2=8-r, c2=8-c; const a=puzzle[r][c], b=puzzle[r2][c2]; if(a===0 && b===0) continue; puzzle[r][c]=0; puzzle[r2][c2]=0; const tmp=deepClone(puzzle); if(countSolutions(tmp,2)===1){ removed += (a?1:0) + (b?1:0); } else { puzzle[r][c]=a; puzzle[r2][c2]=b; } } return puzzle; }
 
-export function generatePuzzle(difficulty){ const solved=generateSolved(); let givens=46; if(difficulty==='medium') givens=38; else if(difficulty==='hard') givens=30; else if(difficulty==='god') givens=25; const puzzle=removeSymmetric(solved, givens); return { givens:puzzle, solution: solved }; }
+export function generatePuzzle(difficulty){ 
+  const solved=generateSolved(); 
+  let givens=73; // Easy: 10% difficulty (73 givens = 8 cells to fill)
+  if(difficulty==='medium') givens=57; // Medium: 30% difficulty (57 givens = 24 cells to fill)
+  else if(difficulty==='hard') givens=41; // Hard: 50% difficulty (41 givens = 40 cells to fill)
+  else if(difficulty==='god') givens=16; // God: 80% difficulty (16 givens = 65 cells to fill)
+  const puzzle=removeSymmetric(solved, givens); 
+  return { givens:puzzle, solution: solved }; 
+}

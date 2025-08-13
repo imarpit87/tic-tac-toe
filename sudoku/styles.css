@@ -501,6 +501,11 @@ body {
   color: var(--color-white) !important;
 }
 
+#sudoku-grid .cell.same-number {
+  background: rgba(255, 149, 0, 0.2) !important;
+  border-color: var(--color-warning) !important;
+}
+
 #sudoku-grid .cell.error {
   background: var(--color-cell-error);
   animation: shake 0.3s ease-in-out;
@@ -845,12 +850,29 @@ body {
   }
 }
 
+/* Home button styles */
+.home-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-4);
+}
+
+.home-btn {
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-2) var(--spacing-3);
+  min-height: 36px;
+}
+
 /* Desktop styles */
 @media (min-width: 1024px) {
   .keypad {
     position: static;
     height: auto;
-    margin-top: var(--spacing-4);
+    margin-top: var(--spacing-2);
+  }
+  
+  .tools-row {
+    margin: var(--spacing-1) auto var(--spacing-2);
   }
   
   .desk {

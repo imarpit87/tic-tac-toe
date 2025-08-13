@@ -80,7 +80,23 @@ function redo(){ try{ if(game.redo()){ showToast('Redone'); render(); } }catch(e
 function doHint(){ try{ const h=game.hint(); if(h){ showToast('Hint used'); selectCell(h.r,h.c); } else showToast('No hint available'); }catch(e){ showError('Hint error: ' + e.message); } }
 function toggleNotes(){ try{ game.notesMode=!game.notesMode; notesBtn?.setAttribute('aria-pressed', String(game.notesMode)); showToast(game.notesMode?'Notes on':'Notes off'); }catch(e){ showError('Notes toggle error: ' + e.message); } }
 
-function highlightPeers(sel){ const {r,c}=sel; for(let rr=0;rr<9;rr++) for(let cc=0;cc<9;cc++){ const el=gridEl.children[rr*9+cc]; el.classList.remove('peer','selected'); if(rr===r&&cc===c) el.classList.add('selected'); if(rr===r||cc===c|| (Math.floor(rr/3)===Math.floor(r/3) && Math.floor(cc/3)===Math.floor(c/3))) el.classList.add('peer'); } }
+function highlightPeers(sel){ 
+  const {r,c}=sel; 
+  const selectedValue = game.board[r][c]; // Get the value of selected cell
+  
+  for(let rr=0;rr<9;rr++) for(let cc=0;cc<9;cc++){ 
+    const el=gridEl.children[rr*9+cc]; 
+    el.classList.remove('peer','selected','same-number'); 
+    
+    if(rr===r&&cc===c) el.classList.add('selected'); 
+    if(rr===r||cc===c|| (Math.floor(rr/3)===Math.floor(r/3) && Math.floor(cc/3)===Math.floor(c/3))) el.classList.add('peer'); 
+    
+    // Highlight cells with the same number as selected cell
+    if(selectedValue && selectedValue !== 0 && game.board[rr][cc] === selectedValue) {
+      el.classList.add('same-number');
+    }
+  } 
+}
 function render(){ if(!game){ return; } if(timerEl) timerEl.textContent = formatTime(timer.valueMs); const sel=game.selected; for(let r=0;r<9;r++) for(let c=0;c<9;c++){ const el=gridEl.children[r*9+c]; const val=game.board[r][c]; el.classList.remove('given','user'); if(game.fixed[r][c]) el.classList.add('given'); el.textContent = val? String(val): ''; if(val && !game.fixed[r][c]){ el.classList.add('user'); const tmp=val; game.board[r][c]=0; const invalid=!isValidMove(game.board,r,c,tmp); game.board[r][c]=tmp; if(invalid) el.classList.add('error'); } } if(sel) highlightPeers(sel); if(game.solved()){ timer.pause(); if(winStats) winStats.textContent = `Puzzle solved in ${formatTime(timer.valueMs)}`; winModal?.classList.remove('hidden'); } }
 function onUpdate(){ updateUndoRedo(); try{ localStorage.setItem(TIMER_KEY, String(timer.valueMs)); }catch{} }
 function updateUndoRedo(){ const canUndo=(game?.undoStack?.length||0)>1; const canRedo=(game?.redoStack?.length||0)>0; if(mUndo) mUndo.disabled=!canUndo; if(mRedo) mRedo.disabled=!canRedo; if(dUndo) dUndo.disabled=!canUndo; if(dRedo) dRedo.disabled=!canRedo; }
