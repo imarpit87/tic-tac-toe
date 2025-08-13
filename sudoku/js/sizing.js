@@ -17,7 +17,7 @@
     const availH = svh - top - act - pad - gaps;
 
     const availW = page.clientWidth - 16; // page padding
-    const size = Math.max(320, Math.min(availH, availW)); // never below 320
+    const size = Math.max(280, Math.min(availH, availW)); // reduced minimum for better fit
     board.style.width = size + 'px';
     board.style.height = size + 'px';
   }
