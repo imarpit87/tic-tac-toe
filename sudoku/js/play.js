@@ -19,10 +19,11 @@ const mRedo=document.getElementById('m-redo');
 const dUndo=document.getElementById('d-undo');
 const dRedo=document.getElementById('d-redo');
 const keypadMobile=document.getElementById('sudoku-keypad');
-const keypadDesk=document.querySelector('.keypad--desk');
 const timerEl=document.getElementById('m-timer');
 const notesBtn=document.getElementById('notesToggleBtn');
 const hintBtn=document.getElementById('hintBtn');
+const dNotesBtn=document.getElementById('d-notesToggleBtn');
+const dHintBtn=document.getElementById('d-hintBtn');
 const newBtn=document.getElementById('newBtn');
 const diffBtn=document.getElementById('difficultyBtn');
 const diffMenu=document.getElementById('difficultyMenu');
@@ -72,10 +73,12 @@ function buildGrid(){ const frag=document.createDocumentFragment(); for(let r=0;
 function wire(){
   gridEl.addEventListener('pointerdown',(e)=>{ const t=e.target.closest('.cell'); if(!t) return; const r=Number(t.dataset.row), c=Number(t.dataset.col); if(Number.isNaN(r)||Number.isNaN(c)) return; if(!game){ showError('Game not initialized'); return; } selectCell(r,c); if(!timer.isRunning) timer.start(); }, {passive:true});
   document.addEventListener('keydown',(e)=>{ if(!game) return; const sel=game.selected; if(!sel) return; const {r,c}=sel; if(/^[1-9]$/.test(e.key)){ place(r,c,Number(e.key)); e.preventDefault(); } else if(['Backspace','Delete','0'].includes(e.key)){ place(r,c,0); e.preventDefault(); } else if(e.key==='ArrowUp'){ selectCell(Math.max(0,r-1),c); } else if(e.key==='ArrowDown'){ selectCell(Math.min(8,r+1),c); } else if(e.key==='ArrowLeft'){ selectCell(r,Math.max(0,c-1)); } else if(e.key==='ArrowRight'){ selectCell(r,Math.min(8,c+1)); } else if(e.key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey) && e.shiftKey){ redo(); } else if(e.key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey)){ undo(); } else if(e.key.toLowerCase()==='h'){ doHint(); } else if(e.key.toLowerCase()==='n'){ toggleNotes(); } });
-  bindPad(keypadMobile); bindPad(keypadDesk);
+  bindPad(keypadMobile);
   [mUndo,mRedo,dUndo,dRedo].forEach((el,idx)=>{ if(!el) return; el.addEventListener('click', ()=> idx%2===0? undo(): redo()); });
   hintBtn?.addEventListener('click', doHint);
   notesBtn?.addEventListener('click', toggleNotes);
+  dHintBtn?.addEventListener('click', doHint);
+  dNotesBtn?.addEventListener('click', toggleNotes);
   newBtn?.addEventListener('click', ()=>{ if(confirm('Start a new puzzle? Your current progress will be lost.')){ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); showToast('New game'); }catch(e){ showError('New game error: ' + e.message); } } });
   // Difficulty button click handler removed - handled by dedicated listener below
   playAgainBtn?.addEventListener('click', ()=>{ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); winModal?.classList.add('hidden'); }catch(e){ showError('Play again error: ' + e.message); } });
@@ -115,7 +118,18 @@ function highlightPeers(sel){
 }
 function render(){ if(!game){ return; } if(timerEl) timerEl.textContent = formatTime(timer.valueMs); const sel=game.selected; for(let r=0;r<9;r++) for(let c=0;c<9;c++){ const el=gridEl.children[r*9+c]; const val=game.board[r][c]; el.classList.remove('given','user'); if(game.fixed[r][c]) el.classList.add('given'); el.textContent = val? String(val): ''; if(val && !game.fixed[r][c]){ el.classList.add('user'); const tmp=val; game.board[r][c]=0; const invalid=!isValidMove(game.board,r,c,tmp); game.board[r][c]=tmp; if(invalid) el.classList.add('error'); } } if(sel) highlightPeers(sel); if(game.solved()){ timer.pause(); if(winStats) winStats.textContent = `Puzzle solved in ${formatTime(timer.valueMs)}`; winModal?.classList.remove('hidden'); } }
 function onUpdate(){ updateUndoRedo(); try{ localStorage.setItem(TIMER_KEY, String(timer.valueMs)); }catch{} }
-function updateUndoRedo(){ const canUndo=(game?.undoStack?.length||0)>1; const canRedo=(game?.redoStack?.length||0)>0; if(mUndo) mUndo.disabled=!canUndo; if(mRedo) mRedo.disabled=!canRedo; if(dUndo) dUndo.disabled=!canUndo; if(dRedo) dRedo.disabled=!canRedo; }
+function updateUndoRedo(){ 
+  const canUndo=(game?.undoStack?.length||0)>1; 
+  const canRedo=(game?.redoStack?.length||0)>0; 
+  if(mUndo) mUndo.disabled=!canUndo; 
+  if(mRedo) mRedo.disabled=!canRedo; 
+  if(dUndo) dUndo.disabled=!canUndo; 
+  if(dRedo) dRedo.disabled=!canRedo; 
+  
+  // Update notes button states
+  if(notesBtn) notesBtn.setAttribute('aria-pressed', String(game?.notesMode||false));
+  if(dNotesBtn) dNotesBtn.setAttribute('aria-pressed', String(game?.notesMode||false));
+}
 function formatTime(ms){ const s=Math.floor(ms/1000); const h=Math.floor(s/3600); const m=Math.floor((s%3600)/60); const sec=s%60; return h>0?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
 
 // Show current difficulty label on the button after starting/changes

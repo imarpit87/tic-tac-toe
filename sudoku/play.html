@@ -33,42 +33,42 @@
       </div>
     </section>
 
-    <div class="tools-row" aria-label="Tools">
-      <button id="m-undo" class="tool-btn" title="Undo" aria-label="Undo">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-        <span>Undo</span>
-      </button>
-      <button id="notesToggleBtn" class="tool-btn" title="Notes" aria-label="Notes">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10l4 4v12H5z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-        <span>Notes</span>
-      </button>
-      <button id="hintBtn" class="tool-btn" title="Hint" aria-label="Hint">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 017 7c0 2.6-1.5 4.5-3 6v2H8v-2c-1.5-1.5-3-3.4-3-6a7 7 0 017-7z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-        <span>Hint</span>
-      </button>
-      <button id="m-redo" class="tool-btn" title="Redo" aria-label="Redo">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-        <span>Redo</span>
-      </button>
-    </div>
-
-    <nav id="sudoku-keypad" class="keypad" aria-label="Number pad (mobile)">
-      <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button>
-      <button data-num="4">4</button><button data-num="5">5</button><button data-num="6">6</button>
-      <button data-num="7">7</button><button data-num="8">8</button><button data-num="9">9</button>
-      <button data-clear>Clear</button>
-    </nav>
-
-    <aside class="desk" aria-label="Desktop controls">
-      <div class="row">
-        <button id="d-undo" class="btn">Undo</button>
-        <button id="d-redo" class="btn">Redo</button>
+    <!-- Mobile/Tablet Controls -->
+    <div class="mobile-controls">
+      <div class="tools-row" aria-label="Tools">
+        <button id="m-undo" class="tool-btn" title="Undo" aria-label="Undo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span>Undo</span>
+        </button>
+        <button id="notesToggleBtn" class="tool-btn" title="Notes" aria-label="Notes">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10l4 4v12H5z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span>Notes</span>
+        </button>
+        <button id="hintBtn" class="tool-btn" title="Hint" aria-label="Hint">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 017 7c0 2.6-1.5 4.5-3 6v2H8v-2c-1.5-1.5-3-3.4-3-6a7 7 0 017-7z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span>Hint</span>
+        </button>
+        <button id="m-redo" class="tool-btn" title="Redo" aria-label="Redo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span>Redo</span>
+        </button>
       </div>
-      <div class="keypad keypad--desk" aria-label="Number pad (desktop)">
+
+      <nav id="sudoku-keypad" class="keypad" aria-label="Number pad (mobile)">
         <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button>
         <button data-num="4">4</button><button data-num="5">5</button><button data-num="6">6</button>
         <button data-num="7">7</button><button data-num="8">8</button><button data-num="9">9</button>
         <button data-clear>Clear</button>
+      </nav>
+    </div>
+
+    <!-- Desktop Controls (No Keypad) -->
+    <aside class="desktop-controls" aria-label="Desktop controls">
+      <div class="desktop-tools">
+        <button id="d-undo" class="btn">Undo</button>
+        <button id="d-redo" class="btn">Redo</button>
+        <button id="d-notesToggleBtn" class="btn tertiary">Notes</button>
+        <button id="d-hintBtn" class="btn tertiary">Hint</button>
       </div>
     </aside>
   </main>
