@@ -177,7 +177,13 @@ function loadSettings() {
   try {
     const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!s) return;
-    if (s.theme) setTheme(s.theme);
+    // Load theme from global localStorage first, fallback to settings
+    const globalTheme = localStorage.getItem('theme');
+    if (globalTheme) {
+      setTheme(globalTheme);
+    } else if (s.theme) {
+      setTheme(s.theme);
+    }
     if (typeof s.soundEnabled === 'boolean') { soundEnabled = s.soundEnabled; soundToggle.checked = soundEnabled; }
     if (s.difficulty) difficulty = s.difficulty;
     if (s.bestOf) bestOf = Number(s.bestOf);
@@ -187,6 +193,12 @@ function loadSettings() {
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   themeSelect.value = theme;
+  // Save to global localStorage for cross-page consistency
+  try {
+    localStorage.setItem('theme', theme);
+  } catch (error) {
+    console.error('Error saving theme:', error);
+  }
   saveSettings();
 }
 

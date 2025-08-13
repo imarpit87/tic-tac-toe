@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe — Setup</title>
+    <meta name="description" content="A simple Tic Tac Toe game I built with AI — try it and share your feedback.">
+    <meta property="og:title" content="Tic Tac Toe — Setup">
+    <meta property="og:description" content="A simple Tic Tac Toe game I built with AI — try it and share your feedback.">
+    <meta property="og:image" content="https://xo-duel.netlify.app/og.png">
+    <meta property="og:url" content="https://xo-duel.netlify.app/">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <link rel="stylesheet" href="./styles.css?v=2025-08-09-01">
+    <!-- Firebase SDKs for optional online mode (only used if firebase-config.js is present) -->
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SJ5LDFKE4E"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);} 
+      gtag('js', new Date());
+      gtag('config', 'G-SJ5LDFKE4E');
+    </script>
+</head>
+<body>
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+    <div class="container">
+        <header class="app-header">
+            <h1 class="app-title" aria-label="Tic Tac Toe">🎮 Tic Tac Toe</h1>
+            <div class="header-controls">
+                <span id="appVersion" title="App version" style="font-size:12px;color:#888;margin-right:6px;"></span>
+                <label class="switch" title="Toggle sounds">
+                    <input type="checkbox" id="soundToggle" checked>
+                    <span>🔊</span>
+                </label>
+                <select id="themeSelect" class="theme-select" aria-label="Theme select">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="neon">Neon</option>
+                    <option value="kids">Kids</option>
+                </select>
+                <button class="btn tertiary" id="rateBtn" title="Rate the game">Rate</button>
+                <a href="index.html" class="btn tertiary">🏠 Home</a>
+            </div>
+        </header>
+        
+        <!-- Game Setup -->
+        <div class="game-setup" id="gameSetup">
+            <div class="game-modes">
+                <button class="mode-btn" onclick="selectMode('ai')">🤖 Play vs AI</button>
+                <button class="mode-btn" onclick="selectMode('human')">👥 Play vs Human</button>
+                <button class="mode-btn" onclick="selectMode('online')">🌐 Play Online</button>
+                <button class="mode-btn" onclick="selectMode('challenge')">🏁 Challenges</button>
+            </div>
+
+            <div class="difficulty-selection" id="difficultySelection">
+                <h3>Choose Difficulty:</h3>
+                <div>
+                    <button class="difficulty-btn active" onclick="setDifficulty('easy')" data-difficulty="easy">Easy</button>
+                    <button class="difficulty-btn" onclick="setDifficulty('medium')" data-difficulty="medium">Medium</button>
+                    <button class="difficulty-btn" onclick="setDifficulty('hard')" data-difficulty="hard">Hard</button>
+                    <button class="difficulty-btn" onclick="setDifficulty('god')" data-difficulty="god">God mode</button>
+                </div>
+            </div>
+
+            <div class="challenge-selection" id="challengeSelection" style="display:none;">
+                <h3>Choose a Challenge:</h3>
+                <div class="challenge-cards">
+                    <input id="challengeNameInput" class="text-input" placeholder="Your name (required)" aria-label="Your name for challenges">
+                    <button class="btn" id="challengeBeat3Btn">Beat the AI in 3 Moves</button>
+                    <button class="btn" id="challengeStreak5Btn">Win 5 in a Row</button>
+                    <button class="btn tertiary" id="challengeLeaderboardBtn">Challenges Leaderboard</button>
+                </div>
+                <div class="muted" id="challengeStatus"></div>
+            </div>
+
+            <div class="rounds-selection" id="roundsSelection" style="display:none;">
+                <h3>Rounds:</h3>
+                <select id="roundsSelect" class="rounds-select" aria-label="Select number of rounds">
+                    <option value="1" selected>Single</option>
+                    <option value="3">Best of 3</option>
+                    <option value="5">Best of 5</option>
+                </select>
+            </div>
+
+            <div class="online-setup" id="onlineSetup" style="display:none;">
+                <h3>Online Room</h3>
+                <div class="online-tabs" role="tablist">
+                    <button class="tab-btn active" id="createTabBtn" role="tab" aria-selected="true">Create</button>
+                    <button class="tab-btn" id="joinTabBtn" role="tab" aria-selected="false">Join</button>
+                </div>
+
+                <div class="online-grid">
+                    <section class="online-panel" id="createPanel" aria-labelledby="createTabBtn">
+                        <p class="panel-desc">Set your name and avatar, then create a room to get a code or a shareable link.</p>
+                        <div class="avatar-picker" id="avatarPicker" aria-label="Choose an avatar">
+                            <button class="avatar-option" data-avatar="🧑‍🚀" title="Astronaut">🧑‍🚀</button>
+                            <button class="avatar-option" data-avatar="🧑‍🎤" title="Rocker">🧑‍🎤</button>
+                            <button class="avatar-option" data-avatar="🦸‍♂️" title="Superhero (M)">🦸‍♂️</button>
+                            <button class="avatar-option" data-avatar="🦸‍♀️" title="Superhero (F)">🦸‍♀️</button>
+                            <button class="avatar-option" data-avatar="🤠" title="Cowboy">🤠</button>
+                            <button class="avatar-option" data-avatar="👩‍🎤" title="Popstar">👩‍🎤</button>
+                        </div>
+                        <div class="online-actions">
+                            <input id="playerNameInput" class="text-input" placeholder="Your name (optional)" aria-label="Your name">
+                            <button class="btn" id="createRoomBtn">Create Room</button>
+                            <button class="btn tertiary" id="shareRoomBtn" style="display:none;" title="Share invite link">Share Link</button>
+                        </div>
+                        <div class="room-code" id="roomCodeWrap" style="display:none;">
+                            <span>Room code:</span> <code id="roomCodeText"></code>
+                            <button class="btn tertiary" id="copyCodeBtn" title="Copy code">Copy Code</button>
+                        </div>
+                    </section>
+
+                    <section class="online-panel hidden" id="joinPanel" aria-labelledby="joinTabBtn">
+                        <p class="panel-desc">Enter your name (optional) and the room code you received to join your friend.</p>
+                        <div class="online-actions">
+                            <input id="playerNameJoinInput" class="text-input" placeholder="Your name (optional)" aria-label="Your name for joining">
+                            <input id="joinCodeInput" class="text-input" placeholder="Enter room code" aria-label="Enter room code to join">
+                            <button class="btn" id="joinRoomBtn">Join Room</button>
+                        </div>
+                    </section>
+                </div>
+ 
+                <div class="room-status" id="roomStatus" aria-live="polite"></div>
+                <div class="room-hint" id="roomHint">Game will auto-start when both players have joined. You can share the invite link or the room code.</div>
+            </div>
+
+            <button class="btn" onclick="startGame()" id="startBtn" style="display: none;">Start Game</button>
+        </div>
+
+        <!-- Game Play -->
+        <div class="game-play" id="gamePlay">
+            <div class="scoreboard">
+                <div class="score"><span id="player1Avatar" class="avatar">🧑</span> <span id="player1Name">Player 1</span>: <span id="score1">0</span></div>
+                <div class="score"><span id="player2Avatar" class="avatar">🤖</span> <span id="player2Name">Player 2</span>: <span id="score2">0</span></div>
+            </div>
+
+            <div class="ai-difficulty hidden" id="aiDifficultyBar">
+                <span class="muted">AI Difficulty:</span>
+                <select id="aiDifficultySelect" class="rounds-select" aria-label="AI difficulty select">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                    <option value="god">God mode</option>
+                </select>
+            </div>
+            <div class="ai-streak hidden" id="aiStreakBar">
+                <span class="muted">Win Streak:</span>
+                <strong id="aiStreakValue">0</strong>
+            </div>
+            <div class="challenge-bar hidden" id="challengeBar">
+                <span class="muted" id="challengeLabel"></span>
+                <span class="muted" id="challengeMeta"></span>
+            </div>
+
+            <div class="game-info" id="gameInfo" aria-live="polite">Player 1's turn</div>
+
+            <div class="share-bar hidden" id="shareBar" aria-label="Share your result">
+                <button class="btn" id="shareNativeBtn">Share</button>
+                <button class="btn tertiary" id="shareCopyBtn">Copy Link</button>
+                <a class="btn tertiary" id="shareTwitterBtn" target="_blank" rel="noopener">Tweet</a>
+            </div>
+
+            <div class="board" id="board" role="grid" aria-label="Tic Tac Toe board">
+                <button class="cell" onclick="makeMove(0)" data-cell="0" role="gridcell" tabindex="0" aria-label="Row 1, Column 1, empty"></button>
+                <button class="cell" onclick="makeMove(1)" data-cell="1" role="gridcell" tabindex="0" aria-label="Row 1, Column 2, empty"></button>
+                <button class="cell" onclick="makeMove(2)" data-cell="2" role="gridcell" tabindex="0" aria-label="Row 1, Column 3, empty"></button>
+                <button class="cell" onclick="makeMove(3)" data-cell="3" role="gridcell" tabindex="0" aria-label="Row 2, Column 1, empty"></button>
+                <button class="cell" onclick="makeMove(4)" data-cell="4" role="gridcell" tabindex="0" aria-label="Row 2, Column 2, empty"></button>
+                <button class="cell" onclick="makeMove(5)" data-cell="5" role="gridcell" tabindex="0" aria-label="Row 2, Column 3, empty"></button>
+                <button class="cell" onclick="makeMove(6)" data-cell="6" role="gridcell" tabindex="0" aria-label="Row 3, Column 1, empty"></button>
+                <button class="cell" onclick="makeMove(7)" data-cell="7" role="gridcell" tabindex="0" aria-label="Row 3, Column 2, empty"></button>
+                <button class="cell" onclick="makeMove(8)" data-cell="8" role="gridcell" tabindex="0" aria-label="Row 3, Column 3, empty"></button>
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="resetGame()">New Game</button>
+                <button class="btn secondary" onclick="backToMenu()">Back to Menu</button>
+                <button class="btn tertiary" id="undoBtn" title="Undo move (local modes only)">Undo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div class="modal hidden" id="leaderboardModal" role="dialog" aria-modal="true" aria-labelledby="leaderboardTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="leaderboardTitle">🏆 Challenges Leaderboard</h3>
+                <button class="btn tertiary" id="leaderboardCloseBtn" aria-label="Close">Close</button>
+            </div>
+            <div id="leaderboardBody" class="leaderboard-body">
+                <div class="muted">Loading…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div class="modal hidden" id="ratingModal" role="dialog" aria-modal="true" aria-labelledby="ratingTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="ratingTitle">How was this match?</h3>
+                <button class="btn tertiary" id="ratingCloseBtn" aria-label="Close">Close</button>
+            </div>
+            <div class="rating-body">
+                <div id="ratingStars" class="rating-stars" role="radiogroup" aria-label="Rate from 1 to 5">
+                    <button class="star" data-star="1" aria-label="1 star">⭐</button>
+                    <button class="star" data-star="2" aria-label="2 stars">⭐</button>
+                    <button class="star" data-star="3" aria-label="3 stars">⭐</button>
+                    <button class="star" data-star="4" aria-label="4 stars">⭐</button>
+                    <button class="star" data-star="5" aria-label="5 stars">⭐</button>
+                </div>
+                <div class="rating-note muted" id="ratingNote"></div>
+                <textarea id="ratingFeedback" class="text-input" rows="3" placeholder="Optional: What could we improve?"></textarea>
+                <div class="rating-actions">
+                    <button class="btn" id="ratingSubmitBtn">Submit</button>
+                    <button class="btn tertiary" id="ratingNotNowBtn">Not now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+    <script type="module" src="./app.js?v=2025-08-09-01"></script>
+    <script defer src="./firebase-config.js"></script>
+</body>
+</html>

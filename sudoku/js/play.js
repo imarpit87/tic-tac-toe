@@ -43,10 +43,10 @@ try{
   
   // Load saved theme
   try {
-    const savedTheme = localStorage.getItem('sudoka:theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    if (themeSelect) themeSelect.value = savedTheme;
-  } catch {}
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  if (themeSelect) themeSelect.value = savedTheme;
+} catch {}
   
   wire();
 }catch(err){ console.error('Sudoku init error', err); showError('Init error: ' + (err?.message||'see console')); }
@@ -82,10 +82,10 @@ function wire(){
   
   // Theme functionality
   themeSelect?.addEventListener('change', () => {
-    const theme = themeSelect.value;
-    document.documentElement.setAttribute('data-theme', theme);
-    try { localStorage.setItem('sudoka:theme', theme); } catch {}
-  });
+  const theme = themeSelect.value;
+  document.documentElement.setAttribute('data-theme', theme);
+  try { localStorage.setItem('theme', theme); } catch {}
+});
 }
 
 function selectCell(r,c){ game.selectCell(r,c); render(); }

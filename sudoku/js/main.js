@@ -16,12 +16,12 @@ let selectedDifficulty='easy'; diffPicker?.addEventListener('click',(e)=>{ const
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   if (themeSelect) themeSelect.value = theme;
-  try { localStorage.setItem('sudoka:theme', theme); } catch {}
+  try { localStorage.setItem('theme', theme); } catch {}
 }
 
 // Load saved theme
 try {
-  const savedTheme = localStorage.getItem('sudoka:theme') || 'light';
+  const savedTheme = localStorage.getItem('theme') || 'light';
   setTheme(savedTheme);
 } catch {}
 
@@ -32,8 +32,8 @@ continueLink?.addEventListener('click',(e)=>{ e.preventDefault(); localStorage.s
 
 form.addEventListener('submit',(e)=>{
   e.preventDefault(); if(!validate()){ nameEl.focus(); return; }
-  const currentTheme = themeSelect ? themeSelect.value : 'light';
-  const setup={ name:nameEl.value.trim(), avatar:selectedAvatar, difficulty:selectedDifficulty, theme:currentTheme };
+  const currentTheme = themeSelect ? themeSelect.value : (localStorage.getItem('theme') || 'light');
+const setup={ name:nameEl.value.trim(), avatar:selectedAvatar, difficulty:selectedDifficulty, theme:currentTheme };
   try{ localStorage.setItem('sudoka:setup', JSON.stringify(setup)); }catch{}
   location.href='play.html';
 });
