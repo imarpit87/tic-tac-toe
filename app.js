@@ -85,7 +85,7 @@ let ratingSelected = 0;
 // Online elements
 const onlineSetupEl = document.getElementById('onlineSetup');
 const playerNameInput = document.getElementById('playerNameInput');
-const roomCodeInput = document.getElementById('roomCodeInput');
+const roomCodeInput = document.getElementById('joinCodeInput');
 const createRoomBtn = document.getElementById('createRoomBtn');
 const joinRoomBtn = document.getElementById('joinRoomBtn');
 const roomStatusEl = document.getElementById('roomStatus');
