@@ -115,6 +115,56 @@
   --color-cell-user: var(--color-neutral-200);
 }
 
+/* Neon theme support */
+[data-theme="neon"] {
+  --color-primary: #00FFFF;
+  --color-primary-hover: #00CCCC;
+  --color-secondary: #FF00FF;
+  --color-success: #00FF00;
+  --color-warning: #FFFF00;
+  --color-error: #FF0080;
+  --color-background: #0A0A0A;
+  --color-background-secondary: #1A1A1A;
+  --color-surface: #1A1A1A;
+  --color-surface-elevated: #2A2A2A;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #CCCCCC;
+  --color-text-tertiary: #999999;
+  --color-border: #333333;
+  --color-border-light: #444444;
+  --color-neutral-100: #2A2A2A;
+  --color-neutral-200: #444444;
+  --color-neutral-300: #555555;
+  --color-neutral-50: #1A1A1A;
+  --color-cell-given: var(--color-surface);
+  --color-cell-user: var(--color-neutral-200);
+}
+
+/* Kids theme support */
+[data-theme="kids"] {
+  --color-primary: #FF6B6B;
+  --color-primary-hover: #FF5252;
+  --color-secondary: #4ECDC4;
+  --color-success: #95E1D3;
+  --color-warning: #FFE66D;
+  --color-error: #FF8A80;
+  --color-background: #FFF9C4;
+  --color-background-secondary: #FFFDE7;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #FFFDE7;
+  --color-text-primary: #4A4A4A;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #888888;
+  --color-border: #FFCCBC;
+  --color-border-light: #FFE0B2;
+  --color-neutral-100: #FFFDE7;
+  --color-neutral-200: #FFE0B2;
+  --color-neutral-300: #FFCCBC;
+  --color-neutral-50: #FFF9C4;
+  --color-cell-given: var(--color-surface);
+  --color-cell-user: var(--color-neutral-200);
+}
+
 /* Base styles */
 *,
 *::before,
@@ -850,10 +900,11 @@ body {
   }
 }
 
-/* Home button styles */
+/* Home button and theme controls */
 .home-button-container {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: var(--spacing-4);
 }
 
@@ -861,6 +912,34 @@ body {
   font-size: var(--font-size-sm);
   padding: var(--spacing-2) var(--spacing-3);
   min-height: 36px;
+}
+
+.theme-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.theme-select {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-system);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.theme-select:hover {
+  border-color: var(--color-primary);
+}
+
+.theme-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
 /* Desktop styles */

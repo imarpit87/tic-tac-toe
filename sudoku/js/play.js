@@ -29,6 +29,7 @@ const diffMenu=document.getElementById('difficultyMenu');
 const playAgainBtn=document.getElementById('playAgainBtn');
 const winModal=document.getElementById('winModal');
 const winStats=document.getElementById('winStats');
+const themeSelect=document.getElementById('themeSelect');
 
 let game;
 
@@ -39,6 +40,14 @@ try{
   else { // fallback demo board to avoid blank UI
     buildGrid(); showError('No setup found. Use Home > Play Sudoku to start.');
   }
+  
+  // Load saved theme
+  try {
+    const savedTheme = localStorage.getItem('sudoka:theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (themeSelect) themeSelect.value = savedTheme;
+  } catch {}
+  
   wire();
 }catch(err){ console.error('Sudoku init error', err); showError('Init error: ' + (err?.message||'see console')); }
 
@@ -70,6 +79,13 @@ function wire(){
   newBtn?.addEventListener('click', ()=>{ if(confirm('Start a new puzzle? Your current progress will be lost.')){ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); showToast('New game'); }catch(e){ showError('New game error: ' + e.message); } } });
   // Difficulty button click handler removed - handled by dedicated listener below
   playAgainBtn?.addEventListener('click', ()=>{ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); winModal?.classList.add('hidden'); }catch(e){ showError('Play again error: ' + e.message); } });
+  
+  // Theme functionality
+  themeSelect?.addEventListener('change', () => {
+    const theme = themeSelect.value;
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('sudoka:theme', theme); } catch {}
+  });
 }
 
 function selectCell(r,c){ game.selectCell(r,c); render(); }
