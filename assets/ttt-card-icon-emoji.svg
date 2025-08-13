@@ -1,0 +1,51 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="ttt-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4ECDC4;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="ttt-x" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE66D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="ttt-o" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4ECDC4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#45B7AA;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="48" cy="48" r="44" fill="url(#ttt-bg)" opacity="0.15"/>
+  
+  <!-- Grid lines with vibrant colors -->
+  <path d="M32 24 L32 72" stroke="#FF6B6B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M64 24 L64 72" stroke="#4ECDC4" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 32 L72 32" stroke="#FFE66D" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 64 L72 64" stroke="#A8E6CF" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- X's and O's with gradients -->
+  <!-- Top left X -->
+  <path d="M28 28 L36 36" stroke="url(#ttt-x)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M36 28 L28 36" stroke="url(#ttt-x)" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Top right O -->
+  <circle cx="56" cy="32" r="4" stroke="url(#ttt-o)" stroke-width="3" fill="none"/>
+  
+  <!-- Bottom left O -->
+  <circle cx="32" cy="56" r="4" stroke="url(#ttt-o)" stroke-width="3" fill="none"/>
+  
+  <!-- Bottom right X -->
+  <path d="M60 60 L68 68" stroke="url(#ttt-x)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M68 60 L60 68" stroke="url(#ttt-x)" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Center X -->
+  <path d="M44 44 L52 52" stroke="url(#ttt-x)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M52 44 L44 52" stroke="url(#ttt-x)" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="20" cy="20" r="2" fill="#FFE66D" opacity="0.6"/>
+  <circle cx="76" cy="20" r="2" fill="#4ECDC4" opacity="0.6"/>
+  <circle cx="20" cy="76" r="2" fill="#A8E6CF" opacity="0.6"/>
+  <circle cx="76" cy="76" r="2" fill="#FF6B6B" opacity="0.6"/>
+</svg>

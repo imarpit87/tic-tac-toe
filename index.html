@@ -31,18 +31,26 @@
     <div class="container">
         <header class="app-header">
             <div class="header-controls">
-                <span id="appVersion" title="App version" class="version-number"></span>
-                <label class="switch" title="Toggle sounds">
-                    <input type="checkbox" id="soundToggle" checked>
-                    <span class="sound-icon">🔊</span>
-                </label>
-                <select id="themeSelect" class="theme-select" aria-label="Theme select">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="neon">Neon</option>
-                    <option value="kids">Kids</option>
-                </select>
-                <button class="btn tertiary" id="rateBtn" title="Rate the game">Rate</button>
+                <div class="control-item">
+                    <span id="appVersion" title="App version" class="version-number"></span>
+                </div>
+                <div class="control-item">
+                    <label class="switch" title="Toggle sounds">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="sound-icon">🔊</span>
+                    </label>
+                </div>
+                <div class="control-item">
+                    <select id="themeSelect" class="theme-select" aria-label="Theme select">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="neon">Neon</option>
+                        <option value="kids">Kids</option>
+                    </select>
+                </div>
+                <div class="control-item">
+                    <button class="btn tertiary" id="rateBtn" title="Rate the game">Rate</button>
+                </div>
             </div>
         </header>
         
@@ -54,12 +62,12 @@
             </div>
             <div class="game-options">
                 <a href="tic-tac-toe.html" class="game-option">
-                    <img src="./assets/ttt-card-icon.svg" alt="Tic Tac Toe" width="96" height="96" class="game-icon">
+                    <img src="./assets/ttt-card-icon-emoji.svg" alt="Tic Tac Toe" width="96" height="96" class="game-icon" loading="eager" decoding="async">
                     <h2>Play Tic Tac Toe</h2>
                     <p>Classic X's and O's with AI, multiplayer, and challenges</p>
                 </a>
                 <a href="sudoku/index.html" class="game-option">
-                    <img src="./assets/sudoku-card-icon-v2.svg" alt="Sudoku" width="96" height="96" class="game-icon">
+                    <img src="./assets/sudoku-card-icon-emoji.svg" alt="Sudoku" width="96" height="96" class="game-icon" loading="eager" decoding="async">
                     <h2>Play Sudoku</h2>
                     <p>Brain-teasing number puzzles with multiple difficulty levels</p>
                 </a>

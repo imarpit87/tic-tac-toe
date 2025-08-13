@@ -267,6 +267,13 @@ body {
   justify-content: center;
 }
 
+.control-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);
@@ -366,9 +373,12 @@ h3 { font-size: var(--font-size-2xl); }
 /* Header-specific theme select */
 .header-controls .theme-select {
   min-width: 120px;
+  height: 44px;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  padding: 0 var(--spacing-3);
 }
 
 /* Version number styling */
@@ -380,6 +390,10 @@ h3 { font-size: var(--font-size-2xl); }
   background-color: var(--color-neutral-100);
   border-radius: var(--radius-base);
   border: 1px solid var(--color-border-light);
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .text-input:focus,
@@ -1071,7 +1085,7 @@ h3 { font-size: var(--font-size-2xl); }
 
 .game-option:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.10);
   border-color: var(--color-primary);
   color: var(--color-text-primary);
 }
@@ -1083,7 +1097,7 @@ h3 { font-size: var(--font-size-2xl); }
 .game-icon {
   width: 96px;
   height: 96px;
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-4);
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
   transition: transform var(--transition-base);
   display: block;
@@ -1241,6 +1255,12 @@ h3 { font-size: var(--font-size-2xl); }
     justify-content: center;
     width: 100%;
     gap: var(--spacing-3);
+    flex-direction: column;
+  }
+  
+  .control-item {
+    width: 100%;
+    justify-content: center;
   }
   
   .version-number {
