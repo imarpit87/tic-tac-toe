@@ -1081,10 +1081,12 @@ h3 { font-size: var(--font-size-2xl); }
 }
 
 .game-icon {
-  font-size: 5rem;
+  width: 96px;
+  height: 96px;
   margin-bottom: var(--spacing-6);
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
   transition: transform var(--transition-base);
+  display: block;
 }
 
 .game-option h2 {

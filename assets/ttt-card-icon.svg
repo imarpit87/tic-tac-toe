@@ -1,0 +1,29 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="48" cy="48" r="44" fill="currentColor" opacity="0.1"/>
+  
+  <!-- Grid lines -->
+  <path d="M32 24 L32 72" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M64 24 L64 72" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 32 L72 32" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 64 L72 64" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- X's and O's -->
+  <!-- Top left X -->
+  <path d="M28 28 L36 36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M36 28 L28 36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Top right O -->
+  <circle cx="56" cy="32" r="4" stroke="currentColor" stroke-width="2.5" fill="none"/>
+  
+  <!-- Bottom left O -->
+  <circle cx="32" cy="56" r="4" stroke="currentColor" stroke-width="2.5" fill="none"/>
+  
+  <!-- Bottom right X -->
+  <path d="M60 60 L68 68" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M68 60 L60 68" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Center X -->
+  <path d="M44 44 L52 52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M52 44 L44 52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
