@@ -872,7 +872,7 @@ body {
   }
   
   .tools-row {
-    margin: var(--spacing-1) auto var(--spacing-2);
+    margin: var(--spacing-1) auto var(--spacing-1);
   }
   
   .desk {
