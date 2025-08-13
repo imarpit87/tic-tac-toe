@@ -11,7 +11,7 @@ function removeSymmetric(solved, targetGivens){ const puzzle=deepClone(solved); 
 
 export function generatePuzzle(difficulty){ 
   const solved=generateSolved(); 
-  let givens=73; // Easy: 10% difficulty (73 givens = 8 cells to fill)
+  let givens=65; // Easy: 20% difficulty (65 givens = 16 cells to fill)
   if(difficulty==='medium') givens=57; // Medium: 30% difficulty (57 givens = 24 cells to fill)
   else if(difficulty==='hard') givens=41; // Hard: 50% difficulty (41 givens = 40 cells to fill)
   else if(difficulty==='god') givens=16; // God: 80% difficulty (16 givens = 65 cells to fill)
