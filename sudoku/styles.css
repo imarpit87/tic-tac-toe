@@ -990,22 +990,52 @@ body {
 
 /* Desktop styles */
 @media (min-width: 1024px) {
-  .keypad {
-    position: static;
-    height: auto;
-    margin-top: var(--spacing-2);
+  .play {
+    grid-template-columns: 1fr auto;
+    gap: var(--spacing-6);
+    padding: var(--spacing-4);
+  }
+  
+  .play-stage {
+    min-height: auto;
+    padding: 0;
   }
   
   .tools-row {
-    margin: var(--spacing-1) auto var(--spacing-1);
+    margin: var(--spacing-4) auto;
+    max-width: var(--grid-max-width);
   }
   
-  .desk {
-    display: none !important;
-  }
-  
+  /* Hide mobile keypad on desktop */
   #sudoku-keypad {
     display: none !important;
+  }
+  
+  /* Show desktop controls */
+  .desk {
+    display: flex !important;
+    flex-direction: column;
+    gap: var(--spacing-4);
+    width: 280px;
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+  }
+  
+  .desk .row {
+    display: flex;
+    gap: var(--spacing-3);
+  }
+  
+  .desk .keypad {
+    margin: 0;
+    max-width: none;
+    width: 100%;
+  }
+  
+  .desk .keypad button {
+    height: 48px;
+    font-size: var(--font-size-base);
   }
 }
 

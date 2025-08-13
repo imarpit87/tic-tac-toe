@@ -35,7 +35,7 @@
                 <span id="appVersion" title="App version" style="font-size:12px;color:#888;margin-right:6px;"></span>
                 <label class="switch" title="Toggle sounds">
                     <input type="checkbox" id="soundToggle" checked>
-                    <span>🔊</span>
+                    <span aria-label="Sound toggle">🔊</span>
                 </label>
                 <select id="themeSelect" class="theme-select" aria-label="Theme select">
                     <option value="light">Light</option>
@@ -71,7 +71,7 @@
                 <h3>Choose a Challenge:</h3>
                 <div class="challenge-cards">
                     <input id="challengeNameInput" class="text-input" placeholder="Your name (required)" aria-label="Your name for challenges">
-                    <button class="btn" id="challengeBeat3Btn">Beat the AI in 3 Moves</button>
+                    <button class="btn" id="challengeBeat3Btn">Beat the AI in 3 Moves (AI moves hidden)</button>
                     <button class="btn" id="challengeStreak5Btn">Win 5 in a Row</button>
                     <button class="btn tertiary" id="challengeLeaderboardBtn">Challenges Leaderboard</button>
                 </div>
@@ -204,7 +204,7 @@
     <div class="modal hidden" id="ratingModal" role="dialog" aria-modal="true" aria-labelledby="ratingTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="ratingTitle">How was this match?</h3>
+                <h3 id="ratingTitle">How do you like XO Duel?</h3>
                 <button class="btn tertiary" id="ratingCloseBtn" aria-label="Close">Close</button>
             </div>
             <div class="rating-body">

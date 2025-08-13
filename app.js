@@ -340,7 +340,7 @@ window.startGame = () => {
     if (challengeMode === 'beat3') {
       challengeHumanMoves = 0;
       challengeLabel.textContent = 'Beat the AI in 3 Moves';
-      challengeMeta.textContent = 'Moves left: 3';
+      challengeMeta.textContent = 'Moves left: 3 (AI moves hidden)';
       challengeBar.classList.remove('hidden');
     } else if (challengeMode === 'streak5') {
       challengeLabel.textContent = 'Win 5 in a Row';
@@ -361,6 +361,10 @@ window.startGame = () => {
 };
 
 function resetBoard() {
+  // Clear confetti when resetting board
+  confetti.stop();
+  confetti.particles = [];
+  
   gameBoard = Array(9).fill('');
   currentPlayer = 'X';
   gameActive = true;
@@ -627,6 +631,21 @@ window.resetGame = () => {
   playClickSound();
 };
 window.backToMenu = () => {
+  // Clear confetti when returning to menu
+  confetti.stop();
+  confetti.particles = [];
+  
+  // Special handling for online mode - go back to main menu
+  if (gameMode === 'online' && online.roomId) {
+    // Disconnect from online room
+    if (window.database) {
+      window.database.ref(`rooms/${online.roomId}`).off();
+    }
+    online.roomId = null;
+    online.isHost = false;
+    online.mySide = null;
+  }
+  
   gameSetupEl.classList.remove('hidden');
   gamePlayEl.classList.remove('active');
   scores = { player1: 0, player2: 0 };
@@ -869,14 +888,46 @@ function shareInviteLink(code) {
 
 function copyToClipboard(text) {
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => roomStatusEl.textContent = 'Invite link copied to clipboard').catch(() => fallbackCopy(text));
+    navigator.clipboard.writeText(text).then(() => showCopyToast('Copied to clipboard!')).catch(() => fallbackCopy(text));
   } else fallbackCopy(text);
 }
 
 function fallbackCopy(text) {
   const ta = document.createElement('textarea');
   ta.value = text; document.body.appendChild(ta); ta.select();
-  try { document.execCommand('copy'); roomStatusEl.textContent = 'Invite link copied to clipboard'; } finally { ta.remove(); }
+  try { document.execCommand('copy'); showCopyToast('Copied to clipboard!'); } finally { ta.remove(); }
+}
+
+function showCopyToast(message) {
+  // Create toast notification
+  const toast = document.createElement('div');
+  toast.className = 'copy-toast';
+  toast.textContent = message;
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--color-success);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  `;
+  document.body.appendChild(toast);
+  
+  // Animate in
+  setTimeout(() => toast.style.transform = 'translateX(0)', 10);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => document.body.removeChild(toast), 300);
+  }, 3000);
 }
 
 // Init
@@ -1061,6 +1112,16 @@ function openRatingModal(trigger) {
   ratingFeedback.value = '';
   ratingNote.textContent = '';
   [...ratingStars.querySelectorAll('.star')].forEach(s => s.classList.remove('selected'));
+  
+  // Update title based on context
+  const ratingTitle = document.getElementById('ratingTitle');
+  if (ratingTitle) {
+    if (trigger === 'manual') {
+      ratingTitle.textContent = 'How do you like XO Duel?';
+    } else {
+      ratingTitle.textContent = 'How was this match?';
+    }
+  }
 }
 function closeRatingModal(reason) {
   if (!ratingModal) return;
