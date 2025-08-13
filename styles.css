@@ -244,7 +244,7 @@ body {
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: var(--spacing-6);
   flex-wrap: wrap;
   gap: var(--spacing-4);
@@ -995,6 +995,30 @@ h3 { font-size: var(--font-size-2xl); }
   padding: var(--spacing-6);
 }
 
+.hero-section {
+  text-align: center;
+  margin-bottom: var(--spacing-8);
+}
+
+.hero-title {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--spacing-4) 0;
+  line-height: 1.1;
+}
+
+.hero-description {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .game-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -1187,6 +1211,14 @@ h3 { font-size: var(--font-size-2xl); }
   .header-controls {
     justify-content: center;
     width: 100%;
+  }
+  
+  .hero-title {
+    font-size: var(--font-size-4xl);
+  }
+  
+  .hero-description {
+    font-size: var(--font-size-base);
   }
   
   .cell {
