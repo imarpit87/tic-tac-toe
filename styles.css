@@ -183,7 +183,7 @@ body {
   font-weight: var(--font-weight-regular);
   line-height: 1.5;
   color: var(--color-text-primary);
-  background-color: var(--color-background-secondary);
+  background-color: var(--color-background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
@@ -962,8 +962,8 @@ h3 { font-size: var(--font-size-2xl); }
 
 .game-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--spacing-6);
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--spacing-8);
   margin-bottom: var(--spacing-6);
 }
 
@@ -972,40 +972,48 @@ h3 { font-size: var(--font-size-2xl); }
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: var(--spacing-6);
+  padding: var(--spacing-8);
   background: var(--color-surface);
   border: 2px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
+  border-radius: var(--radius-xl);
   text-decoration: none;
   color: var(--color-text-primary);
-  transition: all var(--transition-duration);
-  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-lg);
+  min-height: 280px;
+  justify-content: center;
 }
 
 .game-option:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
   border-color: var(--color-primary);
   color: var(--color-text-primary);
 }
 
+.game-option:hover .game-icon {
+  transform: scale(1.1);
+}
+
 .game-icon {
-  font-size: 4rem;
-  margin-bottom: var(--spacing-4);
+  font-size: 5rem;
+  margin-bottom: var(--spacing-6);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  transition: transform var(--transition-base);
 }
 
 .game-option h2 {
-  margin: 0 0 var(--spacing-2) 0;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--spacing-3) 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
 
 .game-option p {
   margin: 0;
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  line-height: 1.5;
+  font-size: var(--font-size-base);
+  line-height: 1.6;
 }
 
 /* Game states */
