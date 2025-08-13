@@ -216,6 +216,20 @@
   box-sizing: border-box;
 }
 
+/* Use dynamic viewport to avoid iOS URL bar issues */
+:root { 
+  --gap: 8px; 
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden; /* prevent page scroll */
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
@@ -234,6 +248,137 @@ body {
   height: 100%;
   overflow-x: hidden;
   touch-action: manipulation;
+}
+
+/* New Sudoku grid-based layout */
+.sudoku-page {
+  height: 100svh; /* dynamic viewport on mobile */
+  display: grid;
+  grid-template-rows: auto 1fr auto auto; /* header | board | actions | keypad */
+  gap: var(--gap);
+  padding: 8px;
+  padding-top: calc(8px + env(safe-area-inset-top));
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+}
+
+/* Header compaction (mobile) */
+.sudoku-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.sudoku-header .btn,
+.sudoku-header select {
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+/* Board: perfect square that shrinks to fit remaining space */
+.board-wrap {
+  display: grid;
+  place-items: center;
+  min-height: 0; /* allow it to shrink within the 1fr row */
+}
+
+.board {
+  aspect-ratio: 1 / 1;
+  width: min(95vw, var(--board-max, 720px));
+  height: auto;
+  max-height: 100%;
+}
+
+/* Action row – one compact line, wraps if needed */
+.action-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.action {
+  min-width: 72px;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.action:hover {
+  background-color: var(--color-neutral-50);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-base);
+}
+
+/* Keypad 3×3 + Clear */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  align-content: center;
+  justify-items: center;
+  padding: 0 8px 4px;
+}
+
+.keypad .num {
+  width: clamp(44px, 10vw, 64px);
+  height: clamp(44px, 10vw, 64px);
+  font-size: clamp(16px, 4vw, 20px);
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  touch-action: manipulation;
+}
+
+.keypad .num:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-base);
+}
+
+.keypad .clear {
+  grid-column: 1 / -1;
+  width: min(100%, 220px);
+  height: 44px;
+  background: var(--color-error);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.keypad .clear:hover {
+  background: #e53e3e;
+}
+
+/* Desktop niceties */
+@media (min-width: 900px) {
+  .sudoku-header .btn,
+  .sudoku-header select { 
+    font-size: 15px; 
+    padding: 8px 12px; 
+  }
+
+  /* Allow a slightly larger board on desktop */
+  .board { 
+    --board-max: 680px; 
+  }
 }
 
 /* Landing page styles */
@@ -1185,4 +1330,18 @@ input:focus-visible {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* Hide legacy duplicated controls on play.html */
+.legacy-controls { display: none !important; }
+
+/* Hide old layout elements */
+.play,
+.play-topbar,
+.play-stage,
+.mobile-controls,
+.desktop-controls,
+.tools-row,
+.tool-btn {
+  display: none !important;
 }

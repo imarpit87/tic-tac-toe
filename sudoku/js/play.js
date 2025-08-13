@@ -14,16 +14,12 @@ const cont = localStorage.getItem('sudoka:continue')==='1';
 if(!setup && !cont){ showError('Missing setup. Please go back and start a new game.'); }
 
 const gridEl=document.getElementById('sudoku-grid');
-const mUndo=document.getElementById('m-undo');
-const mRedo=document.getElementById('m-redo');
-const dUndo=document.getElementById('d-undo');
-const dRedo=document.getElementById('d-redo');
-const keypadMobile=document.getElementById('sudoku-keypad');
+const undoBtn=document.getElementById('undoBtn');
+const redoBtn=document.getElementById('redoBtn');
+const keypadEl=document.querySelector('.keypad');
 const timerEl=document.getElementById('m-timer');
-const notesBtn=document.getElementById('notesToggleBtn');
+const notesBtn=document.getElementById('notesBtn');
 const hintBtn=document.getElementById('hintBtn');
-const dNotesBtn=document.getElementById('d-notesToggleBtn');
-const dHintBtn=document.getElementById('d-hintBtn');
 const newBtn=document.getElementById('newBtn');
 const diffBtn=document.getElementById('difficultyBtn');
 const diffMenu=document.getElementById('difficultyMenu');
@@ -52,33 +48,21 @@ try{
   wire();
 }catch(err){ console.error('Sudoku init error', err); showError('Init error: ' + (err?.message||'see console')); }
 
-// Simplified mobile padding: only sync keypad height; remove viewport height coupling
-(function(){
-  const m = document.getElementById('sudoku-keypad'); if(!m) return;
-  function sync(){ const h = Math.round(m.getBoundingClientRect().height || 220); document.documentElement.style.setProperty('--keypad-h', h+'px'); }
-  ['DOMContentLoaded','load','resize','orientationchange'].forEach(e=>window.addEventListener(e,sync));
-  try{ new ResizeObserver(sync).observe(m);}catch{}
-  sync();
-})();
-
 export function focusCellNoJump(el){
   if (!el) return;
   try { el.focus({ preventScroll: true }); } catch { el.focus(); }
 }
-
-(function(){ const m=keypadMobile; if(!m) return; function sync(){ const h=Math.round(m.getBoundingClientRect().height||260); document.documentElement.style.setProperty('--keypad-h', h+'px'); } window.addEventListener('load',sync); window.addEventListener('resize',sync); window.addEventListener('orientationchange',sync); try{ new ResizeObserver(sync).observe(m);}catch{} sync(); })();
 
 function buildGrid(){ const frag=document.createDocumentFragment(); for(let r=0;r<9;r++) for(let c=0;c<9;c++){ const cell=document.createElement('div'); cell.className='cell'; if(r%3===0) cell.classList.add('box-top'); if(c%3===0) cell.classList.add('box-left'); if(c%3===2) cell.classList.add('box-right'); if(r%3===2) cell.classList.add('box-bottom'); cell.setAttribute('role','gridcell'); cell.setAttribute('tabindex','0'); cell.setAttribute('aria-label',`Row ${r+1}, Column ${c+1}`); cell.dataset.row=String(r); cell.dataset.col=String(c); frag.appendChild(cell);} gridEl.innerHTML=''; gridEl.appendChild(frag); }
 
 function wire(){
   gridEl.addEventListener('pointerdown',(e)=>{ const t=e.target.closest('.cell'); if(!t) return; const r=Number(t.dataset.row), c=Number(t.dataset.col); if(Number.isNaN(r)||Number.isNaN(c)) return; if(!game){ showError('Game not initialized'); return; } selectCell(r,c); if(!timer.isRunning) timer.start(); }, {passive:true});
   document.addEventListener('keydown',(e)=>{ if(!game) return; const sel=game.selected; if(!sel) return; const {r,c}=sel; if(/^[1-9]$/.test(e.key)){ place(r,c,Number(e.key)); e.preventDefault(); } else if(['Backspace','Delete','0'].includes(e.key)){ place(r,c,0); e.preventDefault(); } else if(e.key==='ArrowUp'){ selectCell(Math.max(0,r-1),c); } else if(e.key==='ArrowDown'){ selectCell(Math.min(8,r+1),c); } else if(e.key==='ArrowLeft'){ selectCell(r,Math.max(0,c-1)); } else if(e.key==='ArrowRight'){ selectCell(r,Math.min(8,c+1)); } else if(e.key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey) && e.shiftKey){ redo(); } else if(e.key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey)){ undo(); } else if(e.key.toLowerCase()==='h'){ doHint(); } else if(e.key.toLowerCase()==='n'){ toggleNotes(); } });
-  bindPad(keypadMobile);
-  [mUndo,mRedo,dUndo,dRedo].forEach((el,idx)=>{ if(!el) return; el.addEventListener('click', ()=> idx%2===0? undo(): redo()); });
+  bindPad(keypadEl);
+  undoBtn?.addEventListener('click', undo);
+  redoBtn?.addEventListener('click', redo);
   hintBtn?.addEventListener('click', doHint);
   notesBtn?.addEventListener('click', toggleNotes);
-  dHintBtn?.addEventListener('click', doHint);
-  dNotesBtn?.addEventListener('click', toggleNotes);
   newBtn?.addEventListener('click', ()=>{ if(confirm('Start a new puzzle? Your current progress will be lost.')){ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); showToast('New game'); }catch(e){ showError('New game error: ' + e.message); } } });
   // Difficulty button click handler removed - handled by dedicated listener below
   playAgainBtn?.addEventListener('click', ()=>{ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); winModal?.classList.add('hidden'); }catch(e){ showError('Play again error: ' + e.message); } });
@@ -121,14 +105,11 @@ function onUpdate(){ updateUndoRedo(); try{ localStorage.setItem(TIMER_KEY, Stri
 function updateUndoRedo(){ 
   const canUndo=(game?.undoStack?.length||0)>1; 
   const canRedo=(game?.redoStack?.length||0)>0; 
-  if(mUndo) mUndo.disabled=!canUndo; 
-  if(mRedo) mRedo.disabled=!canRedo; 
-  if(dUndo) dUndo.disabled=!canUndo; 
-  if(dRedo) dRedo.disabled=!canRedo; 
+  if(undoBtn) undoBtn.disabled=!canUndo; 
+  if(redoBtn) redoBtn.disabled=!canRedo; 
   
   // Update notes button states
   if(notesBtn) notesBtn.setAttribute('aria-pressed', String(game?.notesMode||false));
-  if(dNotesBtn) dNotesBtn.setAttribute('aria-pressed', String(game?.notesMode||false));
 }
 function formatTime(ms){ const s=Math.floor(ms/1000); const h=Math.floor(s/3600); const m=Math.floor((s%3600)/60); const sec=s%60; return h>0?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
 
@@ -261,103 +242,3 @@ if (document.readyState === 'loading') {
   setupDifficultyButton();
 }
 
-// Mobile portrait: reserve bottom space equal to keypad height
-(function syncKeypadPadding(){
-  const root = document.documentElement;
-  const pad = document.getElementById('sudoku-keypad');
-  if (!pad) return;
-  function apply() {
-    const h = pad.offsetHeight || 260;
-    root.style.setProperty('--kb', h + 'px');
-  }
-  window.addEventListener('load', apply, { once: true });
-  window.addEventListener('resize', apply);
-  window.addEventListener('orientationchange', apply);
-  try { new ResizeObserver(apply).observe(pad); } catch {}
-})();
-
-// Mobile portrait: safe viewport unit and header/keypad measurement
-function setVHVar(){
-  document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-}
-function setHeaderAndKeypadVars(){
-  const hdr = document.querySelector('.play-topbar, .controls-row');
-  const kb  = document.querySelector('.keypad:not(.keypad--desk)');
-  const hdrH = hdr ? hdr.getBoundingClientRect().height : 0;
-  const kbH  = kb  ? kb.getBoundingClientRect().height  : 260;
-  document.documentElement.style.setProperty('--hdr-h', `${Math.ceil(hdrH)}px`);
-  document.documentElement.style.setProperty('--kb-h',  `${Math.ceil(kbH)}px`);
-}
-const __recalc = () => { setVHVar(); setHeaderAndKeypadVars(); };
-window.addEventListener('load', __recalc, { once:true });
-window.addEventListener('resize', __recalc);
-window.addEventListener('orientationchange', __recalc);
-setTimeout(__recalc, 50);
-
-// Mobile portrait sizing helpers (no game logic changed)
-(function(){
-  const pad = document.getElementById('sudoku-keypad'); if(!pad) return;
-  const root = document.documentElement;
-  function measure(){ const h = pad.offsetHeight || 210; root.style.setProperty('--keypad-h', h+'px'); }
-  window.addEventListener('load', measure, { once:true });
-  window.addEventListener('resize', measure);
-  window.addEventListener('orientationchange', measure);
-  try { new ResizeObserver(measure).observe(pad); } catch {}
-})();
-
-// === Mobile portrait fit so grid + keypad are visible together ===
-(function fitMobilePortrait(){
-  const grid = document.getElementById('sudoku-grid');
-  const keypad = document.getElementById('sudoku-keypad');
-  const header = document.querySelector('.play-topbar') || document.querySelector('.actionbar') || document.querySelector('header');
-  if (!grid || !keypad) return;
-
-  function isPortraitPhone(){ return window.innerWidth <= 600 && window.innerHeight > window.innerWidth; }
-
-  function fit(){
-    if (!isPortraitPhone()) return;
-    const headerH = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
-    const keypadH = Math.ceil(keypad.getBoundingClientRect().height || 180);
-    const verticalGaps = 8 + 8 + 16; // top margin + grid-bottom gap + bottom margin
-    const availH = Math.max(220, window.innerHeight - headerH - keypadH - verticalGaps);
-    const availW = Math.min(document.documentElement.clientWidth, window.innerWidth) - 20; // account for page padding
-
-    const gap = 6;
-    const innerPad = 16; // 8px left + 8px right
-    const maxCellFrom = (container) => Math.floor((container - innerPad - (gap * 8)) / 9);
-
-    const cellFromH = maxCellFrom(availH);
-    const cellFromW = maxCellFrom(availW);
-    const cell = Math.max(28, Math.min(cellFromH, cellFromW));
-    grid.style.setProperty('--cell', `${cell}px`);
-  }
-
-  const run = () => { try{ fit(); }catch{} };
-  window.addEventListener('load', run, { passive: true });
-  window.addEventListener('resize', run, { passive: true });
-  window.addEventListener('orientationchange', run, { passive: true });
-  if (window.visualViewport){ window.visualViewport.addEventListener('resize', run, { passive: true }); window.visualViewport.addEventListener('scroll', run, { passive: true }); }
-  setTimeout(run, 0);
-})();
-
-// Mobile portrait: compute --cellPx to ensure last column never clips
-(function fitMobileGrid(){
-  const grid = document.getElementById('sudoku-grid');
-  if(!grid) return;
-  function compute(){
-    const isPortraitPhone = window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches;
-    if(!isPortraitPhone){ grid.style.removeProperty('--cellPx'); return; }
-    const cs = getComputedStyle(grid);
-    const padL = parseFloat(cs.paddingLeft) || 8;
-    const padR = parseFloat(cs.paddingRight) || 8;
-    const gap = parseFloat(cs.gap) || 6;
-    const safeW = window.innerWidth;
-    const avail = Math.max(0, safeW - padL - padR);
-    let cellPx = Math.floor((avail - (8*gap)) / 9);
-    cellPx = Math.max(30, cellPx - 2); // tiny safety 2px
-    grid.style.setProperty('--cellPx', cellPx + 'px');
-  }
-  ['load','resize','orientationchange'].forEach(e=>window.addEventListener(e, compute, { passive:true }));
-  if(window.visualViewport){ window.visualViewport.addEventListener('resize', compute, { passive:true }); window.visualViewport.addEventListener('scroll', compute, { passive:true }); }
-  compute();
-})();

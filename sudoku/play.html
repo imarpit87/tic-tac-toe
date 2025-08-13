@@ -8,69 +8,45 @@
 </head>
 <body>
   <div id="errorBar" class="errorbar" role="alert" aria-live="assertive" hidden></div>
-  <main class="play">
-    <header class="play-topbar" role="toolbar" aria-label="Sudoku controls">
-      <nav class="actionbar" aria-label="Actions">
-        <a id="homeBtn" href="index.html" class="btn tertiary">Home</a>
-        <button id="newBtn" class="btn">New Game</button>
-        <button id="difficultyBtn" class="btn" aria-haspopup="true" aria-expanded="false">Difficulty ▾</button>
-        <select id="themeSelect" class="theme-select" aria-label="Theme select">
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-          <option value="neon">Neon</option>
-          <option value="kids">Kids</option>
-        </select>
-        <!-- Tools moved below near keypad for compact UI -->
-        <span id="m-timer" class="timer" aria-live="polite">00:00</span>
-      </nav>
+  
+  <!-- New grid-based layout -->
+  <main class="sudoku-page">
+    <header class="sudoku-header" role="toolbar" aria-label="Sudoku controls">
+      <a id="homeBtn" href="index.html" class="btn tertiary">Home</a>
+      <button id="newBtn" class="btn">New Game</button>
+      <button id="difficultyBtn" class="btn" aria-haspopup="true" aria-expanded="false">Difficulty ▾</button>
+      <select id="themeSelect" class="theme-select" aria-label="Theme select">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="neon">Neon</option>
+        <option value="kids">Kids</option>
+      </select>
+      <span id="m-timer" class="timer" aria-live="polite">00:00</span>
     </header>
 
-    <section class="play-stage">
-      <div class="grid-wrap">
-        <div class="grid-card">
-          <div id="sudoku-grid" role="grid" aria-label="Sudoku grid"></div>
-        </div>
-      </div>
+    <section class="board-wrap">
+      <div id="sudoku-grid" class="board" role="grid" aria-label="Sudoku grid"></div>
     </section>
 
-    <!-- Mobile/Tablet Controls -->
-    <div class="mobile-controls">
-      <div class="tools-row" aria-label="Tools">
-        <button id="m-undo" class="tool-btn" title="Undo" aria-label="Undo">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-          <span>Undo</span>
-        </button>
-        <button id="notesToggleBtn" class="tool-btn" title="Notes" aria-label="Notes">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10l4 4v12H5z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-          <span>Notes</span>
-        </button>
-        <button id="hintBtn" class="tool-btn" title="Hint" aria-label="Hint">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 017 7c0 2.6-1.5 4.5-3 6v2H8v-2c-1.5-1.5-3-3.4-3-6a7 7 0 017-7z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-          <span>Hint</span>
-        </button>
-        <button id="m-redo" class="tool-btn" title="Redo" aria-label="Redo">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-          <span>Redo</span>
-        </button>
-      </div>
+    <nav class="action-row" aria-label="Tools">
+      <button id="undoBtn" class="action">Undo</button>
+      <button id="redoBtn" class="action">Redo</button>
+      <button id="notesBtn" class="action">Notes</button>
+      <button id="hintBtn" class="action">Hint</button>
+    </nav>
 
-      <nav id="sudoku-keypad" class="keypad" aria-label="Number pad (mobile)">
-        <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button>
-        <button data-num="4">4</button><button data-num="5">5</button><button data-num="6">6</button>
-        <button data-num="7">7</button><button data-num="8">8</button><button data-num="9">9</button>
-        <button data-clear>Clear</button>
-      </nav>
-    </div>
-
-    <!-- Desktop Controls (No Keypad) -->
-    <aside class="desktop-controls" aria-label="Desktop controls">
-      <div class="desktop-tools">
-        <button id="d-undo" class="btn">Undo</button>
-        <button id="d-redo" class="btn">Redo</button>
-        <button id="d-notesToggleBtn" class="btn tertiary">Notes</button>
-        <button id="d-hintBtn" class="btn tertiary">Hint</button>
-      </div>
-    </aside>
+    <section class="keypad" aria-label="Number pad">
+      <button data-num="1" class="num">1</button>
+      <button data-num="2" class="num">2</button>
+      <button data-num="3" class="num">3</button>
+      <button data-num="4" class="num">4</button>
+      <button data-num="5" class="num">5</button>
+      <button data-num="6" class="num">6</button>
+      <button data-num="7" class="num">7</button>
+      <button data-num="8" class="num">8</button>
+      <button data-num="9" class="num">9</button>
+      <button data-clear class="clear">Clear</button>
+    </section>
   </main>
 
   <div id="toast" class="toast" aria-live="polite" role="status"></div>
@@ -96,5 +72,6 @@
   </div>
 
   <script type="module" src="js/play.js"></script>
+  <script src="js/sizing.js"></script>
 </body>
 </html>
