@@ -10,8 +10,8 @@
   <div id="errorBar" class="errorbar" role="alert" aria-live="assertive" hidden></div>
   
   <!-- New grid-based layout -->
-  <main class="sudoku-page">
-    <header class="sudoku-header" role="toolbar" aria-label="Sudoku controls">
+  <main class="sudoky">
+    <header class="sudoky__top" role="toolbar" aria-label="Sudoku controls">
       <a id="homeBtn" href="index.html" class="btn tertiary">Home</a>
       <button id="newBtn" class="btn">New Game</button>
       <button id="difficultyBtn" class="btn" aria-haspopup="true" aria-expanded="false">Difficulty ▾</button>
@@ -24,27 +24,29 @@
       <span id="m-timer" class="timer" aria-live="polite">00:00</span>
     </header>
 
-    <section class="board-wrap">
-      <div id="sudoku-grid" class="board" role="grid" aria-label="Sudoku grid"></div>
-    </section>
+    <section class="sudoky__stage">
+      <div class="sudoky__gridCard">
+        <div id="sudoku-grid" class="board" role="grid" aria-label="Sudoku grid"></div>
+      </div>
 
-    <nav class="action-row" aria-label="Tools">
-      <button id="undoBtn" class="action">Undo</button>
-      <button id="redoBtn" class="action">Redo</button>
-      <button id="notesBtn" class="action">Notes</button>
-      <button id="hintBtn" class="action">Hint</button>
-    </nav>
+      <div class="sudoky__actions" aria-label="Tools">
+        <button id="undoBtn" class="action">Undo</button>
+        <button id="notesBtn" class="action">Notes</button>
+        <button id="hintBtn" class="action">Hint</button>
+        <button id="redoBtn" class="action">Redo</button>
+      </div>
 
-    <section class="keypad" aria-label="Number pad">
-      <button data-num="1" class="num">1</button>
-      <button data-num="2" class="num">2</button>
-      <button data-num="3" class="num">3</button>
-      <button data-num="4" class="num">4</button>
-      <button data-num="5" class="num">5</button>
-      <button data-num="6" class="num">6</button>
-      <button data-num="7" class="num">7</button>
-      <button data-num="8" class="num">8</button>
-      <button data-num="9" class="num">9</button>
+      <nav id="sudoku-keypad" class="sudoky__pad" aria-label="Number pad">
+        <button data-num="1" class="num">1</button>
+        <button data-num="2" class="num">2</button>
+        <button data-num="3" class="num">3</button>
+        <button data-num="4" class="num">4</button>
+        <button data-num="5" class="num">5</button>
+        <button data-num="6" class="num">6</button>
+        <button data-num="7" class="num">7</button>
+        <button data-num="8" class="num">8</button>
+        <button data-num="9" class="num">9</button>
+      </nav>
     </section>
   </main>
 

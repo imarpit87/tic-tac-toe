@@ -16,7 +16,7 @@ if(!setup && !cont){ showError('Missing setup. Please go back and start a new ga
 const gridEl=document.getElementById('sudoku-grid');
 const undoBtn=document.getElementById('undoBtn');
 const redoBtn=document.getElementById('redoBtn');
-const keypadEl=document.querySelector('.keypad');
+const keypadEl=document.querySelector('.sudoky__pad');
 const timerEl=document.getElementById('m-timer');
 const notesBtn=document.getElementById('notesBtn');
 const hintBtn=document.getElementById('hintBtn');
