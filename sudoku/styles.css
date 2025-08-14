@@ -166,8 +166,9 @@
   flex-direction: column;
   gap: 20px;
   flex: 1;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  padding-top: 20px;
 }
 
 /* Grid card keeps perfect square and centers */
@@ -516,7 +517,8 @@
   }
   
   .sudoky__stage {
-    gap: 12px;
+    gap: 8px;
+    padding-top: 8px;
   }
   
   /* Ensure 3x3 box borders don't cause overflow on mobile */
@@ -581,7 +583,8 @@
   }
   
   .sudoky__stage {
-    gap: 8px;
+    gap: 6px;
+    padding-top: 6px;
   }
   
   /* Ensure 3x3 box borders don't cause overflow on small screens */
