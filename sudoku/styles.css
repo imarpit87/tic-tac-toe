@@ -231,7 +231,7 @@
 #sudoku-grid .cell.given { 
   background: var(--color-neutral-50); 
   font-weight: var(--font-weight-bold);
-  color: var(--color-neutral-800);
+  color: var(--color-text-primary);
   border-color: var(--color-neutral-300);
 }
 
@@ -616,10 +616,13 @@
 [data-theme="dark"] #sudoku-grid .cell {
   background: var(--color-surface);
   border-color: var(--color-border);
+  color: var(--color-text-primary);
 }
 
 [data-theme="dark"] #sudoku-grid .cell.given {
   background: var(--color-neutral-200);
+  color: var(--color-text-primary);
+  border-color: var(--color-neutral-300);
 }
 
 [data-theme="dark"] .sudoky__actions .action {
@@ -643,6 +646,7 @@
 [data-theme="neon"] #sudoku-grid .cell {
   background: var(--color-surface);
   border-color: rgba(0, 255, 255, 0.2);
+  color: var(--color-text-primary);
 }
 
 [data-theme="neon"] .sudoky__actions .action {
@@ -659,6 +663,12 @@
   border: 1px solid rgba(0, 255, 255, 0.1);
 }
 
+[data-theme="neon"] #sudoku-grid .cell.given {
+  background: rgba(0, 255, 255, 0.1);
+  color: var(--color-text-primary);
+  border-color: rgba(0, 255, 255, 0.3);
+}
+
 /* Kids theme support for new layout */
 [data-theme="kids"] .sudoky__gridCard {
   background: var(--color-surface);
@@ -669,6 +679,7 @@
 [data-theme="kids"] #sudoku-grid .cell {
   background: var(--color-surface);
   border-color: var(--color-border);
+  color: var(--color-text-primary);
 }
 
 [data-theme="kids"] .sudoky__actions .action {
@@ -680,6 +691,12 @@
 [data-theme="kids"] .sudoky__pad .num {
   background: var(--color-primary);
   color: var(--color-white);
+}
+
+[data-theme="kids"] #sudoku-grid .cell.given {
+  background: var(--color-neutral-200);
+  color: var(--color-text-primary);
+  border-color: var(--color-neutral-300);
 }
 
 /* Dark theme support - Sophisticated Apple Dark */
