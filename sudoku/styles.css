@@ -544,6 +544,38 @@ body {
   overflow: hidden; /* prevent page scroll */
 }
 
+/* Desktop: Allow scrolling and remove height restrictions */
+@media (min-width: 1024px) {
+  html, body {
+    overflow-y: auto; /* restore vertical scroll on desktop */
+  }
+  
+  .sudoku-page {
+    min-height: 100vh; /* not hard height */
+    height: auto; /* allow content taller than viewport */
+    overflow: visible; /* ensure children aren't clipped */
+  }
+  
+  /* Ensure grid is centered but not forced to fit 100vh */
+  .board-wrap {
+    max-height: none; /* remove hard caps that force clipping */
+  }
+  
+  .board {
+    max-height: none; /* remove hard caps that force clipping */
+  }
+  
+  /* Ensure keypad is in normal flow, not fixed */
+  .keypad {
+    position: static; /* no fixed/sticky on desktop */
+  }
+  
+  /* Ensure action row is in normal flow */
+  .action-row {
+    position: static; /* no fixed/sticky on desktop */
+  }
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
