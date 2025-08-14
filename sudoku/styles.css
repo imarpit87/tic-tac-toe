@@ -114,12 +114,15 @@
   --gap: 12px;
   --grid-max: 640px;
   --card-bg: #fff;
-  --card-shadow: 0 10px 30px rgba(0,0,0,.08);
-  --cell: #fafbff;
-  --cell-border: #CBD5E1;
-  --box-border: #0f172a;
-  --peer: #e8f1ff;
-  --select: #cfe4ff;
+  --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.04);
+  --cell: #ffffff;
+  --cell-border: #e5e7eb;
+  --cell-border-hover: #d1d5db;
+  --box-border: #374151;
+  --peer: rgba(0, 122, 255, 0.08);
+  --select: rgba(0, 122, 255, 0.12);
+  --cell-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --cell-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.1);
   
   min-height: 100vh;
   display: flex;
@@ -158,7 +161,7 @@
 .sudoky__stage {
   display: flex; 
   flex-direction: column;
-  gap: 14px;
+  gap: 20px;
   flex: 1;
   justify-content: center;
   align-items: center;
@@ -169,12 +172,27 @@
   width: min(100vw - (var(--page-pad) * 2), var(--grid-max));
   aspect-ratio: 1 / 1;
   background: var(--card-bg);
-  border-radius: 18px;
+  border-radius: 24px;
   box-shadow: var(--card-shadow);
-  padding: 10px;
+  padding: 16px;
   box-sizing: border-box;
   display: grid;
   place-items: stretch;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.sudoky__gridCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Sudoku grid sizing */
@@ -182,79 +200,104 @@
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-auto-rows: 1fr;
-  gap: 2px;
+  gap: 1px;
   width: 100%;
   height: 100%;
-  background: var(--color-surface);
-  border-radius: 12px;
+  background: var(--color-neutral-200);
+  border-radius: 16px;
   overflow: hidden;
+  padding: 2px;
+  position: relative;
+  z-index: 2;
 }
 
 /* Cells — keep existing IDs/classes used by JS */
 #sudoku-grid .cell {
   background: var(--cell);
   border: 1px solid var(--cell-border);
-  border-radius: 6px;
+  border-radius: 8px;
   aspect-ratio: 1 / 1;
   display: flex; 
   align-items: center; 
   justify-content: center;
-  font-weight: 700;
+  font-weight: var(--font-weight-semibold);
   user-select: none;
-  font-size: clamp(16px, 4vw, 24px);
+  font-size: clamp(18px, 4.5vw, 26px);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
   position: relative;
+  box-shadow: var(--cell-shadow);
+  color: var(--color-text-primary);
+}
+
+#sudoku-grid .cell:hover {
+  border-color: var(--cell-border-hover);
+  box-shadow: var(--cell-shadow-hover);
+  transform: translateY(-1px);
+}
+
+#sudoku-grid .cell:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
+  border-color: var(--color-primary);
 }
 
 #sudoku-grid .cell.given { 
-  background: var(--color-cell-given); 
-  font-weight: var(--font-weight-heavy);
+  background: var(--color-neutral-50); 
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-800);
+  border-color: var(--color-neutral-300);
 }
 
 #sudoku-grid .cell.selected { 
-  box-shadow: 0 0 0 3px var(--select) inset; 
-  background: var(--color-cell-selected) !important;
+  box-shadow: 0 0 0 3px var(--color-primary) inset, var(--cell-shadow-hover); 
+  background: var(--color-primary) !important;
   color: var(--color-white) !important;
+  border-color: var(--color-primary) !important;
+  transform: scale(1.02);
 }
 
 #sudoku-grid .cell.peer { 
   background: var(--peer); 
+  border-color: var(--color-primary);
 }
 
 #sudoku-grid .cell.error {
-  background: var(--color-cell-error);
+  background: rgba(255, 59, 48, 0.1);
   color: var(--color-error) !important;
   font-weight: var(--font-weight-bold);
+  border-color: var(--color-error);
   animation: shake 0.3s ease-in-out;
+  box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.2) inset;
 }
 
 #sudoku-grid .cell.same-number {
-  background: rgba(255, 149, 0, 0.25) !important;
+  background: rgba(255, 149, 0, 0.15) !important;
   border-color: var(--color-warning) !important;
   color: var(--color-text-primary) !important;
+  box-shadow: 0 0 0 1px rgba(255, 149, 0, 0.3) inset;
 }
 
 /* Strong 3x3 box borders */
 #sudoku-grid .cell[data-row="0"], 
 #sudoku-grid .cell[data-row="3"], 
 #sudoku-grid .cell[data-row="6"] { 
-  border-top: 2px solid var(--box-border); 
+  border-top: 3px solid var(--box-border); 
 }
 
 #sudoku-grid .cell[data-col="0"], 
 #sudoku-grid .cell[data-col="3"], 
 #sudoku-grid .cell[data-col="6"] { 
-  border-left: 2px solid var(--box-border); 
+  border-left: 3px solid var(--box-border); 
 }
 
 /* Close bottom/right box edges */
 #sudoku-grid .cell[data-row="8"] { 
-  border-bottom: 2px solid var(--box-border); 
+  border-bottom: 3px solid var(--box-border); 
 }
 
 #sudoku-grid .cell[data-col="8"] { 
-  border-right: 2px solid var(--box-border); 
+  border-right: 3px solid var(--box-border); 
 }
 
 /* Controls row below grid */
@@ -266,26 +309,28 @@
 }
 
 .sudoky__actions .action { 
-  padding: 12px 10px; 
-  border-radius: 12px;
+  padding: 14px 12px; 
+  border-radius: 14px;
   display: flex; 
   align-items: center; 
   justify-content: center;
   gap: 8px; 
-  font-weight: 700;
-  min-height: 44px;
+  font-weight: var(--font-weight-semibold);
+  min-height: 48px;
   background: var(--color-surface);
   color: var(--color-primary);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: all var(--transition-base);
+  font-size: var(--font-size-sm);
 }
 
 .sudoky__actions .action:hover {
   background-color: var(--color-neutral-50);
   border-color: var(--color-primary);
   box-shadow: var(--shadow-base);
+  transform: translateY(-1px);
 }
 
 /* 3×3 keypad (1..9) — MUST NOT overflow */
@@ -298,24 +343,31 @@
 }
 
 .sudoky__pad .num {
-  padding: 16px 0; 
-  border-radius: 16px; 
-  font-size: 18px; 
-  font-weight: 800;
+  padding: 18px 0; 
+  border-radius: 18px; 
+  font-size: 20px; 
+  font-weight: var(--font-weight-bold);
   background: var(--color-primary);
   color: var(--color-white);
   border: none;
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
   cursor: pointer;
   touch-action: manipulation;
-  min-height: 44px;
+  min-height: 52px;
+  position: relative;
+  overflow: hidden;
 }
 
 .sudoky__pad .num:hover {
   background-color: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-base);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.sudoky__pad .num:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Mobile viewport safety: never clip rounded corners or last column/row */
