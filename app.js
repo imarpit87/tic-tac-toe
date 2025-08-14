@@ -16,6 +16,7 @@ let online = { roomId: null, isHost: false, mySide: null, myName: '', myAvatar: 
 online.lastResetAt = 0;
 online.prevJoined = { X: false, O: false };
 online.lastResultShownAt = 0;
+online.previousBoard = Array(9).fill(''); // Track previous board state for sound detection
 // Challenge state
 let challengeMode = null; // 'beat3' | 'streak5' | null
 let challengeMovesAllowed = 0;
@@ -735,9 +736,30 @@ async function joinRoom() {
 function listenRoom(code) {
   window.database.ref(`rooms/${code}`).on('value', (snap) => {
     const data = snap.val(); if (!data) return;
-    gameBoard = data.board || Array(9).fill('');
-    currentPlayer = data.currentPlayer || 'X';
+    const newBoard = data.board || Array(9).fill('');
+    const newCurrentPlayer = data.currentPlayer || 'X';
     scores = data.scores || scores;
+
+    // Detect opponent moves and play sound
+    if (online.mySide && online.mySide !== newCurrentPlayer && data.lastMoveBy !== online.clientId) {
+      // Find which cell was changed by comparing boards
+      for (let i = 0; i < 9; i++) {
+        if (newBoard[i] !== online.previousBoard[i] && newBoard[i] !== '') {
+          // Opponent made a move, play appropriate sound
+          if (newBoard[i] === 'X') {
+            playXSound();
+          } else if (newBoard[i] === 'O') {
+            playOSound();
+          }
+          break;
+        }
+      }
+    }
+
+    // Update board state
+    gameBoard = newBoard;
+    currentPlayer = newCurrentPlayer;
+    online.previousBoard = [...newBoard]; // Store current board for next comparison
 
     // Players & names/avatars
     const pX = data.players?.X || { name: 'X', avatar: '❌', joined: false };
@@ -806,6 +828,7 @@ function listenRoom(code) {
           const resetAt = Date.now();
           window.database.ref(`rooms/${code}`).update({ status: 'playing', currentPlayer: 'X', board: Array(9).fill(''), resetAt, updatedAt: Date.now() });
           online.lastResetAt = resetAt;
+          online.previousBoard = Array(9).fill(''); // Reset previous board state
           roomStatusEl.textContent = 'Both players joined. Starting… X to move';
         } else {
           roomStatusEl.textContent = 'Both players joined. Waiting for host to start…';
@@ -820,6 +843,7 @@ function listenRoom(code) {
     if (data.resetAt && data.resetAt !== online.lastResetAt) {
       online.lastResetAt = data.resetAt;
       resetBoard();
+      online.previousBoard = Array(9).fill(''); // Reset previous board state
       roomStatusEl.textContent = 'New game started';
     }
 
