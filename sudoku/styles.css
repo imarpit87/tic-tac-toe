@@ -179,6 +179,7 @@
   display: grid;
   place-items: stretch;
   border: 1px solid var(--color-border-light);
+  max-width: 100%;
 }
 
 /* Sudoku grid sizing */
@@ -193,6 +194,7 @@
   border-radius: 12px;
   overflow: hidden;
   padding: 2px;
+  box-sizing: border-box;
 }
 
 /* Cells — keep existing IDs/classes used by JS */
@@ -372,33 +374,131 @@
 
 /* Mobile optimizations */
 @media (max-width: 480px) {
+  .sudoky {
+    --page-pad: 12px;
+    --gap: 8px;
+  }
+  
   .sudoky__gridCard {
-    padding: 12px;
+    width: min(100vw - 24px, 400px);
+    padding: 8px;
     border-radius: 12px;
   }
   
   #sudoku-grid {
-    gap: 1px;
-    padding: 2px;
-    border-radius: 10px;
+    gap: 0px;
+    padding: 1px;
+    border-radius: 8px;
   }
   
   #sudoku-grid .cell {
-    border-radius: 4px;
-    font-size: clamp(16px, 4vw, 22px);
+    border-radius: 3px;
+    font-size: clamp(14px, 3.5vw, 20px);
+    border-width: 0.5px;
   }
   
   .sudoky__actions .action {
-    padding: 10px 12px;
-    min-height: 44px;
-    border-radius: 10px;
+    padding: 8px 10px;
+    min-height: 40px;
+    border-radius: 8px;
+    font-size: 12px;
   }
   
   .sudoky__pad .num {
-    padding: 14px 0;
-    min-height: 48px;
-    border-radius: 12px;
-    font-size: 18px;
+    padding: 12px 0;
+    min-height: 44px;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+  
+  .sudoky__stage {
+    gap: 12px;
+  }
+  
+  /* Ensure 3x3 box borders don't cause overflow on mobile */
+  #sudoku-grid .cell[data-row="0"], 
+  #sudoku-grid .cell[data-row="3"], 
+  #sudoku-grid .cell[data-row="6"] { 
+    border-top-width: 1px;
+  }
+
+  #sudoku-grid .cell[data-col="0"], 
+  #sudoku-grid .cell[data-col="3"], 
+  #sudoku-grid .cell[data-col="6"] { 
+    border-left-width: 1px;
+  }
+
+  #sudoku-grid .cell[data-row="8"] { 
+    border-bottom-width: 1px;
+  }
+
+  #sudoku-grid .cell[data-col="8"] { 
+    border-right-width: 1px;
+  }
+}
+
+/* Extra small mobile optimizations */
+@media (max-width: 360px) {
+  .sudoky {
+    --page-pad: 8px;
+    --gap: 6px;
+  }
+  
+  .sudoky__gridCard {
+    width: min(100vw - 16px, 320px);
+    padding: 6px;
+    border-radius: 10px;
+  }
+  
+  #sudoku-grid {
+    gap: 0px;
+    padding: 1px;
+    border-radius: 6px;
+  }
+  
+  #sudoku-grid .cell {
+    border-radius: 2px;
+    font-size: clamp(12px, 3vw, 18px);
+    border-width: 0.5px;
+  }
+  
+  .sudoky__actions .action {
+    padding: 6px 8px;
+    min-height: 36px;
+    border-radius: 6px;
+    font-size: 11px;
+  }
+  
+  .sudoky__pad .num {
+    padding: 10px 0;
+    min-height: 40px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  .sudoky__stage {
+    gap: 8px;
+  }
+  
+  /* Ensure 3x3 box borders don't cause overflow on small screens */
+  #sudoku-grid .cell[data-row="0"], 
+  #sudoku-grid .cell[data-row="3"], 
+  #sudoku-grid .cell[data-row="6"] { 
+    border-top-width: 1px;
+  }
+
+  #sudoku-grid .cell[data-col="0"], 
+  #sudoku-grid .cell[data-col="3"], 
+  #sudoku-grid .cell[data-col="6"] { 
+    border-left-width: 1px;
+  }
+
+  #sudoku-grid .cell[data-row="8"] { 
+    border-bottom-width: 1px;
+  }
+
+  #sudoku-grid .cell[data-col="8"] { 
+    border-right-width: 1px;
   }
 }
 
