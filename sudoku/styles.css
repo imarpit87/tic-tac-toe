@@ -131,6 +131,9 @@
   padding-top: calc(var(--page-pad) + env(safe-area-inset-top));
   padding-bottom: calc(var(--page-pad) + env(safe-area-inset-bottom));
   background: var(--color-background);
+  /* Ensure proper scrolling behavior */
+  height: auto;
+  overflow: visible;
 }
 
 .sudoky__top {
@@ -345,10 +348,11 @@
   box-shadow: 0 1px 4px rgba(0, 122, 255, 0.3);
 }
 
-/* Mobile viewport safety: never clip rounded corners or last column/row */
+/* Mobile viewport safety: ensure proper scrolling without height constraints */
 @supports (height: 1dvh) {
   .sudoky__gridCard { 
-    max-height: calc(100dvh - 320px); 
+    /* Remove max-height constraint to prevent scrolling issues */
+    max-height: none; 
   }
 }
 
@@ -809,7 +813,8 @@ html, body {
 
 body {
   margin: 0;
-  overflow: hidden; /* prevent page scroll */
+  overflow-y: auto; /* allow natural vertical scrolling */
+  overflow-x: hidden; /* prevent horizontal scrolling */
 }
 
 /* Desktop: Allow scrolling and remove height restrictions */
