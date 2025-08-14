@@ -1715,6 +1715,70 @@ body {
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
+/* Switch toggle for sound control */
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  transition: all var(--transition-base);
+  font-size: var(--font-size-lg);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.switch span::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.switch input:checked + span {
+  background-color: var(--color-primary);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.4);
+}
+
+.switch input:not(:checked) + span {
+  background-color: var(--color-neutral-400);
+  transform: scale(0.95);
+  opacity: 0.7;
+}
+
+.switch input:checked + span::before {
+  opacity: 1;
+}
+
+.switch:hover span {
+  background-color: var(--color-primary-hover);
+  transform: scale(1.1);
+}
+
 /* Mobile/Tablet Controls */
 .mobile-controls {
   display: block;

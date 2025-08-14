@@ -6,6 +6,63 @@ const errorBar = document.getElementById('errorBar');
 function showToast(msg){ try{ if(!toast) return; toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1600);}catch{} }
 function showError(msg){ if(!errorBar) return; errorBar.textContent = msg; errorBar.hidden = false; }
 
+// Sound system for Sudoku
+let audioContext = null;
+let soundEnabled = true;
+
+function initAudioContext() {
+  try {
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') audioContext.resume();
+    return audioContext;
+  } catch (e) {
+    console.warn('Audio context not supported:', e);
+    return null;
+  }
+}
+
+function createSound(frequency, duration, type = 'sine', volume = 0.25) {
+  if (!soundEnabled) return;
+  const ctx = initAudioContext();
+  if (!ctx) return;
+  
+  try {
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+    oscillator.type = type;
+    
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + duration);
+  } catch (e) {
+    console.warn('Sound creation failed:', e);
+  }
+}
+
+// Sudoku-specific sound functions
+function playCellSelectSound() { createSound(800, 0.06, 'sine', 0.15); }
+function playNumberPlaceSound() { createSound(600, 0.08, 'sine', 0.2); }
+function playErrorSound() { createSound(300, 0.15, 'square', 0.25); }
+function playSuccessSound() { createSound(800, 0.1, 'sine', 0.2); }
+function playHintSound() { createSound(1000, 0.12, 'triangle', 0.25); }
+function playUndoSound() { createSound(400, 0.08, 'sine', 0.18); }
+function playRedoSound() { createSound(500, 0.08, 'sine', 0.18); }
+function playButtonClickSound() { createSound(700, 0.05, 'sine', 0.15); }
+function playWinSound() {
+  createSound(523, 0.2, 'sine', 0.3); // C
+  setTimeout(() => createSound(659, 0.2, 'sine', 0.3), 100); // E
+  setTimeout(() => createSound(784, 0.3, 'sine', 0.3), 200); // G
+  setTimeout(() => createSound(1047, 0.4, 'sine', 0.3), 300); // C (high)
+}
+
 const TIMER_KEY='sudoka:timerMs';
 const timer=(()=>{ let start=0, running=false, value=0; function load(){ try{ const v=Number(localStorage.getItem(TIMER_KEY)); if(!Number.isNaN(v)) value=v; }catch{} } function save(){ try{ localStorage.setItem(TIMER_KEY,String(value)); }catch{} } function startRun(){ if(running) return; running=true; start=performance.now(); } function pause(){ if(!running) return; running=false; value+=performance.now()-start; save(); } function resume(){ if(running) return; running=true; start=performance.now(); } function reset(){ running=false; start=0; value=0; save(); } function now(){ return running? value+(performance.now()-start): value; } load(); return { start:startRun, pause, resume, reset, get isRunning(){return running;}, get valueMs(){return now();} }; })();
 
@@ -27,6 +84,7 @@ const playAgainBtn=document.getElementById('playAgainBtn');
 const winModal=document.getElementById('winModal');
 const winStats=document.getElementById('winStats');
 const themeSelect=document.getElementById('themeSelect');
+const soundToggle=document.getElementById('soundToggle');
 
 let game;
 
@@ -38,12 +96,19 @@ try{
     buildGrid(); showError('No setup found. Use Home > Play Sudoku to start.');
   }
   
-  // Load saved theme
+  // Load saved theme and sound settings
   try {
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  if (themeSelect) themeSelect.value = savedTheme;
-} catch {}
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (themeSelect) themeSelect.value = savedTheme;
+    
+    // Load sound settings
+    const savedSound = localStorage.getItem('sudoku:soundEnabled');
+    if (savedSound !== null) {
+      soundEnabled = savedSound === 'true';
+      if (soundToggle) soundToggle.checked = soundEnabled;
+    }
+  } catch {}
   
   wire();
 }catch(err){ console.error('Sudoku init error', err); showError('Init error: ' + (err?.message||'see console')); }
@@ -59,29 +124,137 @@ function wire(){
   gridEl.addEventListener('pointerdown',(e)=>{ const t=e.target.closest('.cell'); if(!t) return; const r=Number(t.dataset.row), c=Number(t.dataset.col); if(Number.isNaN(r)||Number.isNaN(c)) return; if(!game){ showError('Game not initialized'); return; } selectCell(r,c); if(!timer.isRunning) timer.start(); }, {passive:true});
   document.addEventListener('keydown',(e)=>{ if(!game) return; const sel=game.selected; if(!sel) return; const {r,c}=sel; if(/^[1-9]$/.test(e.key)){ place(r,c,Number(e.key)); e.preventDefault(); } else if(['Backspace','Delete','0'].includes(e.key)){ place(r,c,0); e.preventDefault(); } else if(e.key==='ArrowUp'){ selectCell(Math.max(0,r-1),c); } else if(e.key==='ArrowDown'){ selectCell(Math.min(8,r+1),c); } else if(e.key==='ArrowLeft'){ selectCell(r,Math.max(0,c-1)); } else if(e.key==='ArrowRight'){ selectCell(r,Math.min(8,c+1)); } else if(e.key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey) && e.shiftKey){ redo(); } else if(e.key.toLowerCase()==='z' && (e.ctrlKey||e.metaKey)){ undo(); } else if(e.key.toLowerCase()==='h'){ doHint(); } else if(e.key.toLowerCase()==='n'){ toggleNotes(); } });
   bindPad(keypadEl);
-  undoBtn?.addEventListener('click', undo);
-  redoBtn?.addEventListener('click', redo);
-  hintBtn?.addEventListener('click', doHint);
-  notesBtn?.addEventListener('click', toggleNotes);
-  newBtn?.addEventListener('click', ()=>{ if(confirm('Start a new puzzle? Your current progress will be lost.')){ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); showToast('New game'); }catch(e){ showError('New game error: ' + e.message); } } });
+  undoBtn?.addEventListener('click', () => { playButtonClickSound(); undo(); });
+  redoBtn?.addEventListener('click', () => { playButtonClickSound(); redo(); });
+  hintBtn?.addEventListener('click', () => { playButtonClickSound(); doHint(); });
+  notesBtn?.addEventListener('click', () => { playButtonClickSound(); toggleNotes(); });
+  newBtn?.addEventListener('click', ()=>{ 
+    playButtonClickSound();
+    if(confirm('Start a new puzzle? Your current progress will be lost.')){ 
+      const s=setup||{}; 
+      try{ 
+        game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); 
+        timer.reset(); 
+        buildGrid(); 
+        render(); 
+        showToast('New game'); 
+      }catch(e){ showError('New game error: ' + e.message); } 
+    } 
+  });
   // Difficulty button click handler removed - handled by dedicated listener below
-  playAgainBtn?.addEventListener('click', ()=>{ const s=setup||{}; try{ game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); timer.reset(); buildGrid(); render(); winModal?.classList.add('hidden'); }catch(e){ showError('Play again error: ' + e.message); } });
+  playAgainBtn?.addEventListener('click', ()=>{ 
+    playButtonClickSound();
+    const s=setup||{}; 
+    try{ 
+      game.newGame({ name:s.name||'', avatar:s.avatar||null, difficulty:s.difficulty||'easy', theme:s.theme||'light' }); 
+      timer.reset(); 
+      buildGrid(); 
+      render(); 
+      winModal?.classList.add('hidden'); 
+    }catch(e){ showError('Play again error: ' + e.message); } 
+  });
   
   // Theme functionality
   themeSelect?.addEventListener('change', () => {
-  const theme = themeSelect.value;
-  document.documentElement.setAttribute('data-theme', theme);
-  try { localStorage.setItem('theme', theme); } catch {}
-});
+    const theme = themeSelect.value;
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('theme', theme); } catch {}
+  });
+  
+  // Sound toggle functionality
+  soundToggle?.addEventListener('change', () => {
+    soundEnabled = soundToggle.checked;
+    try { localStorage.setItem('sudoku:soundEnabled', soundEnabled.toString()); } catch {}
+    playButtonClickSound(); // Play sound when toggling
+  });
 }
 
-function selectCell(r,c){ game.selectCell(r,c); render(); }
-function bindPad(el){ if(!el) return; el.addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(!b) return; b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'),140); const sel=game?.selected; if(!sel) return; if(b.hasAttribute('data-clear')){ place(sel.r, sel.c, 0); return; } const n=b.getAttribute('data-num'); if(n){ place(sel.r, sel.c, Number(n)); } }); }
-function place(r,c,val){ try{ const ok=game.placeNumber(r,c,val); const el=gridEl.children[r*9+c]; if(!timer.isRunning) timer.start(); if(!ok){ showToast('That conflicts with this row/column/box'); el.classList.add('error'); setTimeout(()=>el.classList.remove('error'),180); } else { el.classList.remove('error'); } render(); }catch(e){ showError('Place error: ' + e.message); } }
-function undo(){ try{ if(game.undo()){ showToast('Undone'); render(); } }catch(e){ showError('Undo error: ' + e.message); } }
-function redo(){ try{ if(game.redo()){ showToast('Redone'); render(); } }catch(e){ showError('Redo error: ' + e.message); } }
-function doHint(){ try{ const h=game.hint(); if(h){ showToast('Hint used'); selectCell(h.r,h.c); } else showToast('No hint available'); }catch(e){ showError('Hint error: ' + e.message); } }
-function toggleNotes(){ try{ game.notesMode=!game.notesMode; notesBtn?.setAttribute('aria-pressed', String(game.notesMode)); showToast(game.notesMode?'Notes on':'Notes off'); }catch(e){ showError('Notes toggle error: ' + e.message); } }
+function selectCell(r,c){ 
+  game.selectCell(r,c); 
+  playCellSelectSound();
+  render(); 
+}
+function bindPad(el){ 
+  if(!el) return; 
+  el.addEventListener('click',(e)=>{
+    const b=e.target.closest('button'); 
+    if(!b) return; 
+    b.classList.add('flash'); 
+    setTimeout(()=>b.classList.remove('flash'),140); 
+    playButtonClickSound();
+    const sel=game?.selected; 
+    if(!sel) return; 
+    if(b.hasAttribute('data-clear')){ 
+      place(sel.r, sel.c, 0); 
+      return; 
+    } 
+    const n=b.getAttribute('data-num'); 
+    if(n){ 
+      place(sel.r, sel.c, Number(n)); 
+    } 
+  }); 
+}
+function place(r,c,val){ 
+  try{ 
+    const ok=game.placeNumber(r,c,val); 
+    const el=gridEl.children[r*9+c]; 
+    if(!timer.isRunning) timer.start(); 
+    if(!ok){ 
+      showToast('That conflicts with this row/column/box'); 
+      el.classList.add('error'); 
+      setTimeout(()=>el.classList.remove('error'),180); 
+      playErrorSound();
+    } else { 
+      el.classList.remove('error'); 
+      playNumberPlaceSound();
+      
+      // Check if puzzle is solved
+      if (game.solved()) {
+        setTimeout(() => playWinSound(), 300);
+      }
+    } 
+    render(); 
+  }catch(e){ showError('Place error: ' + e.message); } 
+}
+function undo(){ 
+  try{ 
+    if(game.undo()){
+      showToast('Undone'); 
+      playUndoSound();
+      render(); 
+    } 
+  }catch(e){ showError('Undo error: ' + e.message); } 
+}
+function redo(){ 
+  try{ 
+    if(game.redo()){
+      showToast('Redone'); 
+      playRedoSound();
+      render(); 
+    } 
+  }catch(e){ showError('Redo error: ' + e.message); } 
+}
+function doHint(){ 
+  try{ 
+    const h=game.hint(); 
+    if(h){ 
+      showToast('Hint used'); 
+      playHintSound();
+      selectCell(h.r,h.c); 
+    } else {
+      showToast('No hint available'); 
+      playErrorSound();
+    } 
+  }catch(e){ showError('Hint error: ' + e.message); } 
+}
+function toggleNotes(){ 
+  try{ 
+    game.notesMode=!game.notesMode; 
+    notesBtn?.setAttribute('aria-pressed', String(game.notesMode)); 
+    showToast(game.notesMode?'Notes on':'Notes off'); 
+    playButtonClickSound();
+  }catch(e){ showError('Notes toggle error: ' + e.message); } 
+}
 
 function highlightPeers(sel){ 
   const {r,c}=sel; 
